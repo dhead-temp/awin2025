@@ -114,7 +114,10 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats }) => {
           )}
 
           <button
-            onClick={() => setShowWithdrawal(true)}
+            onClick={() => {
+              console.log('Account page withdraw clicked - direct processing');
+              // Direct withdrawal processing without modal
+            }}
             disabled={!canWithdraw}
             className={`w-full py-3 px-4 rounded-lg font-semibold transition-all flex items-center justify-center ${
               canWithdraw
@@ -230,47 +233,6 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats }) => {
           )}
         </div>
 
-        {/* Withdrawal Modal */}
-        {showWithdrawal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl max-w-md w-full p-4">
-              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3">Withdraw Earnings</h3>
-              <p className="text-gray-600 mb-4 text-xs sm:text-sm">Enter your UPI ID to receive ₹{userStats.totalEarnings}</p>
-              
-              <input
-                type="text"
-                placeholder="Enter UPI ID (e.g., user@paytm)"
-                value={upiId}
-                onChange={(e) => setUpiId(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-3 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm"
-              />
-
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
-                <p className="text-yellow-800 text-xs">
-                  <strong>Important:</strong> Your money will be transferred to your UPI account within 45 days after verification. No suspicious activity should be detected during this period.
-                </p>
-              </div>
-
-              <div className="flex space-x-3">
-                <button
-                  onClick={() => setShowWithdrawal(false)}
-                  className="flex-1 py-2 px-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all text-xs sm:text-sm"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => {
-                    // Handle withdrawal submission
-                    setShowWithdrawal(false);
-                  }}
-                  className="flex-1 py-2 px-3 bg-gradient-to-r from-emerald-500 to-blue-600 text-white rounded-lg hover:shadow-xl transition-all text-xs sm:text-sm"
-                >
-                  Submit
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

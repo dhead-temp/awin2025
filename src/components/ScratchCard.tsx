@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Gift, Trophy, Sparkles } from 'lucide-react';
+import { Gift, Sparkles } from 'lucide-react';
 
 interface ScratchCardProps {
   value: number;
@@ -29,12 +29,8 @@ const ScratchCard: React.FC<ScratchCardProps> = ({ value, onScratch, isScratched
     setMouseDown(false);
   };
 
-  const handleScratch = (e: React.MouseEvent) => {
+  const handleScratch = (_e: React.MouseEvent) => {
     if (!containerRef.current) return;
-    
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
     
     // Simulate scratching by increasing percentage
     setScratchPercentage(prev => {
@@ -65,7 +61,7 @@ const ScratchCard: React.FC<ScratchCardProps> = ({ value, onScratch, isScratched
 
   if (isScratched) {
     return (
-      <div className="relative group w-full max-w-sm mx-auto">
+      <div className="relative group w-full max-w-xs mx-auto">
         {/* Google Pay style revealed card */}
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden transform transition-all duration-500 hover:scale-105 border border-gray-100">
           {/* Celebration sparkles */}
@@ -92,20 +88,20 @@ const ScratchCard: React.FC<ScratchCardProps> = ({ value, onScratch, isScratched
             </div>
           </div>
           
-          <div className="p-8 text-center relative">
+          <div className="p-4 text-center relative">
             {/* Trophy icon with blue circle background */}
-            <div className="relative mb-6">
-              <div className="w-20 h-20 bg-blue-500 rounded-full mx-auto flex items-center justify-center relative">
+            <div className="relative mb-4">
+              <div className="w-16 h-16 bg-blue-500 rounded-full mx-auto flex items-center justify-center relative">
                 {/* Trophy icon */}
                 <div className="relative">
-                  <div className="w-8 h-6 bg-yellow-400 rounded-t-lg relative">
+                  <div className="w-6 h-5 bg-yellow-400 rounded-t-lg relative">
                     {/* Trophy cup */}
-                    <div className="absolute -left-1 top-1 w-2 h-3 bg-yellow-400 rounded-l-full"></div>
-                    <div className="absolute -right-1 top-1 w-2 h-3 bg-yellow-400 rounded-r-full"></div>
+                    <div className="absolute -left-0.5 top-0.5 w-1.5 h-2.5 bg-yellow-400 rounded-l-full"></div>
+                    <div className="absolute -right-0.5 top-0.5 w-1.5 h-2.5 bg-yellow-400 rounded-r-full"></div>
                   </div>
                   {/* Trophy base */}
-                  <div className="w-6 h-2 bg-yellow-500 mx-auto"></div>
-                  <div className="w-8 h-1 bg-yellow-600 mx-auto"></div>
+                  <div className="w-5 h-1.5 bg-yellow-500 mx-auto"></div>
+                  <div className="w-6 h-0.5 bg-yellow-600 mx-auto"></div>
                 </div>
               </div>
               {/* Celebration sparkles around trophy */}
@@ -114,15 +110,14 @@ const ScratchCard: React.FC<ScratchCardProps> = ({ value, onScratch, isScratched
             </div>
             
             {/* Win text */}
-            <h3 className="text-gray-800 text-lg font-medium mb-2">You've won</h3>
+            <h3 className="text-gray-800 text-base font-medium mb-2 text-center">You've won</h3>
             
             {/* Amount */}
-            <div className="text-4xl font-bold text-gray-900 mb-6">₹ {value}</div>
+            <div className="text-2xl font-bold text-gray-900 mb-4 text-center">₹{value}</div>
             
             {/* Success message */}
-            <div className="bg-gray-50 rounded-2xl py-3 px-6 inline-block">
-              <p className="text-gray-600 text-sm font-medium">Excellent!</p>
-              <p className="text-gray-500 text-xs">Added to your wallet</p>
+            <div className="bg-gray-50 rounded-xl py-2 px-4 inline-block">
+              <p className="text-gray-500 text-xs text-center">Added to your wallet</p>
             </div>
           </div>
         </div>
@@ -133,7 +128,7 @@ const ScratchCard: React.FC<ScratchCardProps> = ({ value, onScratch, isScratched
   return (
     <div 
       ref={containerRef}
-      className="relative cursor-pointer select-none w-full max-w-sm mx-auto"
+      className="relative cursor-pointer select-none w-full max-w-xs mx-auto"
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
@@ -141,29 +136,29 @@ const ScratchCard: React.FC<ScratchCardProps> = ({ value, onScratch, isScratched
     >
       {/* Base card with prize (hidden underneath) */}
       <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100 relative">
-        <div className="p-8 text-center">
+        <div className="p-4 text-center">
           {/* Trophy icon with blue circle background */}
-          <div className="relative mb-6">
-            <div className="w-20 h-20 bg-blue-500 rounded-full mx-auto flex items-center justify-center">
+          <div className="relative mb-4">
+            <div className="w-16 h-16 bg-blue-500 rounded-full mx-auto flex items-center justify-center">
               {/* Trophy icon */}
               <div className="relative">
-                <div className="w-8 h-6 bg-yellow-400 rounded-t-lg relative">
+                <div className="w-6 h-5 bg-yellow-400 rounded-t-lg relative">
                   {/* Trophy cup */}
-                  <div className="absolute -left-1 top-1 w-2 h-3 bg-yellow-400 rounded-l-full"></div>
-                  <div className="absolute -right-1 top-1 w-2 h-3 bg-yellow-400 rounded-r-full"></div>
+                  <div className="absolute -left-0.5 top-0.5 w-1.5 h-2.5 bg-yellow-400 rounded-l-full"></div>
+                  <div className="absolute -right-0.5 top-0.5 w-1.5 h-2.5 bg-yellow-400 rounded-r-full"></div>
                 </div>
                 {/* Trophy base */}
-                <div className="w-6 h-2 bg-yellow-500 mx-auto"></div>
-                <div className="w-8 h-1 bg-yellow-600 mx-auto"></div>
+                <div className="w-5 h-1.5 bg-yellow-500 mx-auto"></div>
+                <div className="w-6 h-0.5 bg-yellow-600 mx-auto"></div>
               </div>
             </div>
           </div>
           
           {/* Win text */}
-          <h3 className="text-gray-800 text-lg font-medium mb-2">You've won</h3>
+          <h3 className="text-gray-800 text-base font-medium mb-2 text-center">You've won</h3>
           
           {/* Amount */}
-          <div className="text-4xl font-bold text-gray-900">₹ {value}</div>
+          <div className="text-2xl font-bold text-gray-900 text-center">₹{value}</div>
         </div>
       </div>
 
@@ -179,28 +174,19 @@ const ScratchCard: React.FC<ScratchCardProps> = ({ value, onScratch, isScratched
         }}
       >
         {/* Google Pay style scratch surface */}
-        <div className="h-full w-full flex items-center justify-center relative">
-          {/* Trophy icon in center - darker blue */}
-          <div className="w-16 h-16 bg-blue-600 bg-opacity-50 rounded-full flex items-center justify-center">
-            <Trophy className="h-8 w-8 text-blue-200" />
+        <div className="h-full w-full relative">
+          {/* Subtle corner decorations */}
+          <div className="absolute top-6 left-6">
+            <div className="w-2 h-2 bg-blue-300 bg-opacity-20 rounded-full"></div>
           </div>
-          
-          {/* Corner indicators */}
-          <div className="absolute top-4 left-4">
-            <div className="w-6 h-0.5 bg-blue-300 rounded-full transform rotate-45"></div>
-            <div className="w-6 h-0.5 bg-blue-300 rounded-full transform -rotate-45 -mt-0.5"></div>
+          <div className="absolute top-6 right-6">
+            <div className="w-2 h-2 bg-blue-300 bg-opacity-20 rounded-full"></div>
           </div>
-          <div className="absolute top-4 right-4">
-            <div className="w-6 h-0.5 bg-blue-300 rounded-full transform -rotate-45"></div>
-            <div className="w-6 h-0.5 bg-blue-300 rounded-full transform rotate-45 -mt-0.5"></div>
+          <div className="absolute bottom-6 left-6">
+            <div className="w-2 h-2 bg-blue-300 bg-opacity-20 rounded-full"></div>
           </div>
-          <div className="absolute bottom-4 left-4">
-            <div className="w-6 h-0.5 bg-blue-300 rounded-full transform -rotate-45"></div>
-            <div className="w-6 h-0.5 bg-blue-300 rounded-full transform rotate-45 -mt-0.5"></div>
-          </div>
-          <div className="absolute bottom-4 right-4">
-            <div className="w-6 h-0.5 bg-blue-300 rounded-full transform rotate-45"></div>
-            <div className="w-6 h-0.5 bg-blue-300 rounded-full transform -rotate-45 -mt-0.5"></div>
+          <div className="absolute bottom-6 right-6">
+            <div className="w-2 h-2 bg-blue-300 bg-opacity-20 rounded-full"></div>
           </div>
         </div>
 
@@ -208,8 +194,8 @@ const ScratchCard: React.FC<ScratchCardProps> = ({ value, onScratch, isScratched
         {!isScratching && scratchPercentage === 0 && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center text-white">
-              <Gift className="h-6 w-6 mx-auto mb-2 opacity-80" />
-              <div className="text-sm font-medium opacity-90">Scratch to reveal</div>
+              <Gift className="h-6 w-6 mx-auto mb-2 opacity-90" />
+              <div className="text-sm font-medium opacity-95 text-center">Scratch to reveal</div>
             </div>
           </div>
         )}

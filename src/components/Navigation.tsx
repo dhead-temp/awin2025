@@ -1,28 +1,26 @@
 import { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Home, HelpCircle, User, Trophy, BookOpen, Award, Users } from 'lucide-react';
 
 export type Page = 'home' | 'quiz' | 'win' | 'account' | 'how-it-works' | 'rules' | 'winners' | 'faqs';
 
-interface NavigationProps {
-  currentPage: Page;
-  onNavigate: (page: Page) => void;
-}
+interface NavigationProps {}
 
-export default function Navigation({ currentPage, onNavigate }: NavigationProps) {
+export default function Navigation({}: NavigationProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
 
   const menuItems = [
-    { id: 'home' as Page, label: 'Home', icon: Home },
-    { id: 'quiz' as Page, label: 'Play Quiz', icon: HelpCircle },
-    { id: 'account' as Page, label: 'My Account', icon: User },
-    { id: 'how-it-works' as Page, label: 'How It Works', icon: BookOpen },
-    { id: 'rules' as Page, label: 'Rules', icon: Award },
-    { id: 'winners' as Page, label: 'Winners List', icon: Users },
-    { id: 'faqs' as Page, label: 'FAQs', icon: Trophy },
+    { path: '/', label: 'Home', icon: Home },
+    { path: '/quiz', label: 'Play Quiz', icon: HelpCircle },
+    { path: '/account', label: 'My Account', icon: User },
+    { path: '/how-it-works', label: 'How It Works', icon: BookOpen },
+    { path: '/rules', label: 'Rules', icon: Award },
+    { path: '/winners', label: 'Winners List', icon: Users },
+    { path: '/faqs', label: 'FAQs', icon: Trophy },
   ];
 
-  const handleMenuClick = (page: Page) => {
-    onNavigate(page);
+  const handleMenuClick = () => {
     setIsMenuOpen(false);
   };
 
@@ -62,19 +60,21 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
               <div className="space-y-2">
                 {menuItems.map((item) => {
                   const Icon = item.icon;
+                  const isActive = location.pathname === item.path;
                   return (
-                    <button
-                      key={item.id}
-                      onClick={() => handleMenuClick(item.id)}
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      onClick={handleMenuClick}
                       className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${
-                        currentPage === item.id
+                        isActive
                           ? 'bg-gradient-to-r from-emerald-50 to-blue-50 text-emerald-600 border border-emerald-200'
                           : 'text-gray-700 hover:bg-gray-50'
                       }`}
                     >
                       <Icon className="h-4 w-4 mr-2" />
                       <span className="font-medium text-sm">{item.label}</span>
-                    </button>
+                    </Link>
                   );
                 })}
               </div>
