@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronRight, Trophy, Clock, Target } from 'lucide-react';
+import LiveWinnersList from './LiveWinnersList';
 import { Page } from '../App';
 
 interface QuizPageProps {
@@ -125,15 +126,19 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
 
         {/* Question Card */}
         <div className="bg-white rounded-2xl shadow-2xl p-4 sm:p-6 mb-4">
-          <div className="text-center mb-6">
-            <div className="inline-flex items-center bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-4 border border-blue-200">
-              <Target className="h-4 w-4 mr-2" />
-              Question {currentQuestion + 1}
-            </div>
-            <h2 className="text-sm sm:text-base md:text-lg font-bold text-gray-900 mb-2 px-2 leading-tight">
-            {questions[currentQuestion].question}
-            </h2>
-          </div>
+        <div className="flex items-center justify-between mb-6">
+  {/* Left Side - Question */}
+  <h2 className="text-sm sm:text-base md:text-lg font-bold text-gray-900 px-2 leading-tight">
+    {questions[currentQuestion].question}
+  </h2>
+
+  {/* Right Side - Question Number */}
+  <div className="inline-flex items-center bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium border border-blue-200">
+    <Target className="h-4 w-4 mr-2" />
+    Question {currentQuestion + 1}
+  </div>
+</div>
+
 
           <div className="grid grid-cols-1 gap-3 sm:gap-4">
             {questions[currentQuestion].options.map((option, index) => (
@@ -174,6 +179,11 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Live Winners List */}
+        <div className="mt-6">
+          <LiveWinnersList />
         </div>
       </div>
     </div>

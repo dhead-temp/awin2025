@@ -1,6 +1,7 @@
 import React from 'react';
-import { Trophy, Users, Award, ChevronRight, Star, Zap, BookOpen, TrendingUp, Gift, Crown, Target } from 'lucide-react';
+import { Trophy, Users, ChevronRight, Zap, BookOpen, TrendingUp, Gift, Target } from 'lucide-react';
 import { Page } from '../App';
+import LiveWinnersList from './LiveWinnersList';
 
 interface HomePageProps {
   onNavigate: (page: Page) => void;
@@ -8,13 +9,6 @@ interface HomePageProps {
 }
 
 const HomePage: React.FC<HomePageProps> = ({ onNavigate, hasPlayedQuiz }) => {
-  const recentWinners = [
-    { name: 'Priya S.', amount: 1250, location: 'Mumbai' },
-    { name: 'Rahul K.', amount: 890, location: 'Delhi' },
-    { name: 'Sneha M.', amount: 1500, location: 'Bangalore' },
-    { name: 'Amit P.', amount: 750, location: 'Pune' },
-    { name: 'Kavya R.', amount: 920, location: 'Chennai' }
-  ];
 
   const features = [
     { icon: Trophy, title: 'Answer & Win', desc: 'Answer 3 simple questions and win instantly' },
@@ -89,25 +83,10 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate, hasPlayedQuiz }) => {
         </div>
       </div>
 
-      {/* Recent Winners */}
+      {/* Live Winners List */}
       <div className="py-6 md:py-8 bg-gradient-to-r from-emerald-50 to-blue-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8">
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Recent Winners</h2>
-            <p className="text-gray-600 text-xs sm:text-sm px-4">See who's winning today</p>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
-            {recentWinners.map((winner, index) => (
-              <div key={index} className="bg-white rounded-xl p-2 sm:p-3 text-center shadow-lg hover:shadow-xl transition-all">
-                <div className="w-8 h-8 bg-gradient-to-r from-emerald-500 to-blue-600 rounded-full mx-auto mb-1 flex items-center justify-center">
-                  <Crown className="h-4 w-4 text-white" />
-                </div>
-                <h3 className="font-semibold text-gray-900 text-xs sm:text-sm">{winner.name}</h3>
-                <p className="text-sm sm:text-base font-bold text-emerald-600 mb-1">₹{winner.amount}</p>
-                <p className="text-xs text-gray-500">{winner.location}</p>
-              </div>
-            ))}
-          </div>
+          <LiveWinnersList />
         </div>
       </div>
 

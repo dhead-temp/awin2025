@@ -55,10 +55,8 @@ const HowItWorksPage: React.FC = () => {
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center mb-3">
-                      <span className="bg-gradient-to-r from-emerald-500 to-blue-600 text-white text-sm font-bold px-3 py-1 rounded-full mr-4">
-                        Step {index + 1}
-                      </span>
-                      <h3 className="text-lg md:text-xl font-bold text-gray-900">{step.title}</h3>
+                     
+                      <h3 className="text-lg md:text-xl font-bold text-gray-900">{index + 1}. {step.title}</h3>
                     </div>
                     <p className="text-gray-700 text-base mb-2">{step.description}</p>
                     <p className="text-gray-500 text-sm">{step.details}</p>
