@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Share2, Trophy } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 import HomePage from './components/HomePage';
 import QuizPage from './components/QuizPage';
 import WinPage from './components/WinPage';
 import AccountPage from './components/AccountPage';
 import Navigation from './components/Navigation';
+import PromoStrip from './components/PromoStrip';
 import Footer from './components/Footer';
 import HowItWorksPage from './components/HowItWorksPage';
 import RulesPage from './components/RulesPage';
@@ -44,8 +45,9 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-emerald-50">
       <Navigation currentPage={currentPage} onNavigate={navigateTo} />
+      <PromoStrip />
       
-      <main className="pt-16">
+      <main>
         {currentPage === 'home' && <HomePage onNavigate={navigateTo} hasPlayedQuiz={hasPlayedQuiz} />}
         {currentPage === 'quiz' && <QuizPage onNavigate={navigateTo} onMarkAsPlayed={markQuizAsPlayed} hasPlayedQuiz={hasPlayedQuiz} />}
         {currentPage === 'win' && <WinPage onNavigate={navigateTo} onMarkAsPlayed={markQuizAsPlayed} />}
@@ -57,12 +59,6 @@ function App() {
         <Footer />
       </main>
 
-      {/* Floating Action Button for Quick Actions */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <div className="bg-gradient-to-r from-emerald-500 to-blue-600 text-white p-4 rounded-full shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all cursor-pointer">
-          <Share2 className="h-6 w-6" />
-        </div>
-      </div>
     </div>
   );
 }

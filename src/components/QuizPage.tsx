@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CheckCircle, XCircle, ChevronRight, Trophy, Clock, Target } from 'lucide-react';
+import { ChevronRight, Trophy, Clock, Target } from 'lucide-react';
 import { Page } from '../App';
 
 interface QuizPageProps {
@@ -11,7 +11,7 @@ interface QuizPageProps {
 const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlayedQuiz }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
-  const [timeLeft, setTimeLeft] = useState(30);
+  const [timeLeft, setTimeLeft] = useState(300);
 
   const questions = [
     {
@@ -65,26 +65,26 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
   // If already played, show message instead of quiz
   if (hasPlayedQuiz) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 pb-24 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 pb-24 flex items-center justify-center">
         <div className="max-w-2xl mx-auto px-4 text-center">
           <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12">
-            <div className="w-20 h-20 bg-gradient-to-r from-emerald-500 to-blue-600 rounded-full mx-auto mb-6 flex items-center justify-center">
+            <div className="w-20 h-20 bg-blue-600 rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg">
               <Trophy className="h-10 w-10 text-white" />
             </div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Quiz Already Completed!</h1>
-            <p className="text-gray-600 text-base md:text-lg mb-8 leading-relaxed">
+            <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-3">Quiz Already Completed!</h1>
+            <p className="text-gray-600 text-sm sm:text-base mb-6 leading-relaxed">
               You've already played the quiz and won your prizes. Each player can only play once.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={() => onNavigate('win')}
-                className="bg-gradient-to-r from-emerald-500 to-blue-600 text-white px-6 md:px-8 py-3 rounded-xl font-semibold hover:shadow-xl transition-all text-sm md:text-base"
+                className="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-blue-700 hover:shadow-xl transition-all text-xs sm:text-sm"
               >
                 View My Winnings
               </button>
               <button
                 onClick={() => onNavigate('account')}
-                className="border-2 border-gray-300 text-gray-700 px-6 md:px-8 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-all text-sm md:text-base"
+                className="border-2 border-gray-300 text-gray-700 px-5 py-2.5 rounded-lg font-semibold hover:bg-gray-50 hover:border-gray-400 transition-all text-xs sm:text-sm"
               >
                 Earn More by Referring
               </button>
@@ -96,83 +96,80 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 pb-24">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gray-50 pb-24">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Header */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center bg-gradient-to-r from-emerald-500 to-blue-600 text-white px-6 py-3 rounded-full text-sm font-medium mb-4">
-            <Trophy className="h-4 w-4 mr-2" />
-            Contest in Progress
-          </div>
-          <h1 className="text-xl md:text-3xl font-bold text-gray-900 mb-2 px-4">
+          <div className="inline-flex items-center bg-blue-600 text-white px-4 py-2 rounded-full text-xs sm:text-sm font-medium mb-3 shadow-lg">
+            <Trophy className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5" />
             Answer & Win ₹453 + Scratch Cards
-          </h1>
-          <p className="text-gray-600 text-sm md:text-base px-4">Answer all questions correctly to maximize your winnings</p>
+          </div>
+          {/* <p className="text-gray-600 text-sm md:text-base px-4">Answer all questions correctly to maximize your winnings</p> */}
         </div>
 
         {/* Progress Bar */}
         <div className="mb-6">
-          <div className="flex justify-between text-sm text-gray-600 mb-2">
+          <div className="flex justify-between text-xs sm:text-sm text-gray-700 mb-2 font-medium">
             <span>Question {currentQuestion + 1} of {questions.length}</span>
             <span>{Math.round(progressPercentage)}% Complete</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-3">
             <div 
-              className="bg-gradient-to-r from-emerald-500 to-blue-600 h-3 rounded-full transition-all duration-500"
+              className="bg-blue-600 h-3 rounded-full transition-all duration-500"
               style={{ width: `${progressPercentage}%` }}
             ></div>
           </div>
         </div>
 
-        {/* Timer */}
-        <div className="flex justify-center mb-6">
-          <div className="bg-white rounded-2xl shadow-lg p-4 flex items-center space-x-3">
-            <Clock className="h-6 w-6 text-red-500" />
-            <span className="text-lg md:text-xl font-bold text-red-500">{timeLeft}s</span>
-            <span className="text-gray-600 text-sm md:text-base">remaining</span>
-          </div>
-        </div>
+      
 
         {/* Question Card */}
-        <div className="bg-white rounded-3xl shadow-2xl p-4 md:p-6 mb-6">
+        <div className="bg-white rounded-2xl shadow-2xl p-4 sm:p-6 mb-4">
           <div className="text-center mb-6">
-            <div className="inline-flex items-center bg-blue-50 text-blue-600 px-4 py-2 rounded-full text-sm font-medium mb-4">
+            <div className="inline-flex items-center bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-4 border border-blue-200">
               <Target className="h-4 w-4 mr-2" />
               Question {currentQuestion + 1}
             </div>
-            <h2 className="text-lg md:text-2xl font-bold text-gray-900 mb-3 px-2 leading-tight">
-              {questions[currentQuestion].question}
+            <h2 className="text-sm sm:text-base md:text-lg font-bold text-gray-900 mb-2 px-2 leading-tight">
+            {questions[currentQuestion].question}
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 md:gap-4">
+          <div className="grid grid-cols-1 gap-3 sm:gap-4">
             {questions[currentQuestion].options.map((option, index) => (
               <button
                 key={index}
                 onClick={() => handleAnswer(index)}
-                className="bg-gray-50 hover:bg-gradient-to-r hover:from-emerald-500 hover:to-blue-600 hover:text-white p-3 md:p-4 rounded-2xl text-left transition-all transform hover:scale-105 hover:shadow-xl group"
+                className="bg-gray-50 hover:bg-blue-600 hover:text-white p-3 sm:p-4 rounded-xl text-left transition-all transform hover:scale-105 hover:shadow-xl group border border-gray-200 hover:border-blue-600"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-sm md:text-base font-medium">{option}</span>
-                  <ChevronRight className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <span className="text-xs sm:text-sm font-medium">{option}</span>
+                  <ChevronRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity text-white" />
                 </div>
               </button>
             ))}
           </div>
         </div>
-
+  {/* Timer */}
+  <div className="flex justify-center mb-6">
+          <div className="bg-red-50 rounded-xl shadow-lg p-3 flex items-center space-x-2 border border-red-200">
+            <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
+            <span className="text-sm sm:text-base font-bold text-red-500">{timeLeft}s</span>
+            <span className="text-gray-600 text-xs sm:text-sm">remaining</span>
+          </div>
+        </div>
         {/* Prize Info */}
-        <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-2xl p-3 md:p-4">
+        <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
           <div className="text-center">
-            <h3 className="text-base md:text-lg font-bold text-gray-900 mb-2">Guaranteed Prizes</h3>
-            <div className="flex justify-center items-center space-x-4 md:space-x-6 text-sm md:text-base">
-              <div className="flex items-center">
-                <Trophy className="h-5 w-5 text-emerald-600 mr-2" />
-                <span className="font-semibold text-emerald-600">₹453 Cash</span>
+            <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-3">Guaranteed Prizes</h3>
+            <div className="flex justify-center items-center space-x-3 sm:space-x-4 text-xs sm:text-sm">
+              <div className="flex items-center bg-white px-3 py-2 rounded-lg border border-blue-200">
+                <Trophy className="h-4 w-4 text-blue-600 mr-1.5" />
+                <span className="font-semibold text-blue-600">₹453 Cash</span>
               </div>
-              <div className="text-gray-400">+</div>
-              <div className="flex items-center">
-                <Target className="h-5 w-5 text-blue-600 mr-2" />
+              <div className="text-blue-400 font-bold">+</div>
+              <div className="flex items-center bg-white px-3 py-2 rounded-lg border border-blue-200">
+                <Target className="h-4 w-4 text-blue-600 mr-1.5" />
                 <span className="font-semibold text-blue-600">3 Scratch Cards</span>
               </div>
             </div>

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Menu, X, Home, HelpCircle, User, Trophy, BookOpen, Award, Users } from 'lucide-react';
 
-export type Page = 'home' | 'quiz' | 'account' | 'how-it-works' | 'rules' | 'winners' | 'faqs';
+export type Page = 'home' | 'quiz' | 'win' | 'account' | 'how-it-works' | 'rules' | 'winners' | 'faqs';
 
 interface NavigationProps {
   currentPage: Page;
@@ -28,17 +28,17 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
 
   return (
     <>
-      <nav className="bg-white shadow-sm border-b fixed top-0 left-0 right-0 z-40">
+      <nav className="bg-white shadow-sm border-b relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+            <div className="flex justify-between items-center h-12 sm:h-14">
             {/* Logo/Brand */}
             <div className="flex items-center space-x-2">
-              <div className="bg-gradient-to-r from-emerald-500 to-blue-600 p-2 rounded-xl">
-                <Trophy className="h-6 w-6 text-white" />
+              <div className="bg-gradient-to-r from-emerald-500 to-blue-600 p-1.5 sm:p-2 rounded-lg sm:rounded-xl">
+                <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
-                Answer & Win
-              </span>
+            <span className="text-sm sm:text-base font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+              Answer & Get Real Money
+            </span>
             </div>
 
             {/* Hamburger Menu Button */}
@@ -47,9 +47,9 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
               className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
             >
               {isMenuOpen ? (
-                <X className="h-6 w-6 text-gray-600" />
+                <X className="h-5 w-5 text-gray-600" />
               ) : (
-                <Menu className="h-6 w-6 text-gray-600" />
+                <Menu className="h-5 w-5 text-gray-600" />
               )}
             </button>
           </div>
@@ -57,8 +57,8 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
 
         {/* Mobile Menu Dropdown */}
         {isMenuOpen && (
-          <div className="absolute top-16 left-0 right-0 bg-white border-b shadow-lg">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="absolute top-full left-0 right-0 bg-white border-b shadow-lg z-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
               <div className="space-y-2">
                 {menuItems.map((item) => {
                   const Icon = item.icon;
@@ -66,14 +66,14 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
                     <button
                       key={item.id}
                       onClick={() => handleMenuClick(item.id)}
-                      className={`w-full flex items-center px-4 py-3 rounded-lg text-left transition-colors ${
+                      className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${
                         currentPage === item.id
                           ? 'bg-gradient-to-r from-emerald-50 to-blue-50 text-emerald-600 border border-emerald-200'
                           : 'text-gray-700 hover:bg-gray-50'
                       }`}
                     >
-                      <Icon className="h-5 w-5 mr-3" />
-                      <span className="font-medium">{item.label}</span>
+                      <Icon className="h-4 w-4 mr-2" />
+                      <span className="font-medium text-sm">{item.label}</span>
                     </button>
                   );
                 })}
@@ -83,13 +83,6 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
         )}
       </nav>
 
-      {/* Overlay for mobile menu */}
-      {isMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-25 z-30"
-          onClick={() => setIsMenuOpen(false)}
-        />
-      )}
     </>
   );
 }
