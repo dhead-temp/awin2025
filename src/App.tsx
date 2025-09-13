@@ -21,12 +21,16 @@ function AppContent() {
     // Check if user has already played (stored in localStorage)
     return localStorage.getItem('hasPlayedQuiz') === 'true';
   });
-  const [userStats, setUserStats] = useState({
-    totalEarnings: 453,
-    scratchCards: 3,
-    referrals: 12,
-    linkClicks: 84,
-    shares: 156
+  const [userStats, setUserStats] = useState(() => {
+    // Initialize with zero earnings if user hasn't played quiz yet
+    const hasPlayed = localStorage.getItem('hasPlayedQuiz') === 'true';
+    return {
+      totalEarnings: hasPlayed ? 453 : 0,
+      scratchCards: hasPlayed ? 3 : 0,
+      referrals: 12,
+      linkClicks: 84,
+      shares: 156
+    };
   });
 
   const navigateTo = (page: Page) => {
@@ -52,6 +56,12 @@ function AppContent() {
     // Mark as played and store in localStorage to persist across sessions
     setHasPlayedQuiz(true);
     localStorage.setItem('hasPlayedQuiz', 'true');
+    // Update user stats with quiz earnings
+    setUserStats(prev => ({
+      ...prev,
+      totalEarnings: prev.totalEarnings + 453,
+      scratchCards: prev.scratchCards + 3
+    }));
   };
 
   return (

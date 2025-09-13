@@ -13,6 +13,35 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
   const [timeLeft, setTimeLeft] = useState(300);
+  const [isTicking, setIsTicking] = useState(false);
+
+  // Function to play tick sound
+  const playTickSound = (isUrgent = false) => {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // Different frequency for urgent vs normal ticks
+      const frequency = isUrgent ? 1200 : 800;
+      oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+      oscillator.type = 'sine';
+      
+      // Higher volume for urgent ticks
+      const volume = isUrgent ? 0.5 : 0.3;
+      gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.1);
+    } catch (error) {
+      // Silently fail if audio context is not supported
+      console.log('Audio not supported');
+    }
+  };
 
   const questions = [
     {
@@ -54,6 +83,11 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
           handleAnswer(Math.floor(Math.random() * 4));
           return 30;
         }
+        // Trigger tick effect and sound
+        setIsTicking(true);
+        const isUrgent = prev <= 10; // Urgent sound for last 10 seconds
+        playTickSound(isUrgent);
+        setTimeout(() => setIsTicking(false), 200);
         return prev - 1;
       });
     }, 1000);
@@ -141,45 +175,55 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
 
 
           <div className="grid grid-cols-1 gap-3 sm:gap-4">
-            {questions[currentQuestion].options.map((option, index) => (
-              <button
-                key={index}
-                onClick={() => handleAnswer(index)}
-                className="bg-gray-50 hover:bg-blue-600 hover:text-white p-3 sm:p-4 rounded-xl text-left transition-all transform hover:scale-105 hover:shadow-xl group border border-gray-200 hover:border-blue-600"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs sm:text-sm font-medium">{option}</span>
-                  <ChevronRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity text-white" />
-                </div>
-              </button>
-            ))}
+            {questions[currentQuestion].options.map((option, index) => {
+              const optionLabel = String.fromCharCode(65 + index); // A, B, C, D
+              return (
+                <button
+                  key={index}
+                  onClick={() => handleAnswer(index)}
+                  className="bg-gray-50 hover:bg-blue-600 hover:text-white p-3 sm:p-4 rounded-xl text-left transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg group border border-gray-200 hover:border-blue-600 active:scale-[0.98]"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="w-6 h-6 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-bold mr-3 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                        {optionLabel}
+                      </div>
+                      <span className="text-xs sm:text-sm font-medium">{option}</span>
+                    </div>
+                    <ChevronRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity text-white" />
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
   {/* Timer */}
   <div className="flex justify-center mb-6">
-          <div className="bg-red-50 rounded-xl shadow-lg p-3 flex items-center space-x-2 border border-red-200">
-            <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
-            <span className="text-sm sm:text-base font-bold text-red-500">{timeLeft}s</span>
+          <div className={`bg-red-50 rounded-xl shadow-lg p-3 flex items-center space-x-2 border border-red-200 transition-all duration-200 ${isTicking ? 'scale-110 shadow-xl' : 'scale-100'}`}>
+            <Clock className={`h-4 w-4 sm:h-5 sm:w-5 text-red-500 transition-all duration-200 ${isTicking ? 'animate-pulse' : ''}`} />
+            <span className={`text-sm sm:text-base font-bold text-red-500 transition-all duration-200 ${isTicking ? 'animate-bounce' : ''}`}>{timeLeft}s</span>
             <span className="text-gray-600 text-xs sm:text-sm">remaining</span>
           </div>
         </div>
-        {/* Prize Info */}
-        <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
-          <div className="text-center">
-            <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-3">Guaranteed Prizes</h3>
-            <div className="flex justify-center items-center space-x-3 sm:space-x-4 text-xs sm:text-sm">
-              <div className="flex items-center bg-white px-3 py-2 rounded-lg border border-blue-200">
-                <Trophy className="h-4 w-4 text-blue-600 mr-1.5" />
-                <span className="font-semibold text-blue-600">₹453 Cash</span>
-              </div>
-              <div className="text-blue-400 font-bold">+</div>
-              <div className="flex items-center bg-white px-3 py-2 rounded-lg border border-blue-200">
-                <Target className="h-4 w-4 text-blue-600 mr-1.5" />
-                <span className="font-semibold text-blue-600">3 Scratch Cards</span>
+        {/* Prize Info - Only show after quiz completion */}
+        {hasPlayedQuiz && (
+          <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+            <div className="text-center">
+              <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-3">Your Prizes</h3>
+              <div className="flex justify-center items-center space-x-3 sm:space-x-4 text-xs sm:text-sm">
+                <div className="flex items-center bg-white px-3 py-2 rounded-lg border border-blue-200">
+                  <Trophy className="h-4 w-4 text-blue-600 mr-1.5" />
+                  <span className="font-semibold text-blue-600">₹453 Cash</span>
+                </div>
+                <div className="text-blue-400 font-bold">+</div>
+                <div className="flex items-center bg-white px-3 py-2 rounded-lg border border-blue-200">
+                  <Target className="h-4 w-4 text-blue-600 mr-1.5" />
+                  <span className="font-semibold text-blue-600">3 Scratch Cards</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Live Winners List */}
         <div className="mt-6">

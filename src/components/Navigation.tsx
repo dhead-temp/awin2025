@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Home, HelpCircle, User, Trophy, BookOpen, Award, Users } from 'lucide-react';
+import { Menu, X, Home, HelpCircle, User, Trophy, BookOpen, Award, Users, Trash2 } from 'lucide-react';
 
 export type Page = 'home' | 'quiz' | 'win' | 'account' | 'how-it-works' | 'rules' | 'winners' | 'faqs';
 
@@ -22,6 +22,17 @@ export default function Navigation({}: NavigationProps) {
 
   const handleMenuClick = () => {
     setIsMenuOpen(false);
+  };
+
+  const clearAllData = () => {
+    // Clear all localStorage data
+    localStorage.removeItem('hasPlayedQuiz');
+    localStorage.removeItem('userStats');
+    localStorage.removeItem('quizAnswers');
+    localStorage.removeItem('currentQuestion');
+    
+    // Reload the page to reset the app state
+    window.location.reload();
   };
 
   return (
@@ -77,6 +88,20 @@ export default function Navigation({}: NavigationProps) {
                     </Link>
                   );
                 })}
+                
+                {/* Clear Data Button for Testing */}
+                <button
+                  onClick={() => {
+                    if (window.confirm('Are you sure you want to clear all data? This will reset your progress and earnings.')) {
+                      clearAllData();
+                    }
+                    handleMenuClick();
+                  }}
+                  className="w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors text-red-600 hover:bg-red-50 border-t border-gray-200 mt-3 pt-3"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  <span className="font-medium text-sm">Clear Data (Testing)</span>
+                </button>
               </div>
             </div>
           </div>
