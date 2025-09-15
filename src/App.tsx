@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-route
 import HomePage from './components/HomePage';
 import QuizPage from './components/QuizPage';
 import WinPage from './components/WinPage';
+import QuizProcessing from './components/QuizProcessing';
 import AccountPage from './components/AccountPage';
 import Navigation from './components/Navigation';
 import PromoStrip from './components/PromoStrip';
@@ -12,7 +13,7 @@ import RulesPage from './components/RulesPage';
 import WinnersPage from './components/WinnersPage';
 import FaqsPage from './components/FaqsPage';
 
-export type Page = 'home' | 'quiz' | 'win' | 'account' | 'how-it-works' | 'rules' | 'winners' | 'faqs';
+export type Page = 'home' | 'quiz' | 'processing' | 'win' | 'account' | 'how-it-works' | 'rules' | 'winners' | 'faqs';
 
 // Component to handle navigation logic
 function AppContent() {
@@ -37,6 +38,7 @@ function AppContent() {
     const pathMap: Record<Page, string> = {
       'home': '/',
       'quiz': '/quiz',
+      'processing': '/processing',
       'win': '/win',
       'account': '/account',
       'how-it-works': '/how-it-works',
@@ -73,6 +75,7 @@ function AppContent() {
         <Routes>
           <Route path="/" element={<HomePage onNavigate={navigateTo} hasPlayedQuiz={hasPlayedQuiz} />} />
           <Route path="/quiz" element={<QuizPage onNavigate={navigateTo} onMarkAsPlayed={markQuizAsPlayed} hasPlayedQuiz={hasPlayedQuiz} />} />
+          <Route path="/processing" element={<QuizProcessing onNavigate={navigateTo} />} />
           <Route path="/win" element={<WinPage onNavigate={navigateTo} onMarkAsPlayed={markQuizAsPlayed} />} />
           <Route path="/account" element={<AccountPage userStats={userStats} />} />
           <Route path="/how-it-works" element={<HowItWorksPage />} />

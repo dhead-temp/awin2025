@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronRight, Trophy, Clock, Target } from 'lucide-react';
 import LiveWinnersList from './LiveWinnersList';
-import { Page } from '../App';
+import type { Page } from '../App';
 
 interface QuizPageProps {
   onNavigate: (page: Page) => void;
@@ -69,9 +69,9 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
       setCurrentQuestion(currentQuestion + 1);
       setTimeLeft(30);
     } else {
-      // All questions answered, navigate to win page
+      // All questions answered, mark played then show staged processing
       onMarkAsPlayed();
-      onNavigate('win');
+      onNavigate('processing');
     }
   };
 

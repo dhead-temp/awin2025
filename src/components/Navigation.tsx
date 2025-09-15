@@ -25,12 +25,46 @@ export default function Navigation({}: NavigationProps) {
   };
 
   const clearAllData = () => {
-    // Clear all localStorage data
-    localStorage.removeItem('hasPlayedQuiz');
-    localStorage.removeItem('userStats');
-    localStorage.removeItem('quizAnswers');
-    localStorage.removeItem('currentQuestion');
-    
+    // Clear localStorage
+    try {
+      localStorage.clear();
+    } catch (e) {
+      try {
+        localStorage.removeItem('hasPlayedQuiz');
+        localStorage.removeItem('userStats');
+        localStorage.removeItem('quizAnswers');
+        localStorage.removeItem('currentQuestion');
+        localStorage.removeItem('scratchCardData');
+      } catch (_) {}
+    }
+
+    // Clear sessionStorage
+    try {
+      sessionStorage.clear();
+    } catch (_) {}
+
+    // Clear cookies (best-effort)
+    try {
+      const cookies = document.cookie ? document.cookie.split(';') : [];
+      for (const rawCookie of cookies) {
+        const cookie = rawCookie.trim();
+        const eqPos = cookie.indexOf('=');
+        const name = eqPos > -1 ? cookie.substring(0, eqPos) : cookie;
+
+        // Expire cookie for common paths/domains
+        const expires = 'Expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        const path = 'Path=/';
+        // Current domain
+        document.cookie = `${name}=; ${expires}; ${path}`;
+        // Also try removing with domain variations
+        const hostParts = window.location.hostname.split('.');
+        for (let i = 0; i < hostParts.length - 1; i++) {
+          const domain = '.' + hostParts.slice(i).join('.');
+          document.cookie = `${name}=; ${expires}; ${path}; Domain=${domain}`;
+        }
+      }
+    } catch (_) {}
+
     // Reload the page to reset the app state
     window.location.reload();
   };

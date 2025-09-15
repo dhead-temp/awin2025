@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Trophy, Gift, Share2, ChevronRight, Crown, Target, X, Users, MessageCircle, Plus } from 'lucide-react';
-import { Page } from '../App';
+import type { Page } from '../App';
 import ScratchCard from './ScratchCard';
 
 interface WinPageProps {
@@ -124,7 +124,8 @@ const WinPage: React.FC<WinPageProps> = ({ onNavigate, onMarkAsPlayed }) => {
   };
 
   const handleSecondWithdrawClick = () => {
-    if (bonusAddedToAccount || pendingScratchWinnings === 0) {
+    // Only allow navigation to Account after bonus is claimed to balance
+    if (bonusAddedToAccount) {
       onNavigate('account');
     } else {
       setShowWithdrawModal(true);
@@ -160,6 +161,16 @@ const WinPage: React.FC<WinPageProps> = ({ onNavigate, onMarkAsPlayed }) => {
     return `https://wa.me/?text=${message}`;
   };
 
+  useEffect(() => {
+    // Trigger celebration briefly when page loads
+    const t1 = setTimeout(() => setShowCelebration(true), 200);
+    const t2 = setTimeout(() => setShowCelebration(false), 2500);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-orange-50 to-red-50 pb-20">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -167,10 +178,11 @@ const WinPage: React.FC<WinPageProps> = ({ onNavigate, onMarkAsPlayed }) => {
         {/* Celebration Header */}
         <div className="text-center mb-6">
           {showCelebration && (
-            <div className="animate-bounce mb-4">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full">
+            <div className="mb-4">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full animate-bounce">
                 <Crown className="h-8 w-8 text-white" />
               </div>
+              <div className="mt-2 text-yellow-600 text-sm font-semibold animate-pulse">You won! 🎊</div>
             </div>
           )}
 
@@ -243,26 +255,7 @@ const WinPage: React.FC<WinPageProps> = ({ onNavigate, onMarkAsPlayed }) => {
             </div>
           )}
 
-          {/* Add Bonus to Account Button */}
-          {pendingScratchWinnings > 0 && !bonusAddedToAccount && (
-            <div className="text-center mb-6">
-              <div className="bg-gradient-to-r from-orange-50 to-yellow-50 border-2 border-orange-200 rounded-2xl p-4 mb-4">
-                <div className="text-orange-800 font-semibold mb-2">
-                  🎉 You've won ₹{pendingScratchWinnings} in bonus!
-                </div>
-                <div className="text-sm text-orange-700 mb-4">
-                  To add this bonus to your account, invite 3 friends via WhatsApp
-                </div>
-                <button
-                  onClick={handleAddBonusClick}
-                  className="bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center justify-center mx-auto"
-                >
-                  <Plus className="h-5 w-5 mr-2" />
-                  Add Bonus to Earnings
-                </button>
-              </div>
-            </div>
-          )}
+          
         </div>
 
         {/* Account Balance Section */}
@@ -309,6 +302,26 @@ const WinPage: React.FC<WinPageProps> = ({ onNavigate, onMarkAsPlayed }) => {
                 </div>
               </div>
             )}
+            {/* Add Bonus to Account Button */}
+          {pendingScratchWinnings > 0 && !bonusAddedToAccount && (
+            <div className="text-center mb-6">
+              <div className="bg-gradient-to-r from-orange-50 to-yellow-50 border-2 border-orange-200 rounded-2xl p-4 mb-4">
+                <div className="text-orange-800 font-semibold mb-2">
+                  🎉 You've won ₹{pendingScratchWinnings} in bonus!
+                </div>
+                <div className="text-sm text-orange-700 mb-4">
+                  To add this bonus to your account, invite 3 friends via WhatsApp
+                </div>
+                <button
+                  onClick={handleAddBonusClick}
+                  className="bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center justify-center mx-auto"
+                >
+                  <Plus className="h-5 w-5 mr-2" />
+                  Add Bonus to Earnings
+                </button>
+              </div>
+            </div>
+          )}
 
             <div className="flex justify-center mb-4">
               <button
