@@ -110,341 +110,165 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-emerald-50 pb-24">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        
-        {/* Header - Profile + Trust */}
-        <div className="bg-white rounded-2xl shadow-xl p-4 mb-6 border border-gray-100">
+
+        {/* Header - Profile */}
+        <div className="bg-white rounded-2xl shadow-sm p-5 mb-6 border border-gray-100">
           <div className="flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-xl ${userProfile.avatarBg} flex items-center justify-center text-white font-bold text-lg shadow-inner`}> 
+            <div className={`w-14 h-14 rounded-xl ${userProfile.avatarBg} flex items-center justify-center text-white font-bold text-xl shadow-md`}>
               {userProfile.name ? (
                 userProfile.name.split(' ').map(w => w[0]).slice(0,2).join('')
               ) : (
-                <User className="w-6 h-6 text-white" />
+                <User className="w-7 h-7 text-white" />
               )}
             </div>
             <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <h1 className="text-base sm:text-lg font-bold text-gray-900">{userProfile.name || 'Your Account'}</h1>
-                {userProfile.kycVerified && (
-                  <span className="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full text-[11px] font-semibold">
-                    <ShieldCheck className="w-3.5 h-3.5" /> KYC Verified
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-3 mt-0.5">
-                {userProfile.memberSince && (
-                  <div className="text-xs text-gray-500">Member since {userProfile.memberSince}</div>
-                )}
-                {!hasGoogleSignin && (
-                  <button
-                    onClick={() => setHasGoogleSignin(true)}
-                    className="text-xs text-blue-700 underline underline-offset-2"
-                  >
-                    Link Google Account
-                  </button>
-                )}
-              </div>
-            </div>
-            <div className="hidden sm:flex items-center gap-2">
-              <span className="inline-flex items-center gap-1 text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full text-[11px] font-medium">
-                <Lock className="w-3.5 h-3.5" /> SSL Secured
-              </span>
-              {userProfile.upiVerified && (
-                <span className="inline-flex items-center gap-1 text-purple-700 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded-full text-[11px] font-medium">
-                  <CheckCircle className="w-3.5 h-3.5" /> UPI Verified
+              <h1 className="text-lg sm:text-xl font-bold text-gray-900">{userProfile.name || 'Your Account'}</h1>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full text-xs font-medium">
+                  <CheckCircle className="w-3.5 h-3.5" /> Active
                 </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Section 2: Account Balance + Actions */}
-        <div className="bg-white rounded-2xl shadow-xl p-0.5 mb-6 border border-gray-100">
-          <div className="bg-gradient-to-r from-blue-50 to-emerald-50 rounded-t-2xl px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Wallet className="w-5 h-5 text-emerald-600" />
-              <h2 className="text-sm sm:text-base font-semibold text-gray-900">Account Balance</h2>
-            </div>
-            <span className="text-[11px] text-gray-500">Updated just now</span>
-          </div>
-          <div className="p-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start">
-              {/* Left: Balance + Progress + Small history strip */}
-              <div className="md:col-span-2">
-                <div className="flex items-end justify-between mb-4">
-                  <div>
-                    <div className="text-3xl font-extrabold text-gray-900 tracking-tight">₹{userStats.totalEarnings}</div>
-                    <div className="text-xs text-gray-500 mt-0.5">Available balance</div>
-                  </div>
-                  <div className="hidden sm:flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1 text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full text-[11px] font-medium">
-                      <Lock className="w-3.5 h-3.5" /> Secure
-                    </span>
-                  </div>
-                </div>
-                <div className="mb-3">
-                  <div className="flex items-center justify-between text-[11px] text-gray-600 mb-1">
-                    <span>Progress to minimum withdrawal (₹800)</span>
-                    <span>{withdrawProgress}%</span>
-                  </div>
-                  <div className="w-full bg-gray-100 rounded-full h-2">
-                    <div className={`h-2 rounded-full ${withdrawProgress >= 100 ? 'bg-emerald-500' : 'bg-gradient-to-r from-emerald-400 to-blue-500'}`} style={{ width: `${withdrawProgress}%` }}></div>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <button
-                    onClick={() => setShowHistoryModal(true)}
-                    className="text-[12px] sm:text-[13px] border border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50 text-gray-700 px-3 py-1.5 rounded-full inline-flex items-center gap-2"
-                  >
-                    <History className="w-4 h-4" />
-                    History
-                  </button>
-                  <div className="text-[11px] text-gray-500">Payouts within 0–24 hours</div>
-                </div>
-              </div>
-              {/* Right: Withdraw primary action */}
-              <div className="md:col-span-1">
-                <div className="bg-gradient-to-br from-emerald-50 to-blue-50 border border-gray-100 rounded-xl p-3 md:p-4 flex flex-col gap-3">
-                  <div className="text-xs text-gray-600">Ready to cash out?</div>
-                  <button
-                    onClick={() => setShowTeraboxModal(true)}
-                    className={`w-full py-2.5 px-4 rounded-lg font-semibold transition-all flex items-center justify-center bg-gradient-to-r from-emerald-500 to-blue-600 text-white hover:shadow-xl`}
-                  >
-                    <CreditCard className="h-5 w-5 mr-2" />
-                    Withdraw
-                  </button>
-                  <div className="text-[11px] text-gray-600">
-                    Min ₹800 • Terabox verification required
-                  </div>
-                </div>
+                <span className="inline-flex items-center gap-1 text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full text-xs font-medium">
+                  <Lock className="w-3.5 h-3.5" /> Secure
+                </span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Earnings Overview */}
-        <div className="bg-gradient-to-r from-emerald-500 to-blue-600 rounded-2xl text-white p-4 mb-4 shadow-2xl">
-          <div className="text-center mb-4">
-            <div className="text-2xl sm:text-3xl font-bold mb-1">₹{userStats.totalEarnings}</div>
-            <p className="text-emerald-100 text-xs sm:text-sm">Total Earnings</p>
-          </div>
-          
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div>
-              <div className="text-sm sm:text-base font-bold">{userStats.referrals}</div>
-              <p className="text-blue-100 text-xs">Referrals</p>
-            </div>
-            <div>
-              <div className="text-sm sm:text-base font-bold">{userStats.linkClicks}</div>
-              <p className="text-blue-100 text-xs">Link Clicks</p>
-            </div>
-            <div>
-              <div className="text-sm sm:text-base font-bold">{userStats.shares}</div>
-              <p className="text-blue-100 text-xs">Shares</p>
-            </div>
-          </div>
-        </div>
-
-        {/* KPI Stats Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-          <div className="bg-white rounded-xl border border-gray-200 p-3">
-            <div className="flex items-center gap-2 mb-1">
-              <Activity className="w-4 h-4 text-emerald-600" />
-              <div className="text-xs text-gray-500">Net Credits</div>
-            </div>
-            <div className="text-sm sm:text-base font-bold text-gray-900">₹{totalCredits}</div>
-          </div>
-          <div className="bg-white rounded-xl border border-gray-200 p-3">
-            <div className="flex items-center gap-2 mb-1">
-              <CreditCard className="w-4 h-4 text-red-600" />
-              <div className="text-xs text-gray-500">Total Withdrawn</div>
-            </div>
-            <div className="text-sm sm:text-base font-bold text-gray-900">₹{totalDebits}</div>
-          </div>
-          <div className="bg-white rounded-xl border border-gray-200 p-3">
-            <div className="flex items-center gap-2 mb-1">
-              <TrendingUp className="w-4 h-4 text-blue-600" />
-              <div className="text-xs text-gray-500">Referral Conversion</div>
-            </div>
-            <div className="text-sm sm:text-base font-bold text-gray-900">{completionRate}%</div>
-          </div>
-          <div className="bg-white rounded-xl border border-gray-200 p-3">
-            <div className="flex items-center gap-2 mb-1">
-              <BarChart3 className="w-4 h-4 text-purple-600" />
-              <div className="text-xs text-gray-500">Pending Withdrawal</div>
-            </div>
-            <div className="text-sm sm:text-base font-bold text-gray-900">₹{pendingDebits}</div>
-          </div>
-        </div>
-
-        {/* Withdrawal Section */}
-        <div className="bg-white rounded-xl shadow-xl p-3 sm:p-4 mb-4">
+        {/* Balance Card */}
+        <div className="bg-gradient-to-br from-emerald-500 to-blue-600 rounded-2xl shadow-2xl p-6 mb-6 text-white">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-3">
-              <Wallet className="h-6 w-6 text-emerald-600" />
-              <h2 className="text-sm sm:text-base font-semibold text-gray-900">Withdraw Earnings</h2>
+            <div className="flex items-center gap-2">
+              <Wallet className="w-6 h-6" />
+              <h2 className="text-lg font-semibold">Total Balance</h2>
             </div>
-            <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-              canWithdraw ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'
-            }`}>
-              {canWithdraw ? 'Available' : 'Requirements Pending'}
-            </div>
+            <button
+              onClick={() => setShowHistoryModal(true)}
+              className="text-white/90 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-sm inline-flex items-center gap-2 transition-all"
+            >
+              <History className="w-4 h-4" />
+              History
+            </button>
           </div>
 
-          {!canWithdraw && (
-            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-3">
-              <div className="flex items-start space-x-3">
-                <AlertCircle className="h-5 w-5 text-orange-600 mt-1" />
-                <div>
-                  <h3 className="font-medium text-orange-800 mb-1 text-xs sm:text-sm">Withdrawal Requirements</h3>
-                  <ul className="text-orange-700 text-xs space-y-1">
-                    {userStats.totalEarnings < 800 && (
-                      <li>• Minimum balance: ₹800 (Current: ₹{userStats.totalEarnings})</li>
-                    )}
-                    {!hasTerabox && <li>• Download Terabox app</li>}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          )}
+          <div className="mb-6">
+            <div className="text-5xl font-bold mb-2">₹{userStats.totalEarnings}</div>
+            <div className="text-white/80 text-sm">Available to withdraw</div>
+          </div>
+
+          
 
           <button
-            onClick={() => {
-              if (!hasTerabox) {
-                setShowTeraboxModal(true);
-              } else if (canWithdraw) {
-                console.log('Proceed to withdraw');
-              }
-            }}
-            disabled={!hasTerabox && !canWithdraw ? false : !canWithdraw}
-            className={`w-full py-3 px-4 rounded-lg font-semibold transition-all flex items-center justify-center ${
-              canWithdraw
-                ? 'bg-gradient-to-r from-emerald-500 to-blue-600 text-white hover:shadow-xl transform hover:scale-105'
-                : hasTerabox ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-gradient-to-r from-gray-200 to-gray-300 text-gray-700'
-            }`}
+            onClick={() => setShowTeraboxModal(true)}
+            className="w-full bg-white text-emerald-600 hover:bg-gray-50 py-3.5 px-4 rounded-xl font-bold text-base transition-all flex items-center justify-center shadow-lg hover:shadow-xl"
           >
             <CreditCard className="h-5 w-5 mr-2" />
-            {hasTerabox ? (canWithdraw ? 'Withdraw Now' : `Need ₹${800 - userStats.totalEarnings} more`) : 'Verify Terabox to Withdraw'}
+            Withdraw Now
           </button>
-
-          {/* Helper tips */}
-          <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-2.5">
-              <div className="text-[11px] text-gray-500">Daily Limit</div>
-              <div className="text-xs font-semibold text-gray-900">Up to ₹1,000/day</div>
-            </div>
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-2.5">
-              <div className="text-[11px] text-gray-500">Next Payout Window</div>
-              <div className="text-xs font-semibold text-gray-900">Today, 6pm–9pm</div>
-            </div>
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-2.5">
-              <div className="text-[11px] text-gray-500">Processing Time</div>
-              <div className="text-xs font-semibold text-gray-900">Instant to 24 hours</div>
-            </div>
+          <div className="text-center text-white/70 text-xs mt-3">
+See Payment Proofs
           </div>
         </div>
 
-       
+        {/* Stats Grid */}
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
+            <Users className="w-6 h-6 text-emerald-600 mx-auto mb-2" />
+            <div className="text-2xl font-bold text-gray-900">{userStats.referrals}</div>
+            <div className="text-xs text-gray-500">Referrals</div>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
+            <Activity className="w-6 h-6 text-blue-600 mx-auto mb-2" />
+            <div className="text-2xl font-bold text-gray-900">{userStats.linkClicks}</div>
+            <div className="text-xs text-gray-500">Clicks</div>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
+            <Share2 className="w-6 h-6 text-orange-600 mx-auto mb-2" />
+            <div className="text-2xl font-bold text-gray-900">{userStats.shares}</div>
+            <div className="text-xs text-gray-500">Shares</div>
+          </div>
+        </div>
+
+
 
         {/* Referral Section */}
-        <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-3 sm:p-4 mb-4">
-          <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">Invite Friends & Earn</h2>
-          <p className="text-gray-600 mb-3 text-xs sm:text-sm leading-relaxed">Share your referral link and earn money for every action:</p>
-          
-          <div className="grid grid-cols-3 gap-4 mb-4 text-center">
-            <div className="bg-white rounded-lg p-3">
-              <div className="text-sm sm:text-base font-bold text-emerald-600">₹300</div>
-              <div className="text-xs text-gray-600">Per Join</div>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-xl flex items-center justify-center">
+              <Users className="w-5 h-5 text-white" />
             </div>
-            <div className="bg-white rounded-lg p-3">
-              <div className="text-sm sm:text-base font-bold text-blue-600">₹10</div>
-              <div className="text-xs text-gray-600">Per Click</div>
-            </div>
-            <div className="bg-white rounded-lg p-3">
-              <div className="text-sm sm:text-base font-bold text-purple-600">₹1</div>
-              <div className="text-xs text-gray-600">Per Share</div>
+            <div>
+              <h2 className="text-base font-bold text-gray-900">Invite Friends & Earn</h2>
+              <p className="text-xs text-gray-500">Earn ₹300 per friend + ₹10 per click</p>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg p-3 mb-3">
-            <div className="flex items-center justify-between">
-              <div className="flex-1 mr-3">
-                <p className="text-xs text-gray-600 mb-1">Your Referral Link</p>
-                <p className="text-gray-900 font-mono text-xs break-all">{referralLink}</p>
-              </div>
+          <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-xl p-4 mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-gray-600">Your Referral Link</span>
               <button
                 onClick={copyReferralLink}
-                className="bg-gray-100 hover:bg-gray-200 p-1.5 rounded-lg transition-all"
+                className="text-blue-600 hover:text-blue-700 text-xs font-medium flex items-center gap-1"
               >
-                <Copy className="h-4 w-4 text-gray-600" />
+                <Copy className="h-3.5 w-3.5" />
+                Copy
               </button>
+            </div>
+            <div className="bg-white rounded-lg p-3">
+              <p className="text-gray-900 font-mono text-xs break-all">{referralLink}</p>
             </div>
           </div>
 
           <button
             onClick={shareOnWhatsApp}
-            className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-2.5 px-4 rounded-lg font-semibold hover:shadow-xl transition-all flex items-center justify-center text-xs sm:text-sm"
+            className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-3 px-4 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all flex items-center justify-center"
           >
-            <Share2 className="h-4 w-4 mr-1.5" />
+            <Share2 className="h-5 w-5 mr-2" />
             Share on WhatsApp
-            <ExternalLink className="h-3 w-3 ml-1.5" />
           </button>
         </div>
 
         {/* Transaction History */}
-        <div className="bg-white rounded-2xl shadow-xl p-3 sm:p-4 mb-6 border border-gray-100">
-          <div className="flex items-center justify-between mb-3">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <History className="w-5 h-5 text-gray-700" />
-              <h2 className="text-sm sm:text-base font-semibold text-gray-900">Transaction History</h2>
+              <h2 className="text-base font-bold text-gray-900">Recent Transactions</h2>
             </div>
-            <div className="flex items-center gap-1">
-              {(
-                [
-                  { key: 'all', label: 'All' },
-                  { key: 'credit', label: 'Credits' },
-                  { key: 'debit', label: 'Debits' },
-                  { key: 'completed', label: 'Completed' },
-                  { key: 'pending', label: 'Pending' },
-                  { key: 'failed', label: 'Failed' }
-                ] as const
-              ).map(btn => (
-                <button
-                  key={btn.key}
-                  onClick={() => setTxFilter(btn.key)}
-                  className={`px-2.5 py-1 rounded-full text-[11px] border transition-all ${txFilter === btn.key ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-300'}
-                  `}
-                >
-                  {btn.label}
-                </button>
-              ))}
-              <button onClick={() => setShowHistoryModal(true)} className="ml-2 px-2.5 py-1 rounded-full text-[11px] border bg-white text-gray-700 border-gray-300">View All</button>
-            </div>
+            <button
+              onClick={() => setShowHistoryModal(true)}
+              className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+            >
+              View All
+            </button>
           </div>
 
-          <div className="divide-y divide-gray-100">
+          <div className="space-y-3">
             {filteredTx.length === 0 && (
-              <div className="text-center text-xs text-gray-500 py-6">No transactions to show.</div>
+              <div className="text-center text-sm text-gray-500 py-8">No transactions yet</div>
             )}
-            {filteredTx.map(tx => {
+            {filteredTx.slice(0, 5).map(tx => {
               const isCredit = tx.type === 'Credit';
               const statusClasses = tx.status === 'Completed'
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                ? 'bg-emerald-50 text-emerald-700'
                 : tx.status === 'Pending'
-                ? 'bg-amber-50 text-amber-700 border-amber-200'
-                : 'bg-rose-50 text-rose-700 border-rose-200';
+                ? 'bg-amber-50 text-amber-700'
+                : 'bg-red-50 text-red-700';
               return (
-                <div key={tx.id} className="py-3 flex items-center">
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center mr-3 ${isCredit ? 'bg-emerald-50' : 'bg-red-50'}`}>
+                <div key={tx.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isCredit ? 'bg-emerald-100' : 'bg-red-100'}`}>
                     {isCredit ? <TrendingUp className="w-5 h-5 text-emerald-600" /> : <CreditCard className="w-5 h-5 text-red-600" />}
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <div className="text-xs sm:text-sm font-semibold text-gray-900">{tx.description}</div>
-                      <div className={`text-xs sm:text-sm font-bold ${isCredit ? 'text-emerald-700' : 'text-red-700'}`}>{isCredit ? '+' : '-'}₹{tx.amount}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="text-sm font-semibold text-gray-900 truncate">{tx.description}</div>
+                      <div className={`text-sm font-bold whitespace-nowrap ${isCredit ? 'text-emerald-700' : 'text-red-700'}`}>
+                        {isCredit ? '+' : '-'}₹{tx.amount}
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between mt-1">
-                      <div className="text-[11px] text-gray-500">{tx.date} • {tx.id}</div>
-                      <span className={`text-[11px] px-2 py-0.5 rounded-full border ${statusClasses}`}>{tx.status}</span>
+                    <div className="flex items-center justify-between gap-2 mt-1">
+                      <div className="text-xs text-gray-500">{tx.date.split(' ')[0]}</div>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${statusClasses} font-medium`}>{tx.status}</span>
                     </div>
                   </div>
                 </div>
@@ -453,28 +277,43 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats }) => {
           </div>
         </div>
 
-        {/* Withdraw Modal: Handles Terabox + Eligibility */}
+        {/* Withdraw Modal */}
         {showTeraboxModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl max-w-md w-full overflow-hidden shadow-2xl">
-              <div className="flex items-center justify-between p-4 border-b">
-                <h3 className="text-base sm:text-lg font-bold text-gray-900">Withdraw</h3>
-                <button onClick={() => { setShowTeraboxModal(false); setTeraboxVerifyStatus('idle'); }} className="text-gray-400 hover:text-gray-600">
-                  <X className="w-5 h-5" />
-                </button>
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+            <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl">
+              <div className="bg-gradient-to-r from-emerald-500 to-blue-600 p-5">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xl font-bold text-white">Withdraw Earnings</h3>
+                  <button
+                    onClick={() => { setShowTeraboxModal(false); setTeraboxVerifyStatus('idle'); }}
+                    className="text-white/80 hover:text-white transition-colors"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+                <div className="text-3xl font-bold text-white">₹{userStats.totalEarnings}</div>
               </div>
-              <div className="p-4 space-y-4">
+
+              <div className="p-5 space-y-4">
                 {!hasTerabox && (
                   <>
-                    <p className="text-sm text-gray-700">To withdraw, please install Terabox and verify installation. This helps us confirm you are a real user.</p>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                      <div className="flex items-start gap-3">
+                        <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
+                        <div className="text-sm text-blue-800">
+                          To withdraw, verify Terabox installation. This helps us confirm you are a real user.
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
                       <a
                         href="https://www.1024terabox.com/"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 px-3 rounded-lg font-semibold"
+                        className="w-full block text-center bg-gradient-to-r from-emerald-500 to-blue-600 hover:from-emerald-600 hover:to-blue-700 text-white py-3 px-4 rounded-xl font-semibold shadow-md transition-all"
                       >
-                        Download Terabox
+                        Download Terabox App
                       </a>
                       <button
                         onClick={() => {
@@ -502,43 +341,60 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats }) => {
                           window.addEventListener('focus', onFocus);
                         }}
                         disabled={isVerifyingTerabox}
-                        className={`w-full py-2.5 px-3 rounded-lg font-semibold border ${isVerifyingTerabox ? 'bg-gray-100 text-gray-400 border-gray-200' : 'bg-white text-gray-800 hover:bg-gray-50 border-gray-300'}`}
+                        className={`w-full py-3 px-4 rounded-xl font-semibold border-2 transition-all ${
+                          isVerifyingTerabox
+                            ? 'bg-gray-100 text-gray-400 border-gray-200'
+                            : 'bg-white text-gray-800 hover:bg-gray-50 border-gray-300'
+                        }`}
                       >
-                        {isVerifyingTerabox ? 'Verifying…' : 'Verify Installation'}
+                        {isVerifyingTerabox ? 'Verifying...' : 'Verify Installation'}
                       </button>
                     </div>
+
                     {teraboxVerifyStatus === 'success' && (
-                      <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg p-3 text-sm">✅ Terabox verified! You can withdraw now.</div>
+                      <div className="bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-xl p-4 flex items-center gap-3">
+                        <CheckCircle className="w-5 h-5 text-emerald-600" />
+                        <span className="font-medium">Terabox verified successfully!</span>
+                      </div>
                     )}
                     {teraboxVerifyStatus === 'failed' && (
-                      <div className="bg-rose-50 border border-rose-200 text-rose-800 rounded-lg p-3 text-sm">❌ Verification failed. Please install/open Terabox and try again.</div>
+                      <div className="bg-red-50 border border-red-300 text-red-800 rounded-xl p-4 flex items-center gap-3">
+                        <AlertCircle className="w-5 h-5 text-red-600" />
+                        <span className="font-medium">Verification failed. Please install Terabox and try again.</span>
+                      </div>
                     )}
                   </>
                 )}
 
                 {hasTerabox && !canWithdraw && (
-                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                    <div className="text-amber-800 font-semibold mb-1">Insufficient Balance</div>
-                    <div className="text-sm text-amber-700">Minimum ₹800 required to withdraw. You need ₹{800 - userStats.totalEarnings} more.</div>
+                  <div className="bg-amber-50 border border-amber-300 rounded-xl p-4">
+                    <div className="flex items-start gap-3">
+                      <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5" />
+                      <div>
+                        <div className="text-amber-900 font-semibold mb-1">Insufficient Balance</div>
+                        <div className="text-sm text-amber-800">
+                          Minimum ₹800 required. You need ₹{800 - userStats.totalEarnings} more.
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
 
                 {hasTerabox && canWithdraw && (
-                  <div className="space-y-3">
-                    <div className="text-sm text-gray-700">You are eligible to withdraw your balance.</div>
-                    <button className="w-full bg-gradient-to-r from-emerald-500 to-blue-600 hover:from-emerald-600 hover:to-blue-700 text-white py-2.5 px-4 rounded-lg font-semibold">Confirm Withdraw</button>
-                    <div className="text-[11px] text-gray-500 text-center">Payouts may take up to 24 hours.</div>
+                  <div className="space-y-4">
+                    <div className="bg-emerald-50 border border-emerald-300 rounded-xl p-4">
+                      <div className="flex items-start gap-3">
+                        <CheckCircle className="w-5 h-5 text-emerald-600 mt-0.5" />
+                        <div className="text-sm text-emerald-800">
+                          You are eligible to withdraw your earnings. Payouts are processed within 24 hours.
+                        </div>
+                      </div>
+                    </div>
+                    <button className="w-full bg-gradient-to-r from-emerald-500 to-blue-600 hover:from-emerald-600 hover:to-blue-700 text-white py-3.5 px-4 rounded-xl font-bold shadow-md hover:shadow-lg transition-all">
+                      Confirm Withdrawal
+                    </button>
                   </div>
                 )}
-
-                <div className="flex justify-end pt-2">
-                  <button
-                    onClick={() => setShowTeraboxModal(false)}
-                    className="text-sm text-gray-700 px-3 py-2 hover:bg-gray-50 rounded-lg"
-                  >
-                    Close
-                  </button>
-                </div>
               </div>
             </div>
           </div>
@@ -586,62 +442,6 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats }) => {
             </div>
           </div>
         )}
-        {/* Requirements */}
-        <div className="space-y-3">
-          {!hasGoogleSignin && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium text-blue-900 text-sm">Sign in with Google</h3>
-                  <p className="text-blue-700 text-xs">Save your progress and secure your account</p>
-                </div>
-                <button 
-                  onClick={() => setHasGoogleSignin(true)}
-                  className="bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-all text-xs"
-                >
-                  Sign In
-                </button>
-              </div>
-            </div>
-          )}
-
-          {!hasTerabox && (
-            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium text-orange-900 text-sm">Download Terabox</h3>
-                  <p className="text-orange-700 text-xs">Required for withdrawal eligibility</p>
-                </div>
-                <button 
-                  onClick={() => setHasTerabox(true)}
-                  className="bg-orange-600 text-white px-3 py-1.5 rounded-lg hover:bg-orange-700 transition-all flex items-center text-xs"
-                >
-                  <Download className="h-3 w-3 mr-1.5" />
-                  Download
-                </button>
-              </div>
-            </div>
-          )}
-           {/* Earning Methods */}
-        <div className="mb-6">
-          <h2 className="text-base sm:text-lg font-bold text-gray-900 mb-3 px-4 sm:px-0">Ways to Earn More</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {earningMethods.map((method, index) => {
-              const Icon = method.icon;
-              return (
-                <div key={index} className="bg-white rounded-xl shadow-lg p-3 hover:shadow-xl transition-all">
-                  <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-r from-emerald-500 to-blue-600 rounded-lg mb-2">
-                    <Icon className="h-4 w-4 text-white" />
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-1 text-xs sm:text-sm">{method.title}</h3>
-                  <p className="text-emerald-600 font-bold text-xs sm:text-sm mb-1">{method.earning}</p>
-                  <p className="text-gray-500 text-xs">{method.bonus || method.status}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-        </div>
 
       </div>
     </div>
