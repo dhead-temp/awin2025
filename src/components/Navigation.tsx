@@ -76,10 +76,10 @@ export default function Navigation({}: NavigationProps) {
             <div className="flex justify-between items-center h-12 sm:h-14">
             {/* Logo/Brand */}
             <div className="flex items-center space-x-2">
-              <div className="bg-gradient-to-r from-emerald-500 to-blue-600 p-1.5 sm:p-2 rounded-lg sm:rounded-xl">
+              <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-1.5 sm:p-2 rounded-lg sm:rounded-xl">
                 <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
-            <span className="text-sm sm:text-base font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+            <span className="text-sm sm:text-base font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
               Answer & Get Real Money
             </span>
             </div>
@@ -113,7 +113,7 @@ export default function Navigation({}: NavigationProps) {
                       onClick={handleMenuClick}
                       className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${
                         isActive
-                          ? 'bg-gradient-to-r from-emerald-50 to-blue-50 text-emerald-600 border border-emerald-200'
+                          ? 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 border border-blue-200'
                           : 'text-gray-700 hover:bg-gray-50'
                       }`}
                     >

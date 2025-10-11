@@ -20,7 +20,7 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate, hasPlayedQuiz }) => {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-emerald-600 via-blue-600 to-purple-700">
+      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 to-blue-700">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
           <div className="text-center">
             <button
@@ -35,7 +35,7 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate, hasPlayedQuiz }) => {
             </div>
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-3 leading-tight">
               Answer Simple Questions &
-              <span className="block bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+              <span className="block bg-gradient-to-r from-yellow-300 to-yellow-400 bg-clip-text text-transparent">
                 Win Real Money
               </span>
             </h1>
@@ -48,7 +48,7 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate, hasPlayedQuiz }) => {
               className={`inline-flex items-center px-6 py-3 rounded-xl text-sm sm:text-base font-semibold transition-all ${
                 hasPlayedQuiz
                   ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-yellow-500 to-orange-600 text-white hover:shadow-2xl transform hover:scale-105'
+                  : 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-white hover:shadow-2xl transform hover:scale-105'
               }`}
             >
               <Trophy className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
@@ -71,7 +71,7 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate, hasPlayedQuiz }) => {
               const Icon = feature.icon;
               return (
                 <div key={index} className="text-center group px-4">
-                  <div className="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-r from-emerald-500 to-blue-600 text-white rounded-xl mb-2 group-hover:shadow-xl transition-all">
+                  <div className="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl mb-2 group-hover:shadow-xl transition-all">
                     <Icon className="h-5 w-5" />
                   </div>
                   <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-1">{feature.title}</h3>
@@ -84,14 +84,14 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate, hasPlayedQuiz }) => {
       </div>
 
       {/* Live Winners List */}
-      <div className="py-6 md:py-8 bg-gradient-to-r from-emerald-50 to-blue-50">
+      <div className="py-6 md:py-8 bg-gradient-to-r from-blue-50 to-blue-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <LiveWinnersList />
         </div>
       </div>
 
       {/* CTA Section */}
-      <div className="py-6 md:py-8 bg-gradient-to-r from-purple-600 to-pink-600">
+      <div className="py-6 md:py-8 bg-gradient-to-r from-blue-600 to-blue-700">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-3">Ready to Start Winning?</h2>
           <p className="text-sm sm:text-base text-white/90 mb-4 leading-relaxed">
@@ -112,7 +112,7 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate, hasPlayedQuiz }) => {
             </button>
             <button
               onClick={() => onNavigate('account')}
-              className="inline-flex items-center border-2 border-white text-white px-6 py-3 rounded-xl text-sm sm:text-base font-semibold hover:bg-white hover:text-purple-600 transition-all"
+              className="inline-flex items-center border-2 border-white text-white px-6 py-3 rounded-xl text-sm sm:text-base font-semibold hover:bg-white hover:text-blue-600 transition-all"
             >
               <Target className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
               View Earnings

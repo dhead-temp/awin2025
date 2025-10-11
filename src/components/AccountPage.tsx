@@ -1,24 +1,22 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { 
   Wallet, 
   Users, 
-  Download, 
   Share2, 
   TrendingUp, 
-  ExternalLink,
   Copy,
   Trophy,
   CreditCard,
   AlertCircle,
-  ShieldCheck,
   Lock,
   CheckCircle,
   Activity,
-  BarChart3,
   History,
   User,
-  X
+  X,
+  Link
 } from 'lucide-react';
+import { apiService, DOMAIN, User as ApiUser, Transaction } from '../services/api';
 
 interface AccountPageProps {
   userStats: {
@@ -32,286 +30,577 @@ interface AccountPageProps {
 const AccountPage: React.FC<AccountPageProps> = ({ userStats }) => {
   
   const [hasTerabox, setHasTerabox] = useState(false);
-  const [hasGoogleSignin, setHasGoogleSignin] = useState(false);
   const [showTeraboxModal, setShowTeraboxModal] = useState(false);
   const [isVerifyingTerabox, setIsVerifyingTerabox] = useState(false);
   const [teraboxVerifyStatus, setTeraboxVerifyStatus] = useState<'idle' | 'success' | 'failed'>('idle');
   const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [showShareBanner, setShowShareBanner] = useState(false);
+  const [isClaimingReward, setIsClaimingReward] = useState(false);
+  const [unclaimedShares, setUnclaimedShares] = useState(0);
+  const [showEmailPhoneModal, setShowEmailPhoneModal] = useState(false);
+  const [email, setEmail] = useState<string | null>(null);
+  const [phone, setPhone] = useState<string | null>(null);
+  const [name, setName] = useState<string | null>(null);
+  const [upi, setUpi] = useState<string | null>(null);
+  const [isUpdatingContact, setIsUpdatingContact] = useState(false);
+  const [isProcessingWithdrawal, setIsProcessingWithdrawal] = useState(false);
+  const [withdrawalSuccess, setWithdrawalSuccess] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
+  
+  // Real user data from API
+  const [currentUser, setCurrentUser] = useState<ApiUser | null>(null);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Demo user details (can be wired to real auth later)
+  const [txFilter] = useState<'all' | 'credit' | 'debit' | 'completed' | 'pending' | 'failed'>('all');
+
+  // Fetch user data on component mount
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        // Get current user from localStorage
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+          const userData = JSON.parse(savedUser);
+          if (userData.id) {
+            const response = await apiService.getUser(userData.id);
+            if (response.status === 'success' && response.data) {
+              setCurrentUser(response.data.user);
+              setTransactions(response.data.transactions);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch user data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  // User profile data
   const userProfile = {
-    name: 'user6565',
-    memberSince: '',
+    name: currentUser?.name || `user${currentUser?.id || 'new'}`,
+    memberSince: currentUser?.created_on ? new Date(currentUser.created_on).toLocaleDateString() : '',
     kycVerified: false,
     upiVerified: false,
-    avatarBg: 'bg-gradient-to-br from-blue-500 to-emerald-500'
+    avatarBg: 'bg-gradient-to-br from-blue-500 to-blue-600'
   };
 
-  type TxStatus = 'Completed' | 'Pending' | 'Failed';
-  interface TransactionItem {
-    id: string;
-    date: string; // ISO or readable
-    description: string;
-    type: 'Credit' | 'Debit';
-    amount: number;
-    status: TxStatus;
-  }
-
-  const [txFilter, setTxFilter] = useState<'all' | 'credit' | 'debit' | 'completed' | 'pending' | 'failed'>('all');
-  const [transactions] = useState<TransactionItem[]>([
-    { id: 'TXN-982341', date: '2025-09-12 10:24', description: 'Quiz Completion Prize', type: 'Credit', amount: 453, status: 'Completed' },
-    { id: 'TXN-982112', date: '2025-09-12 09:18', description: 'Referral Bonus (2 joins)', type: 'Credit', amount: 600, status: 'Completed' },
-    { id: 'TXN-981776', date: '2025-09-11 20:04', description: 'Withdrawal • UPI', type: 'Debit', amount: 800, status: 'Pending' },
-    { id: 'TXN-981222', date: '2025-09-10 16:40', description: 'Link Clicks Earnings (40)', type: 'Credit', amount: 400, status: 'Completed' },
-    { id: 'TXN-980901', date: '2025-09-09 13:22', description: 'Share Bonus', type: 'Credit', amount: 25, status: 'Completed' },
-    { id: 'TXN-980455', date: '2025-09-08 18:11', description: 'Withdrawal • UPI', type: 'Debit', amount: 900, status: 'Failed' }
-  ]);
-
-  const referralLink = 'https://answerwin.com/ref/user123';
-  const canWithdraw = userStats.totalEarnings >= 800 && hasTerabox;
+  const referralLink = currentUser?.id ? `${DOMAIN}?by=${currentUser.id}` : `${DOMAIN}?by=new`;
+  const canWithdraw = (currentUser?.balance || 0) >= 100 && hasTerabox && currentUser?.upi;
 
   const copyReferralLink = () => {
     navigator.clipboard.writeText(referralLink);
-    // Could show a toast here
+    setLinkCopied(true);
+    setTimeout(() => {
+      setLinkCopied(false);
+    }, 2000);
   };
 
-  const shareOnWhatsApp = () => {
-    const message = encodeURIComponent(`🎉 Join AnswerWin and start earning money by answering simple questions! I've already earned ₹${userStats.totalEarnings}! Use my link: ${referralLink}`);
-    window.open(`https://wa.me/?text=${message}`, '_blank');
+
+  const handleShareClick = () => {
+    setShowShareBanner(true);
+    setUnclaimedShares(prev => prev + 1);
   };
 
-  const earningMethods = [
-    { icon: Users, title: 'Invite Friends', earning: '₹300 per join', bonus: '₹10 per click, ₹1 per share' },
-    { icon: Download, title: 'Download Terabox', earning: 'Required for withdrawal', status: hasTerabox ? 'Completed' : 'Pending' },
-    { icon: Trophy, title: 'Answer Questions', earning: '₹453 + Scratch Cards', bonus: 'Play daily for more' }
-  ];
+  const claimShareReward = async () => {
+    if (!currentUser?.id || unclaimedShares <= 0) return;
+    
+    setIsClaimingReward(true);
+    try {
+      // Calculate new values - ensure they are numbers
+      const currentShares = parseInt(String(currentUser.shares || 0), 10);
+      const newShares = currentShares + unclaimedShares;
+      
+      // Make API call to update user shares with all unclaimed shares
+      // Backend trigger will automatically create transaction:
+      // - ₹2 per share (from after_user_shares_update trigger)
+      const response = await apiService.updateUser(currentUser.id, {
+        shares: newShares
+      });
+      
+      if (response.status === 'success') {
+        // Fetch updated user data to get the new balance calculated by backend
+        const updatedUserResponse = await apiService.getUser(currentUser.id);
+        
+        if (updatedUserResponse.status === 'success' && updatedUserResponse.data) {
+          // Update local state with fresh data from backend
+          setCurrentUser(updatedUserResponse.data.user);
+          setTransactions(updatedUserResponse.data.transactions);
+          
+          // Hide banner and reset unclaimed shares after claiming
+          setShowShareBanner(false);
+          setUnclaimedShares(0);
+        }
+      } else {
+        console.error('Failed to claim reward:', response.message);
+        // You could show a toast notification here
+      }
+      
+    } catch (error) {
+      console.error('Failed to claim reward:', error);
+      // You could show a toast notification here
+    } finally {
+      setIsClaimingReward(false);
+    }
+  };
 
-  const totalCredits = useMemo(() => transactions.filter(t => t.type === 'Credit' && t.status !== 'Failed').reduce((s, t) => s + t.amount, 0), [transactions]);
-  const totalDebits = useMemo(() => transactions.filter(t => t.type === 'Debit' && t.status !== 'Failed').reduce((s, t) => s + t.amount, 0), [transactions]);
-  const pendingDebits = useMemo(() => transactions.filter(t => t.type === 'Debit' && t.status === 'Pending').reduce((s, t) => s + t.amount, 0), [transactions]);
-  const completionRate = useMemo(() => {
-    const clicks = userStats.linkClicks || 1;
-    return Math.min(100, Math.round((userStats.referrals / clicks) * 100));
-  }, [userStats]);
+  const handleUpdateContact = async () => {
+    if (!currentUser?.id || (email === null && phone === null && name === null && upi === null)) return;
+    
+    setIsUpdatingContact(true);
+    try {
+      const updateData: any = {};
+      if (email !== null) updateData.email = email;
+      if (phone !== null) updateData.phone = phone;
+      if (name !== null) updateData.name = name;
+      if (upi !== null) updateData.upi = upi;
+      
+      const response = await apiService.updateUser(currentUser.id, updateData);
+      
+      if (response.status === 'success') {
+        // Fetch updated user data
+        const updatedUserResponse = await apiService.getUser(currentUser.id);
+        
+        if (updatedUserResponse.status === 'success' && updatedUserResponse.data) {
+          setCurrentUser(updatedUserResponse.data.user);
+          setShowEmailPhoneModal(false);
+          setEmail(null);
+          setPhone(null);
+          setName(null);
+          setUpi(null);
+        }
+      } else {
+        console.error('Failed to update contact:', response.message);
+        // You could show a toast notification here
+      }
+      
+    } catch (error) {
+      console.error('Failed to update contact:', error);
+      // You could show a toast notification here
+    } finally {
+      setIsUpdatingContact(false);
+    }
+  };
+
+  const handleWithdrawal = async () => {
+    if (!currentUser?.id || !canWithdraw) return;
+    
+    setIsProcessingWithdrawal(true);
+    try {
+      const response = await apiService.createWithdrawalRequest(currentUser.id, currentUser.balance);
+      
+      if (response.status === 'success') {
+        // Fetch updated user data to get the new transaction
+        const updatedUserResponse = await apiService.getUser(currentUser.id);
+        
+        if (updatedUserResponse.status === 'success' && updatedUserResponse.data) {
+          setCurrentUser(updatedUserResponse.data.user);
+          setTransactions(updatedUserResponse.data.transactions);
+          setWithdrawalSuccess(true);
+          setShowTeraboxModal(false);
+        }
+      } else {
+        console.error('Failed to process withdrawal:', response.message);
+        // You could show a toast notification here
+      }
+      
+    } catch (error) {
+      console.error('Failed to process withdrawal:', error);
+      // You could show a toast notification here
+    } finally {
+      setIsProcessingWithdrawal(false);
+    }
+  };
 
   const filteredTx = useMemo(() => {
     switch (txFilter) {
-      case 'credit': return transactions.filter(t => t.type === 'Credit');
-      case 'debit': return transactions.filter(t => t.type === 'Debit');
-      case 'completed': return transactions.filter(t => t.status === 'Completed');
-      case 'pending': return transactions.filter(t => t.status === 'Pending');
-      case 'failed': return transactions.filter(t => t.status === 'Failed');
+      case 'credit': return transactions.filter(t => t.type === 'credit');
+      case 'debit': return transactions.filter(t => t.type === 'debit');
       default: return transactions;
     }
   }, [txFilter, transactions]);
 
-  const withdrawProgress = Math.min(100, Math.round((userStats.totalEarnings / 800) * 100));
+  
+  // Check if email/phone is linked
+  const isContactLinked = currentUser?.email || currentUser?.phone;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-emerald-50 pb-24">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 pb-20">
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6">
 
         {/* Header - Profile */}
-        <div className="bg-white rounded-2xl shadow-sm p-5 mb-6 border border-gray-100">
-          <div className="flex items-center gap-4">
-            <div className={`w-14 h-14 rounded-xl ${userProfile.avatarBg} flex items-center justify-center text-white font-bold text-xl shadow-md`}>
-              {userProfile.name ? (
-                userProfile.name.split(' ').map(w => w[0]).slice(0,2).join('')
-              ) : (
-                <User className="w-7 h-7 text-white" />
-              )}
-            </div>
-            <div className="flex-1">
-              <h1 className="text-lg sm:text-xl font-bold text-gray-900">{userProfile.name || 'Your Account'}</h1>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full text-xs font-medium">
-                  <CheckCircle className="w-3.5 h-3.5" /> Active
-                </span>
-                <span className="inline-flex items-center gap-1 text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full text-xs font-medium">
-                  <Lock className="w-3.5 h-3.5" /> Secure
-                </span>
+        <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-5 mb-4 sm:mb-6 border border-gray-100">
+          <div className="flex items-center justify-between gap-3 sm:gap-4">
+            {/* User Info */}
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl ${userProfile.avatarBg} flex items-center justify-center text-white font-bold text-lg sm:text-xl shadow-md`}>
+                {userProfile.name ? (
+                  userProfile.name.split(' ').map(w => w[0]).slice(0,2).join('')
+                ) : (
+                  <User className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <h1 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 truncate">{userProfile.name || 'Your Account'}</h1>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="inline-flex items-center gap-1 text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full text-xs font-medium">
+                    <Lock className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Secure
+                  </span>
+                </div>
               </div>
             </div>
+            
+            {/* Link Email/Phone Link */}
+            <button 
+              onClick={() => setShowEmailPhoneModal(true)}
+              className={`inline-flex items-center gap-1 sm:gap-2 font-medium text-xs sm:text-sm transition-colors px-2 py-1.5 rounded-lg ${
+                isContactLinked 
+                  ? 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' 
+                  : 'text-blue-600 hover:text-blue-700 hover:bg-blue-50'
+              }`}
+            >
+              {isContactLinked ? (
+                <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              ) : (
+                <Link className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              )}
+              <span className="hidden sm:inline">{isContactLinked ? 'Update Account Info' : 'Link Email/Phone'}</span>
+              <span className="sm:hidden">{isContactLinked ? 'Update' : 'Link'}</span>
+            </button>
           </div>
         </div>
 
         {/* Balance Card */}
-        <div className="bg-gradient-to-br from-emerald-500 to-blue-600 rounded-2xl shadow-2xl p-6 mb-6 text-white">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-2xl p-4 sm:p-6 mb-4 sm:mb-6 text-white">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
             <div className="flex items-center gap-2">
-              <Wallet className="w-6 h-6" />
-              <h2 className="text-lg font-semibold">Total Balance</h2>
+              <Wallet className="w-5 h-5 sm:w-6 sm:h-6" />
+              <h2 className="text-base sm:text-lg font-semibold">Total Balance</h2>
             </div>
             <button
               onClick={() => setShowHistoryModal(true)}
-              className="text-white/90 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-sm inline-flex items-center gap-2 transition-all"
+              className="text-white/90 hover:text-white bg-white/10 hover:bg-white/20 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm inline-flex items-center gap-1 sm:gap-2 transition-all"
             >
-              <History className="w-4 h-4" />
-              History
+              <History className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">History</span>
             </button>
           </div>
 
-          <div className="mb-6">
-            <div className="text-5xl font-bold mb-2">₹{userStats.totalEarnings}</div>
-            <div className="text-white/80 text-sm">Available to withdraw</div>
+          <div className="mb-4 sm:mb-6">
+            <div className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-1 sm:mb-2">₹{currentUser?.balance || 0}</div>
+            <div className="text-white/80 text-xs sm:text-sm">Available to withdraw</div>
           </div>
-
-          
 
           <button
             onClick={() => setShowTeraboxModal(true)}
-            className="w-full bg-white text-emerald-600 hover:bg-gray-50 py-3.5 px-4 rounded-xl font-bold text-base transition-all flex items-center justify-center shadow-lg hover:shadow-xl"
+            className="w-full bg-white text-blue-600 hover:bg-gray-50 py-3 sm:py-3.5 px-4 rounded-xl font-bold text-sm sm:text-base transition-all flex items-center justify-center shadow-lg hover:shadow-xl min-h-[48px]"
           >
-            <CreditCard className="h-5 w-5 mr-2" />
+            <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
             Withdraw Now
           </button>
-          <div className="text-center text-white/70 text-xs mt-3">
-See Payment Proofs
+          <div className="text-center text-white/70 text-xs mt-2 sm:mt-3">
+            See Payment Proofs
           </div>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
-            <Users className="w-6 h-6 text-emerald-600 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-gray-900">{userStats.referrals}</div>
-            <div className="text-xs text-gray-500">Referrals</div>
+        <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4 sm:mb-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 sm:p-4 text-center">
+            <Share2 className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto mb-1 sm:mb-2" />
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{currentUser?.shares || 0}</div>
+            <div className="text-xs text-gray-500">Shares</div>
           </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
-            <Activity className="w-6 h-6 text-blue-600 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-gray-900">{userStats.linkClicks}</div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 sm:p-4 text-center">
+            <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto mb-1 sm:mb-2" />
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{currentUser?.clicks || 0}</div>
             <div className="text-xs text-gray-500">Clicks</div>
           </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
-            <Share2 className="w-6 h-6 text-orange-600 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-gray-900">{userStats.shares}</div>
-            <div className="text-xs text-gray-500">Shares</div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 sm:p-4 text-center">
+            <Users className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 mx-auto mb-1 sm:mb-2" />
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{userStats.referrals || 0}</div>
+            <div className="text-xs text-gray-500">Users</div>
           </div>
         </div>
 
 
 
         {/* Referral Section */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-xl flex items-center justify-center">
-              <Users className="w-5 h-5 text-white" />
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 mb-4 sm:mb-6">
+          <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
+              <Users className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-gray-900">Invite Friends & Earn</h2>
-              <p className="text-xs text-gray-500">Earn ₹300 per friend + ₹10 per click</p>
+              <h2 className="text-sm sm:text-base font-bold text-gray-900">💰 Earning Opportunities</h2>
+              <p className="text-xs text-gray-500">Multiple ways to earn - from ₹2 to ₹900!</p>
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-xl p-4 mb-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-600">Your Referral Link</span>
+          {/* Earning Funnel */}
+          <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-4">
+            {/* Level 1 - Highest - Withdrawal Bonus */}
+            <div className="bg-gray-900 rounded-xl p-3 sm:p-4 text-white shadow-lg border border-gray-700">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-700 rounded-lg flex items-center justify-center">
+                    <Trophy className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400" />
+                  </div>
+                  <div>
+                    <div className="text-sm sm:text-base font-bold">First Withdrawal Bonus</div>
+                    <div className="text-xs text-gray-300">When they make First withdrawal</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-lg sm:text-xl font-bold text-yellow-400">₹900</div>
+                  <div className="text-xs text-gray-300">Once Per User</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Level 2 - High - Invite Friends */}
+            <div className="bg-gray-800 rounded-xl p-3 sm:p-4 text-white shadow-md border border-gray-600">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-600 rounded-lg flex items-center justify-center">
+                    <Users className="w-3 h-3 sm:w-4 sm:h-4 text-blue-400" />
+                  </div>
+                  <div>
+                    <div className="text-sm sm:text-base font-bold">Invite Friends</div>
+                    <div className="text-xs text-gray-300">When they Visit Account Page</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-lg sm:text-xl font-bold text-blue-400">₹300</div>
+                  <div className="text-xs text-gray-300">per friend</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Level 3 - Medium - Unique Clicks */}
+            <div className="bg-gray-700 rounded-xl p-3 sm:p-4 text-white shadow-sm border border-gray-500">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-500 rounded-lg flex items-center justify-center">
+                    <Activity className="w-3 h-3 sm:w-4 sm:h-4 text-gray-300" />
+                  </div>
+                  <div>
+                    <div className="text-sm sm:text-base font-bold">Unique Clicks</div>
+                    <div className="text-xs text-gray-300">When they click your link</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-lg sm:text-xl font-bold text-gray-300">₹10</div>
+                  <div className="text-xs text-gray-300">per click</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Level 4 - Lowest - Share on WhatsApp */}
+            <div className="bg-gray-600 rounded-xl p-3 sm:p-4 text-white shadow-sm border border-gray-400">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-400 rounded-lg flex items-center justify-center">
+                    <Share2 className="w-3 h-3 sm:w-4 sm:h-4 text-gray-200" />
+                  </div>
+                  <div>
+                    <div className="text-sm sm:text-base font-bold">Share on WhatsApp</div>
+                    <div className="text-xs text-gray-300">When you share your link</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-lg sm:text-xl font-bold text-gray-200">₹2</div>
+                  <div className="text-xs text-gray-300">per share</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Share Reward Banner */}
+          {showShareBanner && (
+            <div className="relative bg-gray-50 border border-gray-200 rounded-2xl p-4 sm:p-6 mb-3 sm:mb-4 shadow-sm overflow-hidden">
+              {/* Background Pattern */}
+              <div className="absolute inset-0 opacity-5">
+                <div className="absolute top-4 right-4 w-20 h-20 bg-gray-400 rounded-full blur-xl"></div>
+                <div className="absolute bottom-4 left-4 w-16 h-16 bg-gray-500 rounded-full blur-xl"></div>
+              </div>
+              
+              <div className="relative flex items-center gap-3 sm:gap-5">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-800 rounded-2xl flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
+                  <Trophy className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-400 drop-shadow-lg" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1 sm:mb-2">
+                    <h3 className="text-base sm:text-lg font-bold text-gray-900">🎉 Share Rewards Ready!</h3>
+                    <span className="px-2 sm:px-3 py-1 bg-gray-800 text-white text-xs font-bold rounded-full shadow-md">
+                      NEW
+                    </span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-gray-700 mb-2 sm:mb-3">
+                    You have <span className="font-bold text-gray-800">{unclaimedShares} unclaimed share{unclaimedShares > 1 ? 's' : ''}</span> waiting for you!
+                  </p>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+                    <div className="bg-white/80 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2 shadow-md border border-gray-200">
+                      <span className="text-xs text-gray-600">Total Value</span>
+                      <div className="text-lg sm:text-xl font-bold text-gray-800">
+                        ₹{unclaimedShares * 2}
+                      </div>
+                    </div>
+                    <button
+                      onClick={claimShareReward}
+                      disabled={isClaimingReward}
+                      className={`px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold text-xs sm:text-sm transition-all transform hover:scale-105 active:scale-95 min-h-[44px] ${
+                        isClaimingReward
+                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          : 'bg-gray-800 hover:bg-gray-900 text-white shadow-lg hover:shadow-xl'
+                      }`}
+                    >
+                      {isClaimingReward ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          Adding...
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <span>💰</span>
+                          <span>Claim ₹{unclaimedShares * 2}</span>
+                        </div>
+                      )}
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2 sm:mt-3 flex items-center gap-1">
+                    <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                    Instant credit to your balance - no waiting!
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex gap-2 sm:gap-3 mb-3 sm:mb-4">
+            <div className="flex-[85] relative">
+              {/* Shining border animation */}
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-400 via-blue-300 to-blue-400 rounded-xl opacity-75 animate-pulse"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent rounded-xl animate-pulse" style={{animationDuration: '2s'}}></div>
+              
               <button
-                onClick={copyReferralLink}
-                className="text-blue-600 hover:text-blue-700 text-xs font-medium flex items-center gap-1"
+                onClick={handleShareClick}
+                className="relative w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3 px-3 sm:px-4 rounded-xl font-semibold shadow-xl hover:shadow-2xl transition-all flex items-center justify-center min-h-[48px] border-2 border-blue-300 z-10 transform hover:scale-105"
               >
-                <Copy className="h-3.5 w-3.5" />
-                Copy
+                <Share2 className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2 drop-shadow-sm" />
+                <span className="text-xs sm:text-sm font-bold drop-shadow-sm">Share WhatsApp</span>
               </button>
             </div>
-            <div className="bg-white rounded-lg p-3">
-              <p className="text-gray-900 font-mono text-xs break-all">{referralLink}</p>
-            </div>
+            
+            <button
+              onClick={copyReferralLink}
+              className={`flex-[15] py-3 px-3 sm:px-4 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all flex items-center justify-center min-h-[48px] ${
+                linkCopied 
+                  ? 'bg-gray-700 text-white' 
+                  : 'bg-gray-600 hover:bg-gray-700 text-white'
+              }`}
+            >
+              {linkCopied ? (
+                <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5" />
+              ) : (
+                <Copy className="h-4 w-4 sm:h-5 sm:w-5" />
+              )}
+            </button>
           </div>
-
-          <button
-            onClick={shareOnWhatsApp}
-            className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-3 px-4 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all flex items-center justify-center"
-          >
-            <Share2 className="h-5 w-5 mr-2" />
-            Share on WhatsApp
-          </button>
         </div>
 
         {/* Transaction History */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 mb-4 sm:mb-6">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
             <div className="flex items-center gap-2">
-              <History className="w-5 h-5 text-gray-700" />
-              <h2 className="text-base font-bold text-gray-900">Recent Transactions</h2>
+              <History className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" />
+              <h2 className="text-sm sm:text-base font-bold text-gray-900">Recent Transactions</h2>
             </div>
             <button
               onClick={() => setShowHistoryModal(true)}
-              className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+              className="text-blue-600 hover:text-blue-700 text-xs sm:text-sm font-medium px-2 py-1 rounded-lg hover:bg-blue-50 transition-all"
             >
               View All
             </button>
           </div>
 
-          <div className="space-y-3">
-            {filteredTx.length === 0 && (
-              <div className="text-center text-sm text-gray-500 py-8">No transactions yet</div>
-            )}
-            {filteredTx.slice(0, 5).map(tx => {
-              const isCredit = tx.type === 'Credit';
-              const statusClasses = tx.status === 'Completed'
-                ? 'bg-emerald-50 text-emerald-700'
-                : tx.status === 'Pending'
-                ? 'bg-amber-50 text-amber-700'
-                : 'bg-red-50 text-red-700';
-              return (
-                <div key={tx.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isCredit ? 'bg-emerald-100' : 'bg-red-100'}`}>
-                    {isCredit ? <TrendingUp className="w-5 h-5 text-emerald-600" /> : <CreditCard className="w-5 h-5 text-red-600" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="text-sm font-semibold text-gray-900 truncate">{tx.description}</div>
-                      <div className={`text-sm font-bold whitespace-nowrap ${isCredit ? 'text-emerald-700' : 'text-red-700'}`}>
-                        {isCredit ? '+' : '-'}₹{tx.amount}
+          <div className="space-y-2 sm:space-y-3">
+            {isLoading ? (
+              <div className="text-center text-xs sm:text-sm text-gray-500 py-6 sm:py-8">Loading transactions...</div>
+            ) : filteredTx.length === 0 ? (
+              <div className="text-center text-xs sm:text-sm text-gray-500 py-6 sm:py-8">No transactions yet</div>
+            ) : (
+              filteredTx.slice(0, 5).map(tx => {
+                const isCredit = tx.type === 'credit';
+                return (
+                  <div key={tx.id} className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                    <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center ${isCredit ? 'bg-emerald-100' : 'bg-red-100'}`}>
+                      {isCredit ? <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" /> : <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="text-xs sm:text-sm font-semibold text-gray-900 truncate">{tx.note || 'Transaction'}</div>
+                        <div className={`text-xs sm:text-sm font-bold whitespace-nowrap ${isCredit ? 'text-emerald-700' : 'text-red-700'}`}>
+                          {isCredit ? '+' : '-'}₹{typeof tx.amount === 'string' ? parseFloat(tx.amount).toFixed(2) : tx.amount}
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between gap-2 mt-1">
+                        <div className="text-xs text-gray-500">{new Date(tx.created_on).toLocaleDateString()}</div>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                          tx.note === 'Withdrawal Request' 
+                            ? 'bg-yellow-50 text-yellow-700' 
+                            : 'bg-emerald-50 text-emerald-700'
+                        }`}>
+                          {tx.note === 'Withdrawal Request' ? 'In Process' : 'Completed'}
+                        </span>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between gap-2 mt-1">
-                      <div className="text-xs text-gray-500">{tx.date.split(' ')[0]}</div>
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${statusClasses} font-medium`}>{tx.status}</span>
-                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </div>
 
         {/* Withdraw Modal */}
         {showTeraboxModal && (
-          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-            <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl">
-              <div className="bg-gradient-to-r from-emerald-500 to-blue-600 p-5">
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-3 sm:p-4 backdrop-blur-sm">
+            <div className="bg-white rounded-2xl sm:rounded-3xl max-w-md w-full overflow-hidden shadow-2xl max-h-[90vh] overflow-y-auto">
+              <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4 sm:p-5">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-xl font-bold text-white">Withdraw Earnings</h3>
+                  <h3 className="text-lg sm:text-xl font-bold text-white">Withdraw Earnings</h3>
                   <button
                     onClick={() => { setShowTeraboxModal(false); setTeraboxVerifyStatus('idle'); }}
-                    className="text-white/80 hover:text-white transition-colors"
+                    className="text-white/80 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10"
                   >
-                    <X className="w-6 h-6" />
+                    <X className="w-5 h-5 sm:w-6 sm:h-6" />
                   </button>
                 </div>
-                <div className="text-3xl font-bold text-white">₹{userStats.totalEarnings}</div>
+                <div className="text-2xl sm:text-3xl font-bold text-white">₹{currentUser?.balance || 0}</div>
               </div>
 
-              <div className="p-5 space-y-4">
+              <div className="p-4 sm:p-5 space-y-3 sm:space-y-4">
                 {!hasTerabox && (
                   <>
-                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                      <div className="flex items-start gap-3">
-                        <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
-                        <div className="text-sm text-blue-800">
+                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 sm:p-4">
+                      <div className="flex items-start gap-2 sm:gap-3">
+                        <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 mt-0.5" />
+                        <div className="text-xs sm:text-sm text-blue-800">
                           To withdraw, verify Terabox installation. This helps us confirm you are a real user.
                         </div>
                       </div>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-2 sm:space-y-3">
                       <a
                         href="https://www.1024terabox.com/"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-full block text-center bg-gradient-to-r from-emerald-500 to-blue-600 hover:from-emerald-600 hover:to-blue-700 text-white py-3 px-4 rounded-xl font-semibold shadow-md transition-all"
+                        className="w-full block text-center bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-4 rounded-xl font-semibold shadow-md transition-all min-h-[48px] flex items-center justify-center"
                       >
                         Download Terabox App
                       </a>
@@ -341,7 +630,7 @@ See Payment Proofs
                           window.addEventListener('focus', onFocus);
                         }}
                         disabled={isVerifyingTerabox}
-                        className={`w-full py-3 px-4 rounded-xl font-semibold border-2 transition-all ${
+                        className={`w-full py-3 px-4 rounded-xl font-semibold border-2 transition-all min-h-[48px] ${
                           isVerifyingTerabox
                             ? 'bg-gray-100 text-gray-400 border-gray-200'
                             : 'bg-white text-gray-800 hover:bg-gray-50 border-gray-300'
@@ -352,28 +641,42 @@ See Payment Proofs
                     </div>
 
                     {teraboxVerifyStatus === 'success' && (
-                      <div className="bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-xl p-4 flex items-center gap-3">
-                        <CheckCircle className="w-5 h-5 text-emerald-600" />
-                        <span className="font-medium">Terabox verified successfully!</span>
+                      <div className="bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-xl p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
+                        <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
+                        <span className="text-xs sm:text-sm font-medium">Terabox verified successfully!</span>
                       </div>
                     )}
                     {teraboxVerifyStatus === 'failed' && (
-                      <div className="bg-red-50 border border-red-300 text-red-800 rounded-xl p-4 flex items-center gap-3">
-                        <AlertCircle className="w-5 h-5 text-red-600" />
-                        <span className="font-medium">Verification failed. Please install Terabox and try again.</span>
+                      <div className="bg-red-50 border border-red-300 text-red-800 rounded-xl p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
+                        <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
+                        <span className="text-xs sm:text-sm font-medium">Verification failed. Please install Terabox and try again.</span>
                       </div>
                     )}
                   </>
                 )}
 
-                {hasTerabox && !canWithdraw && (
-                  <div className="bg-amber-50 border border-amber-300 rounded-xl p-4">
-                    <div className="flex items-start gap-3">
-                      <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5" />
+                {hasTerabox && !currentUser?.upi && (
+                  <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 sm:p-4">
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 mt-0.5" />
                       <div>
-                        <div className="text-amber-900 font-semibold mb-1">Insufficient Balance</div>
-                        <div className="text-sm text-amber-800">
-                          Minimum ₹800 required. You need ₹{800 - userStats.totalEarnings} more.
+                        <div className="text-amber-900 font-semibold mb-1 text-xs sm:text-sm">UPI ID Required</div>
+                        <div className="text-xs sm:text-sm text-amber-800">
+                          Please add your UPI ID in account settings to enable withdrawals.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {hasTerabox && currentUser?.upi && !canWithdraw && (
+                  <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 sm:p-4">
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 mt-0.5" />
+                      <div>
+                        <div className="text-amber-900 font-semibold mb-1 text-xs sm:text-sm">Insufficient Balance</div>
+                        <div className="text-xs sm:text-sm text-amber-800">
+                          Minimum ₹100 required. You need ₹{100 - (currentUser?.balance || 0)} more.
                         </div>
                       </div>
                     </div>
@@ -381,17 +684,25 @@ See Payment Proofs
                 )}
 
                 {hasTerabox && canWithdraw && (
-                  <div className="space-y-4">
-                    <div className="bg-emerald-50 border border-emerald-300 rounded-xl p-4">
-                      <div className="flex items-start gap-3">
-                        <CheckCircle className="w-5 h-5 text-emerald-600 mt-0.5" />
-                        <div className="text-sm text-emerald-800">
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="bg-emerald-50 border border-emerald-300 rounded-xl p-3 sm:p-4">
+                      <div className="flex items-start gap-2 sm:gap-3">
+                        <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 mt-0.5" />
+                        <div className="text-xs sm:text-sm text-emerald-800">
                           You are eligible to withdraw your earnings. Payouts are processed within 24 hours.
                         </div>
                       </div>
                     </div>
-                    <button className="w-full bg-gradient-to-r from-emerald-500 to-blue-600 hover:from-emerald-600 hover:to-blue-700 text-white py-3.5 px-4 rounded-xl font-bold shadow-md hover:shadow-lg transition-all">
-                      Confirm Withdrawal
+                    <button 
+                      onClick={handleWithdrawal}
+                      disabled={isProcessingWithdrawal}
+                      className={`w-full py-3 sm:py-3.5 px-4 rounded-xl font-bold shadow-md transition-all min-h-[48px] ${
+                        isProcessingWithdrawal
+                          ? 'bg-gray-400 text-white cursor-not-allowed'
+                          : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white hover:shadow-lg'
+                      }`}
+                    >
+                      {isProcessingWithdrawal ? 'Processing...' : 'Confirm Withdrawal'}
                     </button>
                   </div>
                 )}
@@ -400,43 +711,181 @@ See Payment Proofs
           </div>
         )}
 
+        {/* Withdrawal Success Message */}
+        {withdrawalSuccess && (
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 sm:p-5 mb-4 sm:mb-6 shadow-sm">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-md">
+                <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-1">✅ Withdrawal Request Submitted Successfully!</h3>
+                <p className="text-xs sm:text-sm text-gray-700 mb-2">Your withdrawal request has been processed and is now under review.</p>
+                <p className="text-xs sm:text-sm text-gray-600 font-medium">💰 <span className="text-green-600">₹{currentUser?.balance || 0}</span> will be credited to your account by the <span className="font-semibold text-blue-600">5th day of the upcoming month</span>.</p>
+                <p className="text-xs text-gray-500 mt-2">You'll receive a confirmation notification once the payment is processed.</p>
+              </div>
+              <button
+                onClick={() => setWithdrawalSuccess(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100"
+              >
+                <X className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Transaction History Modal */}
         {showHistoryModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl">
-              <div className="flex items-center justify-between p-4 border-b">
-                <h3 className="text-base sm:text-lg font-bold text-gray-900">All Transactions</h3>
-                <button onClick={() => setShowHistoryModal(false)} className="text-gray-400 hover:text-gray-600">
-                  <X className="w-5 h-5" />
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
+            <div className="bg-white rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
+              <div className="flex items-center justify-between p-3 sm:p-4 border-b">
+                <h3 className="text-sm sm:text-base lg:text-lg font-bold text-gray-900">All Transactions</h3>
+                <button onClick={() => setShowHistoryModal(false)} className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100">
+                  <X className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
               </div>
-              <div className="p-4">
-                <div className="divide-y divide-gray-100 max-h-[70vh] overflow-y-auto">
-                  {transactions.map(tx => {
-                    const isCredit = tx.type === 'Credit';
-                    const statusClasses = tx.status === 'Completed'
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                      : tx.status === 'Pending'
-                      ? 'bg-amber-50 text-amber-700 border-amber-200'
-                      : 'bg-rose-50 text-rose-700 border-rose-200';
-                    return (
-                      <div key={tx.id} className="py-3 flex items-center">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center mr-3 ${isCredit ? 'bg-emerald-50' : 'bg-red-50'}`}>
-                          {isCredit ? <TrendingUp className="w-5 h-5 text-emerald-600" /> : <CreditCard className="w-5 h-5 text-red-600" />}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <div className="text-xs sm:text-sm font-semibold text-gray-900">{tx.description}</div>
-                            <div className={`text-xs sm:text-sm font-bold ${isCredit ? 'text-emerald-700' : 'text-red-700'}`}>{isCredit ? '+' : '-'}₹{tx.amount}</div>
+              <div className="p-3 sm:p-4 flex-1 overflow-y-auto">
+                <div className="divide-y divide-gray-100">
+                  {isLoading ? (
+                    <div className="text-center text-xs sm:text-sm text-gray-500 py-6 sm:py-8">Loading transactions...</div>
+                  ) : transactions.length === 0 ? (
+                    <div className="text-center text-xs sm:text-sm text-gray-500 py-6 sm:py-8">No transactions yet</div>
+                  ) : (
+                    transactions.map(tx => {
+                      const isCredit = tx.type === 'credit';
+                      return (
+                        <div key={tx.id} className="py-2 sm:py-3 flex items-center">
+                          <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center mr-2 sm:mr-3 ${isCredit ? 'bg-emerald-50' : 'bg-red-50'}`}>
+                            {isCredit ? <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" /> : <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />}
                           </div>
-                          <div className="flex items-center justify-between mt-1">
-                            <div className="text-[11px] text-gray-500">{tx.date} • {tx.id}</div>
-                            <span className={`text-[11px] px-2 py-0.5 rounded-full border ${statusClasses}`}>{tx.status}</span>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <div className="text-xs sm:text-sm font-semibold text-gray-900 truncate">{tx.note || 'Transaction'}</div>
+                              <div className={`text-xs sm:text-sm font-bold ${isCredit ? 'text-emerald-700' : 'text-red-700'}`}>{isCredit ? '+' : '-'}₹{typeof tx.amount === 'string' ? parseFloat(tx.amount).toFixed(2) : tx.amount}</div>
+                            </div>
+                            <div className="flex items-center justify-between mt-1">
+                              <div className="text-[10px] sm:text-[11px] text-gray-500">{new Date(tx.created_on).toLocaleString()} • TXN-{String(tx.id)}</div>
+                              <span className={`text-[10px] sm:text-[11px] px-2 py-0.5 rounded-full border font-medium ${
+                                tx.note === 'Withdrawal Request' 
+                                  ? 'bg-yellow-50 text-yellow-700 border-yellow-200' 
+                                  : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                              }`}>
+                                {tx.note === 'Withdrawal Request' ? 'In Process' : 'Completed'}
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Email/Phone Update Modal */}
+        {showEmailPhoneModal && (
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-3 sm:p-4 backdrop-blur-sm">
+            <div className="bg-white rounded-2xl sm:rounded-3xl max-w-md w-full overflow-hidden shadow-2xl max-h-[90vh] overflow-y-auto">
+              <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4 sm:p-5">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg sm:text-xl font-bold text-white">Update Account Info</h3>
+                  <button
+                    onClick={() => { 
+                      setShowEmailPhoneModal(false); 
+                      setEmail(''); 
+                      setPhone(''); 
+                      setName('');
+                      setUpi('');
+                    }}
+                    className="text-white/80 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10"
+                  >
+                    <X className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </button>
+                </div>
+                <p className="text-white/90 text-xs sm:text-sm">Update your name, email, phone and UPI ID</p>
+              </div>
+
+              <div className="p-4 sm:p-5 space-y-3 sm:space-y-4">
+                <div className="space-y-2 sm:space-y-3">
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      value={name !== null ? name : (currentUser?.name || '')}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Enter your full name"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm sm:text-base"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      value={email !== null ? email : (currentUser?.email || '')}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter your email"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm sm:text-base"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                      Phone Number
+                    </label>
+                    <input
+                      type="tel"
+                      value={phone !== null ? phone : (currentUser?.phone || '')}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="Enter your phone number"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm sm:text-base"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                      UPI ID
+                    </label>
+                    <input
+                      type="text"
+                      value={upi !== null ? upi : (currentUser?.upi || '')}
+                      onChange={(e) => setUpi(e.target.value)}
+                      placeholder="Enter your UPI ID (e.g., user@paytm)"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm sm:text-base"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-2 sm:gap-3 pt-2">
+                  <button
+                    onClick={() => { 
+                      setShowEmailPhoneModal(false); 
+                      setEmail(null); 
+                      setPhone(null); 
+                      setName(null);
+                      setUpi(null);
+                    }}
+                    className="flex-1 py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl font-semibold border-2 border-gray-300 text-gray-700 hover:bg-gray-50 transition-all text-sm sm:text-base min-h-[44px]"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleUpdateContact}
+                    disabled={isUpdatingContact || (email === null && phone === null && name === null && upi === null)}
+                    className={`flex-1 py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl font-semibold transition-all text-sm sm:text-base min-h-[44px] ${
+                      isUpdatingContact || (email === null && phone === null && name === null && upi === null)
+                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg'
+                    }`}
+                  >
+                    {isUpdatingContact ? 'Updating...' : 'Update Contact'}
+                  </button>
                 </div>
               </div>
             </div>
