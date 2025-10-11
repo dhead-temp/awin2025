@@ -1,0 +1,153 @@
+
+--
+-- Database: `u240376517_awin`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `transactions`
+--
+
+CREATE TABLE `transactions` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `type` enum('credit','debit') NOT NULL,
+  `note` text DEFAULT NULL,
+  `created_on` timestamp NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL,
+  `token` varchar(100) NOT NULL,
+  `name` varchar(100) DEFAULT NULL,
+  `email` varchar(150) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `shares` int(11) DEFAULT 0,
+  `clicks` int(11) DEFAULT 0,
+  `is_terabox_done` tinyint(1) DEFAULT 0,
+  `is_quiz_reward_claimed` tinyint(1) DEFAULT 0,
+  `invited_by` varchar(100) DEFAULT NULL,
+  `created_on` timestamp NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `token`, `name`, `email`, `phone`, `shares`, `clicks`, `is_terabox_done`, `is_quiz_reward_claimed`, `invited_by`, `created_on`) VALUES
+(1, '', NULL, NULL, NULL, 0, 0, 0, 0, NULL, '2025-10-02 12:31:37');
+
+--
+-- Triggers `users`
+--
+DELIMITER $$
+CREATE TRIGGER `after_user_clicks_update` AFTER UPDATE ON `users` FOR EACH ROW BEGIN
+    DECLARE diff INT;
+    SET diff = NEW.clicks - OLD.clicks;
+
+    IF diff > 0 THEN
+        INSERT INTO transactions (user_id, amount, type, note, created_on)
+        VALUES (NEW.id, diff * 10, 'credit', CONCAT('Auto Click Reward (', diff, ' clicks)'), NOW());
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `after_user_shares_update` AFTER UPDATE ON `users` FOR EACH ROW BEGIN
+    DECLARE diff INT;
+    SET diff = NEW.shares - OLD.shares;
+
+    IF diff > 0 THEN
+        INSERT INTO transactions (user_id, amount, type, note, created_on)
+        VALUES (NEW.id, diff * 2, 'credit', CONCAT('Auto Share Reward (', diff, ' shares)'), NOW());
+    END IF;
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `user_view`
+-- (See below for the actual view)
+--
+CREATE TABLE `user_view` (
+`id` int(11)
+,`token` varchar(100)
+,`name` varchar(100)
+,`email` varchar(150)
+,`phone` varchar(20)
+,`shares` int(11)
+,`clicks` int(11)
+,`is_terabox_done` tinyint(1)
+,`is_quiz_reward_claimed` tinyint(1)
+,`invited_by` varchar(100)
+,`created_on` timestamp
+,`balance` decimal(32,2)
+);
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `transactions`
+--
+ALTER TABLE `transactions`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `token` (`token`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `transactions`
+--
+ALTER TABLE `transactions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `user_view`
+--
+DROP TABLE IF EXISTS `user_view`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`u240376517_awin`@`127.0.0.1` SQL SECURITY DEFINER VIEW `user_view`  AS SELECT `u`.`id` AS `id`, `u`.`token` AS `token`, `u`.`name` AS `name`, `u`.`email` AS `email`, `u`.`phone` AS `phone`, `u`.`shares` AS `shares`, `u`.`clicks` AS `clicks`, `u`.`is_terabox_done` AS `is_terabox_done`, `u`.`is_quiz_reward_claimed` AS `is_quiz_reward_claimed`, `u`.`invited_by` AS `invited_by`, `u`.`created_on` AS `created_on`, ifnull(sum(case when `t`.`type` = 'credit' then `t`.`amount` when `t`.`type` = 'debit' then -`t`.`amount` else 0 end),0) AS `balance` FROM (`users` `u` left join `transactions` `t` on(`u`.`id` = `t`.`user_id`)) GROUP BY `u`.`id` ;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `transactions`
+--
+ALTER TABLE `transactions`
+  ADD CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

@@ -1,0 +1,83 @@
+Webhook => https://be7.in/winapi.php
+
+<?php
+// ==== CORS HEADERS ====
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
+header("Content-Type: application/json");
+
+// ==== CONFIG ====
+$host = "localhost"; 
+$dbname = "u240376517_awin";
+$username = "u240376517_awin";
+$password = "bBVXzj7M/";
+
+// ==== CONNECT ====
+$conn = new mysqli($host, $username, $password, $dbname);
+if ($conn->connect_error) {
+    die(json_encode(["status"=>"error","message"=>"DB Connection Failed: " . $conn->connect_error]));
+}
+
+// ==== HELPER FUNCTION ====
+function response($status, $message, $data = null) {
+    echo json_encode(["status"=>$status, "message"=>$message, "data"=>$data]);
+    exit;
+}
+
+// ==== API ROUTES ====
+$action = $_GET['action'] ?? '';
+
+switch($action) {
+
+    // 1. CREATE USER
+    case "create_user":
+        $sql = "INSERT INTO users () VALUES ()"; // empty row, only ID generated
+        if ($conn->query($sql)) {
+            response("success", "User created", ["user_id"=>$conn->insert_id]);
+        } else {
+            response("error", $conn->error);
+        }
+        break;
+
+    // 2. UPDATE USER INFO (shares, clicks, is_quiz_reward_claimed, is_terabox_done, etc.)
+    case "update_user":
+        $user_id = $_POST['user_id'] ?? 0;
+        if (!$user_id) response("error", "user_id required");
+
+        $fields = [];
+        foreach ($_POST as $key=>$val) {
+            if ($key != "user_id") {
+                $val = $conn->real_escape_string($val);
+                $fields[] = "$key = '$val'";
+            }
+        }
+
+        if (empty($fields)) response("error", "No fields to update");
+
+        $sql = "UPDATE users SET ".implode(", ", $fields)." WHERE id=$user_id";
+        if ($conn->query($sql)) {
+            response("success", "User updated");
+        } else {
+            response("error", $conn->error);
+        }
+        break;
+
+    // 3. GET USER DETAILS
+    case "get_user":
+        $user_id = $_GET['user_id'] ?? 0;
+        if (!$user_id) response("error", "user_id required");
+
+        $sql = "SELECT * FROM user_view WHERE id=$user_id";
+        $result = $conn->query($sql);
+        if ($result && $result->num_rows > 0) {
+            response("success", "User details", $result->fetch_assoc());
+        } else {
+            response("error", "User not found");
+        }
+        break;
+
+    // DEFAULT
+    default:
+        response("error", "Invalid action. Use ?action=create_user | update_user | get_user");
+}
