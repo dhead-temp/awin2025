@@ -73,7 +73,7 @@ const WinPage: React.FC<WinPageProps> = ({ onNavigate, onMarkAsPlayed, currentUs
     const userId = currentUser.id || 'new';
     const referralUrl = `${DOMAIN}?by=${userId}`;
     const message = encodeURIComponent(
-      `🎉 Hey! I just won ₹453 by answering simple questions on this amazing app! You can earn money too by playing quizzes and completing tasks. Join now using my link and start earning: ${referralUrl}`
+      `Ye Dekhna - ${referralUrl}`
     );
     return `https://wa.me/?text=${message}`;
   };
