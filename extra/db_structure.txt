@@ -36,6 +36,7 @@ CREATE TABLE `users` (
   `is_quiz_reward_claimed` tinyint(1) DEFAULT 0,
   `invited_by` varchar(100) DEFAULT NULL,
   `created_on` timestamp NULL DEFAULT current_timestamp()
+  'ip'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --

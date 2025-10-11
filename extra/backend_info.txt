@@ -1,6 +1,11 @@
 Webhook => https://be7.in/winapi.php
 
 <?php
+// ==== SHOW ERRORS ====
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // ==== CORS HEADERS ====
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
@@ -32,15 +37,28 @@ switch($action) {
 
     // 1. CREATE USER
     case "create_user":
-        $sql = "INSERT INTO users () VALUES ()"; // empty row, only ID generated
-        if ($conn->query($sql)) {
-            response("success", "User created", ["user_id"=>$conn->insert_id]);
-        } else {
-            response("error", $conn->error);
-        }
-        break;
+    case "create_user":
+    // generate unique random token
+    $token = bin2hex(random_bytes(8));
 
-    // 2. UPDATE USER INFO (shares, clicks, is_quiz_reward_claimed, is_terabox_done, etc.)
+    // get user IP
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+
+    // insert new user
+    $sql = "INSERT INTO users (token, ip) VALUES ('$token', '$ip')";
+    if ($conn->query($sql)) {
+        response("success", "User created", [
+            "user_id" => $conn->insert_id,
+            "token" => $token,
+            "ip" => $ip
+        ]);
+    } else {
+        response("error", "Query Failed: " . $conn->error);
+    }
+    break;
+
+
+    // 2. UPDATE USER
     case "update_user":
         $user_id = $_POST['user_id'] ?? 0;
         if (!$user_id) response("error", "user_id required");
@@ -59,25 +77,44 @@ switch($action) {
         if ($conn->query($sql)) {
             response("success", "User updated");
         } else {
-            response("error", $conn->error);
+            response("error", "Query Failed: " . $conn->error);
         }
         break;
 
-    // 3. GET USER DETAILS
+    // 3. GET USER
     case "get_user":
-        $user_id = $_GET['user_id'] ?? 0;
-        if (!$user_id) response("error", "user_id required");
+    $user_id = $_GET['user_id'] ?? 0;
+    if (!$user_id) response("error", "user_id required");
 
-        $sql = "SELECT * FROM user_view WHERE id=$user_id";
-        $result = $conn->query($sql);
-        if ($result && $result->num_rows > 0) {
-            response("success", "User details", $result->fetch_assoc());
-        } else {
-            response("error", "User not found");
+    // 1️⃣ Get user details
+    $sql = "SELECT * FROM user_view WHERE id = $user_id";
+    $result = $conn->query($sql);
+    if (!$result || $result->num_rows == 0) {
+        response("error", "User not found");
+    }
+
+    $user = $result->fetch_assoc();
+
+    // 2️⃣ Get user transactions
+    $tx_sql = "SELECT id, amount, type, created_on FROM transactions WHERE user_id = $user_id ORDER BY id DESC";
+    $tx_result = $conn->query($tx_sql);
+
+    $transactions = [];
+    if ($tx_result && $tx_result->num_rows > 0) {
+        while ($row = $tx_result->fetch_assoc()) {
+            $transactions[] = $row;
         }
-        break;
+    }
 
-    // DEFAULT
+    // 3️⃣ Send both in one JSON
+    response("success", "User details with transactions", [
+        "user" => $user,
+        "transactions" => $transactions
+    ]);
+    break;
+
+    // 4. DEFAULT
     default:
         response("error", "Invalid action. Use ?action=create_user | update_user | get_user");
 }
+?>
