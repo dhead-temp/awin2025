@@ -101,7 +101,21 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats }) => {
   };
 
 
+  const generateWhatsAppLink = () => {
+    const userId = currentUser?.id || 'new';
+    const referralUrl = `${DOMAIN}?by=${userId}`;
+    const message = encodeURIComponent(
+      `🎉 Amazing opportunity! Join me and earn money easily!\n\n${referralUrl}\n\nDon't miss out on this chance! 💰`
+    );
+    return `https://wa.me/?text=${message}`;
+  };
+
   const handleShareClick = () => {
+    // Open WhatsApp with the referral link
+    const whatsappUrl = generateWhatsAppLink();
+    window.open(whatsappUrl, '_blank');
+    
+    // Show banner and increment shares after sharing
     setShowShareBanner(true);
     setUnclaimedShares(prev => prev + 1);
   };
@@ -428,86 +442,112 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats }) => {
                 <div className="absolute bottom-4 left-4 w-16 h-16 bg-gray-500 rounded-full blur-xl"></div>
               </div>
               
-              <div className="relative flex items-center gap-3 sm:gap-5">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-800 rounded-2xl flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
-                  <Trophy className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-400 drop-shadow-lg" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1 sm:mb-2">
-                    <h3 className="text-base sm:text-lg font-bold text-gray-900">🎉 Share Rewards Ready!</h3>
-                    <span className="px-2 sm:px-3 py-1 bg-gray-800 text-white text-xs font-bold rounded-full shadow-md">
-                      NEW
-                    </span>
+              <div className="relative">
+                {/* Mobile-first layout */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-5">
+                  {/* Trophy Icon */}
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-800 rounded-2xl flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300 flex-shrink-0">
+                    <Trophy className="w-7 h-7 sm:w-8 sm:h-8 text-yellow-400 drop-shadow-lg" />
                   </div>
-                  <p className="text-xs sm:text-sm text-gray-700 mb-2 sm:mb-3">
-                    You have <span className="font-bold text-gray-800">{unclaimedShares} unclaimed share{unclaimedShares > 1 ? 's' : ''}</span> waiting for you!
-                  </p>
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
-                    <div className="bg-white/80 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2 shadow-md border border-gray-200">
-                      <span className="text-xs text-gray-600">Total Value</span>
-                      <div className="text-lg sm:text-xl font-bold text-gray-800">
-                        ₹{unclaimedShares * 2}
+                  
+                  {/* Content */}
+                  <div className="flex-1 min-w-0 w-full">
+                    {/* Header */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2 sm:mb-3">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg sm:text-xl font-bold text-gray-900">🎉 Share Rewards Ready!</h3>
+                        <span className="px-2 py-1 bg-gray-800 text-white text-xs font-bold rounded-full shadow-md">
+                          NEW
+                        </span>
                       </div>
                     </div>
-                    <button
-                      onClick={claimShareReward}
-                      disabled={isClaimingReward}
-                      className={`px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold text-xs sm:text-sm transition-all transform hover:scale-105 active:scale-95 min-h-[44px] ${
-                        isClaimingReward
-                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                          : 'bg-gray-800 hover:bg-gray-900 text-white shadow-lg hover:shadow-xl'
-                      }`}
-                    >
-                      {isClaimingReward ? (
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                          Adding...
+                    
+                    {/* Description */}
+                    <p className="text-sm sm:text-base text-gray-700 mb-3 sm:mb-4">
+                      You have <span className="font-bold text-gray-800">{unclaimedShares} unclaimed share{unclaimedShares > 1 ? 's' : ''}</span> waiting for you!
+                    </p>
+                    
+                    {/* Value and Claim Button */}
+                    <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-3">
+                      {/* Value Card */}
+                      <div className="bg-white/90 backdrop-blur-sm rounded-xl px-4 py-3 shadow-md border border-gray-200 flex-shrink-0 xs:flex-1">
+                        <span className="text-xs text-gray-600 block mb-1">Total Value</span>
+                        <div className="text-xl sm:text-2xl font-bold text-gray-800">
+                          ₹{unclaimedShares * 2}
                         </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <span>💰</span>
-                          <span>Claim ₹{unclaimedShares * 2}</span>
-                        </div>
-                      )}
-                    </button>
+                      </div>
+                      
+                      {/* Claim Button */}
+                      <button
+                        onClick={claimShareReward}
+                        disabled={isClaimingReward}
+                        className={`px-6 py-3 rounded-xl font-bold text-sm transition-all transform hover:scale-105 active:scale-95 min-h-[48px] xs:flex-1 ${
+                          isClaimingReward
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-gray-800 hover:bg-gray-900 text-white shadow-lg hover:shadow-xl'
+                        }`}
+                      >
+                        {isClaimingReward ? (
+                          <div className="flex items-center justify-center gap-2">
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            <span>Adding...</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-center gap-2">
+                            <span>💰</span>
+                            <span>Claim ₹{unclaimedShares * 2}</span>
+                          </div>
+                        )}
+                      </button>
+                    </div>
+                    
+                    {/* Status Message */}
+                    <p className="text-xs text-gray-500 mt-3 flex items-center gap-2">
+                      <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                      Instant credit to your balance - no waiting!
+                    </p>
                   </div>
-                  <p className="text-xs text-gray-500 mt-2 sm:mt-3 flex items-center gap-1">
-                    <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                    Instant credit to your balance - no waiting!
-                  </p>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Action Buttons */}
-          <div className="flex gap-2 sm:gap-3 mb-3 sm:mb-4">
-            <div className="flex-[85] relative">
+          {/* Action Buttons - Mobile Optimized */}
+          <div className="flex flex-col xs:flex-row gap-3 mb-4 sm:mb-6">
+            {/* WhatsApp Share Button */}
+            <div className="flex-1 relative">
               {/* Shining border animation */}
               <div className="absolute inset-0 bg-gradient-to-r from-blue-400 via-blue-300 to-blue-400 rounded-xl opacity-75 animate-pulse"></div>
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent rounded-xl animate-pulse" style={{animationDuration: '2s'}}></div>
               
               <button
                 onClick={handleShareClick}
-                className="relative w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3 px-3 sm:px-4 rounded-xl font-semibold shadow-xl hover:shadow-2xl transition-all flex items-center justify-center min-h-[48px] border-2 border-blue-300 z-10 transform hover:scale-105"
+                className="relative w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-4 px-4 rounded-xl font-semibold shadow-xl hover:shadow-2xl transition-all flex items-center justify-center min-h-[52px] border-2 border-blue-300 z-10 transform hover:scale-105"
               >
-                <Share2 className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2 drop-shadow-sm" />
-                <span className="text-xs sm:text-sm font-bold drop-shadow-sm">Share WhatsApp</span>
+                <Share2 className="h-5 w-5 mr-2 drop-shadow-sm" />
+                <span className="text-sm font-bold drop-shadow-sm">Share on WhatsApp</span>
               </button>
             </div>
             
+            {/* Copy Link Button */}
             <button
               onClick={copyReferralLink}
-              className={`flex-[15] py-3 px-3 sm:px-4 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all flex items-center justify-center min-h-[48px] ${
+              className={`xs:w-auto w-full py-4 px-4 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all flex items-center justify-center min-h-[52px] ${
                 linkCopied 
                   ? 'bg-gray-700 text-white' 
                   : 'bg-gray-600 hover:bg-gray-700 text-white'
               }`}
             >
               {linkCopied ? (
-                <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5" />
+                <>
+                  <CheckCircle className="h-5 w-5 mr-2" />
+                  <span className="text-sm font-medium">Copied!</span>
+                </>
               ) : (
-                <Copy className="h-4 w-4 sm:h-5 sm:w-5" />
+                <>
+                  <Copy className="h-5 w-5 mr-2" />
+                  <span className="text-sm font-medium">Copy Link</span>
+                </>
               )}
             </button>
           </div>
