@@ -35,30 +35,23 @@ $action = $_GET['action'] ?? '';
 
 switch($action) {
 
-    // 1. CREATE USER
+    // 1️⃣ CREATE USER
     case "create_user":
-    case "create_user":
-    // generate unique random token
-    $token = bin2hex(random_bytes(8));
+        $token = bin2hex(random_bytes(8));
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+        $sql = "INSERT INTO users (token, ip) VALUES ('$token', '$ip')";
+        if ($conn->query($sql)) {
+            response("success", "User created", [
+                "user_id" => $conn->insert_id,
+                "token" => $token,
+                "ip" => $ip
+            ]);
+        } else {
+            response("error", "Query Failed: " . $conn->error);
+        }
+        break;
 
-    // get user IP
-    $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-
-    // insert new user
-    $sql = "INSERT INTO users (token, ip) VALUES ('$token', '$ip')";
-    if ($conn->query($sql)) {
-        response("success", "User created", [
-            "user_id" => $conn->insert_id,
-            "token" => $token,
-            "ip" => $ip
-        ]);
-    } else {
-        response("error", "Query Failed: " . $conn->error);
-    }
-    break;
-
-
-    // 2. UPDATE USER
+    // 2️⃣ UPDATE USER
     case "update_user":
         $user_id = $_POST['user_id'] ?? 0;
         if (!$user_id) response("error", "user_id required");
@@ -81,40 +74,69 @@ switch($action) {
         }
         break;
 
-    // 3. GET USER
+    // 3️⃣ GET USER (with transactions)
     case "get_user":
-    $user_id = $_GET['user_id'] ?? 0;
-    if (!$user_id) response("error", "user_id required");
+        $user_id = $_GET['user_id'] ?? 0;
+        if (!$user_id) response("error", "user_id required");
 
-    // 1️⃣ Get user details
-    $sql = "SELECT * FROM user_view WHERE id = $user_id";
-    $result = $conn->query($sql);
-    if (!$result || $result->num_rows == 0) {
-        response("error", "User not found");
-    }
-
-    $user = $result->fetch_assoc();
-
-    // 2️⃣ Get user transactions
-    $tx_sql = "SELECT id, amount, type, created_on FROM transactions WHERE user_id = $user_id ORDER BY id DESC";
-    $tx_result = $conn->query($tx_sql);
-
-    $transactions = [];
-    if ($tx_result && $tx_result->num_rows > 0) {
-        while ($row = $tx_result->fetch_assoc()) {
-            $transactions[] = $row;
+        $sql = "SELECT * FROM user_view WHERE id = $user_id";
+        $result = $conn->query($sql);
+        if (!$result || $result->num_rows == 0) {
+            response("error", "User not found");
         }
-    }
 
-    // 3️⃣ Send both in one JSON
-    response("success", "User details with transactions", [
-        "user" => $user,
-        "transactions" => $transactions
-    ]);
-    break;
+        $user = $result->fetch_assoc();
 
-    // 4. DEFAULT
+        $tx_sql = "SELECT id, amount, type, note, created_on FROM transactions WHERE user_id = $user_id ORDER BY id DESC";
+        $tx_result = $conn->query($tx_sql);
+
+        $transactions = [];
+        if ($tx_result && $tx_result->num_rows > 0) {
+            while ($row = $tx_result->fetch_assoc()) {
+                $transactions[] = $row;
+            }
+        }
+
+        response("success", "User details with transactions", [
+            "user" => $user,
+            "transactions" => $transactions
+        ]);
+        break;
+
+    // 4️⃣ WITHDRAW REQUEST
+    case "withdraw_request":
+        $user_id = $_POST['user_id'] ?? 0;
+        $amount = $_POST['amount'] ?? 0;
+
+        if (!$user_id || !$amount || $amount <= 0) {
+            response("error", "user_id and valid amount required");
+        }
+
+        // check if user exists
+        $check = $conn->query("SELECT id FROM users WHERE id = $user_id");
+        if (!$check || $check->num_rows == 0) {
+            response("error", "User not found");
+        }
+
+        // insert withdrawal transaction
+        $note = "Withdrawal Request";
+        $sql = "INSERT INTO transactions (user_id, amount, type, note, created_on)
+                VALUES ($user_id, $amount, 'debit', '$note', NOW())";
+
+        if ($conn->query($sql)) {
+            response("success", "Withdrawal request added", [
+                "transaction_id" => $conn->insert_id,
+                "amount" => $amount,
+                "type" => "debit",
+                "note" => $note
+            ]);
+        } else {
+            response("error", "Query Failed: " . $conn->error);
+        }
+        break;
+
+    // 5️⃣ DEFAULT
     default:
-        response("error", "Invalid action. Use ?action=create_user | update_user | get_user");
+        response("error", "Invalid action. Use ?action=create_user | update_user | get_user | withdraw_request");
 }
 ?>
