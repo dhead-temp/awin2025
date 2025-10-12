@@ -2,19 +2,20 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import HomePage from './components/HomePage';
 import QuizPage from './components/QuizPage';
-import WinPage from './components/WinPage';
+import WinPage1 from './components/WinPage1';
 import QuizProcessing from './components/QuizProcessing';
 import AccountPage from './components/AccountPage';
 import Navigation from './components/Navigation';
 import PromoStrip from './components/PromoStrip';
 import Footer from './components/Footer';
+import PaymentProofsFooter from './components/PaymentProofsFooter';
 import HowItWorksPage from './components/HowItWorksPage';
 import RulesPage from './components/RulesPage';
 import WinnersPage from './components/WinnersPage';
 import FaqsPage from './components/FaqsPage';
 import { apiService } from './services/api';
 
-export type Page = 'home' | 'quiz' | 'processing' | 'win' | 'account' | 'how-it-works' | 'rules' | 'winners' | 'faqs';
+export type Page = 'home' | 'quiz' | 'processing' | 'win' | 'win1' | 'account' | 'how-it-works' | 'rules' | 'winners' | 'faqs';
 
 // Component to handle navigation logic
 function AppContent() {
@@ -29,7 +30,6 @@ function AppContent() {
     const hasPlayed = localStorage.getItem('hasPlayedQuiz') === 'true';
     return {
       totalEarnings: hasPlayed ? 453 : 0,
-      scratchCards: hasPlayed ? 3 : 0,
       referrals: 12,
       linkClicks: 84,
       shares: 156
@@ -73,7 +73,7 @@ function AppContent() {
       'home': '/',
       'quiz': '/quiz',
       'processing': '/processing',
-      'win': '/win',
+      'win1': '/win1',
       'account': '/account',
       'how-it-works': '/how-it-works',
       'rules': '/rules',
@@ -95,8 +95,7 @@ function AppContent() {
     // Update user stats with quiz earnings
     setUserStats(prev => ({
       ...prev,
-      totalEarnings: prev.totalEarnings + 453,
-      scratchCards: prev.scratchCards + 3
+      totalEarnings: prev.totalEarnings + 453
     }));
   };
 
@@ -148,7 +147,7 @@ function AppContent() {
           <Route path="/" element={<HomePage onNavigate={navigateTo} hasPlayedQuiz={hasPlayedQuiz} />} />
           <Route path="/quiz" element={<QuizPage onNavigate={navigateTo} onMarkAsPlayed={markQuizAsPlayed} hasPlayedQuiz={hasPlayedQuiz} />} />
           <Route path="/processing" element={<QuizProcessing onNavigate={navigateTo} />} />
-          <Route path="/win" element={<WinPage onNavigate={navigateTo} onMarkAsPlayed={markQuizAsPlayed} currentUser={currentUser} onCreateUser={createUser} />} />
+          <Route path="/win1" element={<WinPage1 onNavigate={navigateTo} onMarkAsPlayed={markQuizAsPlayed} currentUser={currentUser} onCreateUser={createUser} />} />
           <Route path="/account" element={<AccountPage userStats={userStats} />} />
           <Route path="/how-it-works" element={<HowItWorksPage />} />
           <Route path="/rules" element={<RulesPage />} />
@@ -157,6 +156,7 @@ function AppContent() {
         </Routes>
         <Footer />
       </main>
+      <PaymentProofsFooter />
     </div>
   );
 }

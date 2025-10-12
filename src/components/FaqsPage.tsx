@@ -7,7 +7,7 @@ const FaqsPage: React.FC = () => {
   const faqs = [
     {
       question: 'How do I start earning money?',
-      answer: 'Simply answer 3 questions correctly to win ₹453 + 3 scratch cards. Each player can only play once, so make sure to answer carefully. After completing the quiz, you can earn more by referring friends.'
+      answer: 'Simply answer 3 questions correctly to win ₹453. Each player can only play once, so make sure to answer carefully. After completing the quiz, you can earn more by referring friends.'
     },
     {
       question: 'Can I play the quiz multiple times?',
@@ -31,11 +31,7 @@ const FaqsPage: React.FC = () => {
     },
     {
       question: 'What happens if I provide wrong answers?',
-      answer: 'Don\'t worry! You still win the guaranteed ₹453 + 3 scratch cards regardless of whether your answers are correct or incorrect. The quiz is designed to be fun and rewarding for everyone.'
-    },
-    {
-      question: 'How do scratch cards work?',
-      answer: 'After completing the quiz, you receive 3 scratch cards. Each card contains a prize between ₹50-₹100. Simply scratch the cards to reveal your bonus winnings, which are added to your total earnings.'
+      answer: 'Don\'t worry! You still win the guaranteed ₹453 regardless of whether your answers are correct or incorrect. The quiz is designed to be fun and rewarding for everyone.'
     },
     {
       question: 'Is this platform safe and legitimate?',
@@ -51,7 +47,7 @@ const FaqsPage: React.FC = () => {
     },
     {
       question: 'How can I track my earnings?',
-      answer: 'You can track all your earnings in the "My Account" section. This includes your quiz winnings, scratch card bonuses, referral earnings, and total balance available for withdrawal.'
+      answer: 'You can track all your earnings in the "My Account" section. This includes your quiz winnings, referral earnings, and total balance available for withdrawal.'
     }
   ];
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trophy, Users, ChevronRight, Zap, BookOpen, TrendingUp, Gift, Target } from 'lucide-react';
+import { Trophy, Users, ChevronRight, Zap, BookOpen, TrendingUp, Target } from 'lucide-react';
 import { Page } from '../App';
 import LiveWinnersList from './LiveWinnersList';
 
@@ -13,7 +13,6 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate, hasPlayedQuiz }) => {
   const features = [
     { icon: Trophy, title: 'Answer & Win', desc: 'Answer 3 simple questions and win instantly' },
     { icon: Users, title: 'Refer Friends', desc: 'Earn ₹300 per referral + bonuses' },
-    { icon: Gift, title: 'Scratch Cards', desc: 'Win up to ₹100 with every game' },
     { icon: TrendingUp, title: 'Grow Earnings', desc: 'Multiple ways to increase your income' }
   ];
 

@@ -21,7 +21,7 @@ interface User {
   shares: number;
   clicks: number;
   is_terabox_done: boolean;
-  is_quiz_reward_claimed: boolean;
+  is_quiz_reward_claimed: string;
   quiz_withdraw: boolean;
   invited_by?: string;
   created_on: string;
@@ -149,7 +149,7 @@ class ApiService {
   // Update quiz reward claimed status and shares
   async updateQuizRewardStatus(userId: number, shares: number): Promise<ApiResponse> {
     return this.updateUser(userId, {
-      is_quiz_reward_claimed: true,
+      is_quiz_reward_claimed: 1,
       shares: shares
     });
   }

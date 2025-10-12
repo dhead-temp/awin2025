@@ -15,9 +15,6 @@ const WinnersPage: React.FC = () => {
         </div>
 
 
-        {/* Live Winners List */}
-        <LiveWinnersList title="🔴 Live Winners" subtitle="Winners updating every 2 seconds" maxHeight={false} />
-
         {/* Stats */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-2xl p-4 text-white text-center">

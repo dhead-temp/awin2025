@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Home, HelpCircle, User, Trophy, BookOpen, Award, Users, Trash2 } from 'lucide-react';
 
-export type Page = 'home' | 'quiz' | 'win' | 'account' | 'how-it-works' | 'rules' | 'winners' | 'faqs';
+export type Page = 'home' | 'quiz' | 'win' | 'win1' | 'account' | 'how-it-works' | 'rules' | 'winners' | 'faqs';
 
 interface NavigationProps {}
 
@@ -13,6 +13,7 @@ export default function Navigation({}: NavigationProps) {
   const menuItems = [
     { path: '/', label: 'Home', icon: Home },
     { path: '/quiz', label: 'Play Quiz', icon: HelpCircle },
+    { path: '/win1', label: 'Win Page (New)', icon: Trophy },
     { path: '/account', label: 'My Account', icon: User },
     { path: '/how-it-works', label: 'How It Works', icon: BookOpen },
     { path: '/rules', label: 'Rules', icon: Award },
@@ -34,7 +35,6 @@ export default function Navigation({}: NavigationProps) {
         localStorage.removeItem('userStats');
         localStorage.removeItem('quizAnswers');
         localStorage.removeItem('currentQuestion');
-        localStorage.removeItem('scratchCardData');
       } catch (_) {}
     }
 
