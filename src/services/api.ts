@@ -99,12 +99,14 @@ class ApiService {
 
   // Update user data
   async updateUser(userId: number, updates: Partial<User>): Promise<ApiResponse> {
+    console.log('API: updateUser called', { userId, updates });
     const data = { user_id: userId, ...updates };
     return this.makeRequest('update_user', 'POST', data);
   }
 
   // Get user details with transactions
   async getUser(userId: number): Promise<ApiResponse<UserWithTransactions>> {
+    console.log('API: getUser called', { userId });
     const url = new URL(API_BASE_URL);
     url.searchParams.set('action', 'get_user');
     url.searchParams.set('user_id', userId.toString());
@@ -148,8 +150,9 @@ class ApiService {
 
   // Update quiz reward claimed status and shares
   async updateQuizRewardStatus(userId: number, shares: number): Promise<ApiResponse> {
+    console.log('API: updateQuizRewardStatus called', { userId, shares });
     return this.updateUser(userId, {
-      is_quiz_reward_claimed: 1,
+      is_quiz_reward_claimed: '1',
       shares: shares
     });
   }

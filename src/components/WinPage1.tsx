@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Trophy, Gift, X, MessageCircle } from 'lucide-react';
 import type { Page } from '../App';
 import { DOMAIN, apiService } from '../services/api';
@@ -20,15 +20,52 @@ interface WinPage1Props {
   } | null>;
 }
 
-const WinPage1: React.FC<WinPage1Props> = ({ onNavigate, currentUser, onCreateUser }) => {
+const WinPage1: React.FC<WinPage1Props> = ({ onNavigate, onMarkAsPlayed, currentUser, onCreateUser }) => {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [invitedFriends, setInvitedFriends] = useState(0);
   const [isCreatingUser, setIsCreatingUser] = useState(false);
+  const [hasMarkedAsPlayed, setHasMarkedAsPlayed] = useState(false);
+  const [isQuizRewardClaimed, setIsQuizRewardClaimed] = useState(false);
 
   const baseQuizWinnings = 453;
 
+  // Mark quiz as played when component mounts (user reached win page)
+  useEffect(() => {
+    if (!hasMarkedAsPlayed) {
+      onMarkAsPlayed();
+      setHasMarkedAsPlayed(true);
+    }
+  }, [onMarkAsPlayed, hasMarkedAsPlayed]);
+
+  // Check quiz reward status from database
+  useEffect(() => {
+    const checkQuizRewardStatus = async () => {
+      if (currentUser?.id) {
+        try {
+          const response = await apiService.getUser(parseInt(currentUser.id));
+          if (response.status === 'success' && response.data) {
+            const claimed = response.data.user.is_quiz_reward_claimed === '1' || response.data.user.is_quiz_reward_claimed === 'true';
+            setIsQuizRewardClaimed(claimed);
+          }
+        } catch (error) {
+          console.error('Failed to check quiz reward status:', error);
+        }
+      }
+    };
+
+    checkQuizRewardStatus();
+  }, [currentUser?.id]);
+
   const handleWithdrawClick = async () => {
     setIsCreatingUser(true);
+    
+    // If quiz reward is already claimed and user exists, go directly to account page
+    if (isQuizRewardClaimed && currentUser?.id) {
+      console.log('Quiz reward already claimed, redirecting to account page');
+      onNavigate('account');
+      setIsCreatingUser(false);
+      return;
+    }
     
     // Create user if not exists
     const user = await onCreateUser();
@@ -151,7 +188,9 @@ const WinPage1: React.FC<WinPage1Props> = ({ onNavigate, currentUser, onCreateUs
                   <span className="text-sm">Processing...</span>
                 </div>
               ) : (
-                <span className="text-sm">Withdraw Now</span>
+                <span className="text-sm">
+                  {isQuizRewardClaimed && currentUser?.id ? 'Go to Account' : 'Withdraw Now'}
+                </span>
               )}
             </button>
           </div>

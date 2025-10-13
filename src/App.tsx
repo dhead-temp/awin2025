@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import HomePage from './components/HomePage';
 import QuizPage from './components/QuizPage';
@@ -21,6 +21,7 @@ function AppContent() {
     // Check if user has already played (stored in localStorage)
     return localStorage.getItem('hasPlayedQuiz') === 'true';
   });
+  const [isQuizRewardClaimed, setIsQuizRewardClaimed] = useState(false);
   const [userStats, setUserStats] = useState(() => {
     // Initialize with zero earnings if user hasn't played quiz yet
     const hasPlayed = localStorage.getItem('hasPlayedQuiz') === 'true';
@@ -40,6 +41,42 @@ function AppContent() {
     const savedUser = localStorage.getItem('currentUser');
     return savedUser ? JSON.parse(savedUser) : { id: null, token: null, invitedBy: null };
   });
+
+  // Check quiz reward status from database
+  useEffect(() => {
+    const checkQuizRewardStatus = async () => {
+      console.log('App: checkQuizRewardStatus called');
+      const savedUser = localStorage.getItem('currentUser');
+      if (savedUser) {
+        const userData = JSON.parse(savedUser);
+        if (userData.id) {
+          try {
+            const response = await apiService.getUser(userData.id);
+            if (response.status === 'success' && response.data) {
+              const claimed = response.data.user.is_quiz_reward_claimed === '1' || response.data.user.is_quiz_reward_claimed === 'true';
+              setIsQuizRewardClaimed(claimed);
+              // Sync localStorage with database status
+              if (claimed) {
+                setHasPlayedQuiz(true);
+                localStorage.setItem('hasPlayedQuiz', 'true');
+              } else {
+                // If database says not claimed but localStorage says played, sync to database
+                const localPlayed = localStorage.getItem('hasPlayedQuiz') === 'true';
+                if (localPlayed) {
+                  await apiService.updateQuizRewardStatus(userData.id, 0);
+                  setIsQuizRewardClaimed(true);
+                }
+              }
+            }
+          } catch (error) {
+            console.error('Failed to check quiz reward status:', error);
+          }
+        }
+      }
+    };
+
+    checkQuizRewardStatus();
+  }, []); // Run only once on mount
 
   // Handle invite code detection and click count increment
   useEffect(() => {
@@ -80,16 +117,29 @@ function AppContent() {
   //   setUserStats(prev => ({ ...prev, totalEarnings: prev.totalEarnings + amount }));
   // };
 
-  const markQuizAsPlayed = () => {
+  const markQuizAsPlayed = useCallback(async () => {
+    console.log('App: markQuizAsPlayed called', { currentUser: currentUser.id });
     // Mark as played and store in localStorage to persist across sessions
     setHasPlayedQuiz(true);
     localStorage.setItem('hasPlayedQuiz', 'true');
+    setIsQuizRewardClaimed(true);
+    
     // Update user stats with quiz earnings
     setUserStats(prev => ({
       ...prev,
       totalEarnings: prev.totalEarnings + 453
     }));
-  };
+
+    // Update database if user exists
+    if (currentUser.id) {
+      try {
+        await apiService.updateQuizRewardStatus(currentUser.id, 0); // shares will be updated separately
+        console.log('Quiz reward status updated in database');
+      } catch (error) {
+        console.error('Failed to update quiz reward status:', error);
+      }
+    }
+  }, [currentUser.id]);
 
   // Create user when withdraw button is clicked
   const createUser = async () => {
@@ -140,7 +190,7 @@ function AppContent() {
           <Route path="/home" element={<HomePage onNavigate={navigateTo} hasPlayedQuiz={hasPlayedQuiz} />} />
           <Route path="/quiz" element={<QuizPage onNavigate={navigateTo} onMarkAsPlayed={markQuizAsPlayed} hasPlayedQuiz={hasPlayedQuiz} />} />
           <Route path="/win1" element={<WinPage1 onNavigate={navigateTo} onMarkAsPlayed={markQuizAsPlayed} currentUser={currentUser} onCreateUser={createUser} />} />
-          <Route path="/account" element={<AccountPage userStats={userStats} hasPlayedQuiz={hasPlayedQuiz} onNavigate={navigateTo} />} />
+          <Route path="/account" element={<AccountPage userStats={userStats} onNavigate={navigateTo} />} />
           <Route path="/how-it-works" element={<HowItWorksPage />} />
         </Routes>
         <Footer />

@@ -28,11 +28,10 @@ interface AccountPageProps {
     linkClicks: number;
     shares: number;
   };
-  hasPlayedQuiz: boolean;
   onNavigate: (page: Page) => void;
 }
 
-const AccountPage: React.FC<AccountPageProps> = ({ userStats, hasPlayedQuiz, onNavigate }) => {
+const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
   
   const [hasTerabox, setHasTerabox] = useState(false);
   const [showTeraboxModal, setShowTeraboxModal] = useState(false);
@@ -57,6 +56,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, hasPlayedQuiz, onN
   const [currentUser, setCurrentUser] = useState<ApiUser | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isQuizRewardClaimed, setIsQuizRewardClaimed] = useState(false);
 
   const [txFilter] = useState<'all' | 'credit' | 'debit' | 'completed' | 'pending' | 'failed'>('all');
 
@@ -92,6 +92,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, hasPlayedQuiz, onN
   // Fetch user data on component mount
   useEffect(() => {
     const fetchUserData = async () => {
+      console.log('AccountPage: fetchUserData called');
       try {
         // Get current user from localStorage
         const savedUser = localStorage.getItem('currentUser');
@@ -102,6 +103,8 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, hasPlayedQuiz, onN
             if (response.status === 'success' && response.data) {
               setCurrentUser(response.data.user);
               setTransactions(response.data.transactions);
+              // Check if quiz reward has been claimed from database
+              setIsQuizRewardClaimed(response.data.user.is_quiz_reward_claimed === '1' || response.data.user.is_quiz_reward_claimed === 'true');
             }
           }
         }
@@ -285,8 +288,8 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, hasPlayedQuiz, onN
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 pb-32">
-      {/* Locked State - Show if user hasn't played quiz */}
-      {!hasPlayedQuiz ? (
+      {/* Locked State - Show if user hasn't claimed quiz reward */}
+      {!isQuizRewardClaimed ? (
         <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6">
           <div className="bg-white rounded-2xl shadow-sm p-6 sm:p-8 mb-4 sm:mb-6 border border-gray-100 relative overflow-hidden">
             {/* Blurred background content */}

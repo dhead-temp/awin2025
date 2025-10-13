@@ -101,7 +101,7 @@ const PaymentProofsFooter: React.FC = () => {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center">
                         <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3">
-                          <img src="/img/sbi.png" alt="SBI" className="w-full h-full object-contain" />
+                          <img src="img/sbi.png" alt="SBI" className="w-full h-full object-contain" />
                         </div>
                         <div>
                           <div className="text-sm font-semibold text-gray-800">Tannu</div>
@@ -128,7 +128,7 @@ const PaymentProofsFooter: React.FC = () => {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center">
                         <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3">
-                          <img src="/img/hdfc.png" alt="HDFC" className="w-full h-full object-contain" />
+                          <img src="img/hdfc.png" alt="HDFC" className="w-full h-full object-contain" />
                         </div>
                         <div>
                           <div className="text-sm font-semibold text-gray-800">Priya Sharma</div>
@@ -155,7 +155,7 @@ const PaymentProofsFooter: React.FC = () => {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center">
                         <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3">
-                          <img src="/img/icici.png" alt="ICICI" className="w-full h-full object-contain" />
+                          <img src="img/icici.png" alt="ICICI" className="w-full h-full object-contain" />
                         </div>
                         <div>
                           <div className="text-sm font-semibold text-gray-800">Rajesh Kumar</div>
@@ -182,7 +182,7 @@ const PaymentProofsFooter: React.FC = () => {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center">
                         <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3">
-                          <img src="/img/axis.png" alt="Axis" className="w-full h-full object-contain" />
+                          <img src="img/axis.png" alt="Axis" className="w-full h-full object-contain" />
                         </div>
                         <div>
                           <div className="text-sm font-semibold text-gray-800">Anita Mehta</div>
@@ -209,7 +209,7 @@ const PaymentProofsFooter: React.FC = () => {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center">
                         <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3">
-                          <img src="/img/sbi.png" alt="SBI" className="w-full h-full object-contain" />
+                          <img src="img/sbi.png" alt="SBI" className="w-full h-full object-contain" />
                         </div>
                         <div>
                           <div className="text-sm font-semibold text-gray-800">Vikram Patel</div>
@@ -236,7 +236,7 @@ const PaymentProofsFooter: React.FC = () => {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center">
                         <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3">
-                          <img src="/img/hdfc.png" alt="HDFC" className="w-full h-full object-contain" />
+                          <img src="img/hdfc.png" alt="HDFC" className="w-full h-full object-contain" />
                         </div>
                         <div>
                           <div className="text-sm font-semibold text-gray-800">Sunita Reddy</div>
@@ -263,7 +263,7 @@ const PaymentProofsFooter: React.FC = () => {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center">
                         <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3">
-                          <img src="/img/icici.png" alt="ICICI" className="w-full h-full object-contain" />
+                          <img src="img/icici.png" alt="ICICI" className="w-full h-full object-contain" />
                         </div>
                         <div>
                           <div className="text-sm font-semibold text-gray-800">Mohit Agarwal</div>
@@ -290,7 +290,7 @@ const PaymentProofsFooter: React.FC = () => {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center">
                         <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3">
-                          <img src="/img/axis.png" alt="Axis" className="w-full h-full object-contain" />
+                          <img src="img/axis.png" alt="Axis" className="w-full h-full object-contain" />
                         </div>
                         <div>
                           <div className="text-sm font-semibold text-gray-800">Kavya Singh</div>

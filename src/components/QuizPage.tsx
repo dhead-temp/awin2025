@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronRight, Trophy, Clock, Target } from 'lucide-react';
 import type { Page } from '../App';
 
@@ -13,6 +13,13 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
   const [answers, setAnswers] = useState<number[]>([]);
   const [timeLeft, setTimeLeft] = useState(300);
   const [isTicking, setIsTicking] = useState(false);
+  const [isQuizRewardClaimed, setIsQuizRewardClaimed] = useState(false);
+
+  // Check if user has already claimed quiz reward from localStorage (App.tsx handles database sync)
+  useEffect(() => {
+    const localPlayed = localStorage.getItem('hasPlayedQuiz') === 'true';
+    setIsQuizRewardClaimed(localPlayed);
+  }, []);
 
   // Function to play tick sound
   const playTickSound = (isUrgent = false) => {
@@ -83,8 +90,8 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
   };
 
   React.useEffect(() => {
-    // Don't start timer if in retry state
-    if (currentQuestion === -1) return;
+    // Don't start timer if in retry state or if quiz reward already claimed
+    if (currentQuestion === -1 || isQuizRewardClaimed) return;
     
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -103,7 +110,7 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [currentQuestion]);
+  }, [currentQuestion, isQuizRewardClaimed]);
 
   const progressPercentage = ((currentQuestion + 1) / questions.length) * 100;
 
@@ -145,7 +152,7 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
   }
 
   // If already played, show message instead of quiz
-  if (hasPlayedQuiz) {
+  if (isQuizRewardClaimed) {
     return (
       <div className="min-h-screen bg-gray-50 pb-32 flex items-center justify-center">
         <div className="max-w-2xl mx-auto px-4 text-center">
@@ -157,18 +164,12 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
             <p className="text-gray-600 text-xs sm:text-sm mb-4 leading-relaxed">
               You played and won prizes. One play per player.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex justify-center">
               <button
                 onClick={() => onNavigate('win1')}
-                className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 hover:shadow-xl transition-all text-xs sm:text-sm"
+                className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 hover:shadow-xl transition-all text-sm sm:text-base"
               >
-                View New Win Page
-              </button>
-              <button
-                onClick={() => onNavigate('account')}
-                className="border-2 border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 hover:border-gray-400 transition-all text-xs sm:text-sm"
-              >
-                Earn More by Referring
+                View Win Page
               </button>
             </div>
           </div>
