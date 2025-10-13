@@ -69,9 +69,9 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
       setCurrentQuestion(currentQuestion + 1);
       setTimeLeft(30);
     } else {
-      // All questions answered, mark played then show staged processing
+      // All questions answered, mark played then navigate to win page
       onMarkAsPlayed();
-      onNavigate('processing');
+      onNavigate('win1');
     }
   };
 
