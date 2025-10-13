@@ -135,7 +135,7 @@ function AppContent() {
         invitedBy: inviteCode,
       }));
     }
-  }, [location.search, currentUser.invitedBy]);
+  }, [location.search]); // Removed currentUser.invitedBy from dependencies to prevent infinite loop
 
   const navigateTo = (page: Page) => {
     const pathMap: Record<Page, string> = {
