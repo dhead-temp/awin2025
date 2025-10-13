@@ -2,7 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 
 const PaymentProofsFooter: React.FC = () => {
-  const [isFooterExpanded, setIsFooterExpanded] = useState(true);
+  const [isFooterExpanded, setIsFooterExpanded] = useState(() => {
+    // Initialize from localStorage, default to true if not set
+    const saved = localStorage.getItem('paymentProofsExpanded');
+    return saved !== null ? saved === 'true' : true;
+  });
   const [currentPaymentIndex, setCurrentPaymentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const footerRef = useRef<HTMLDivElement>(null);
@@ -17,6 +21,11 @@ const PaymentProofsFooter: React.FC = () => {
     { name: 'Mohit Agarwal', city: 'Kolkata', amount: '750', bank: 'icici' },
     { name: 'Kavya Singh', city: 'Pune', amount: '1,300', bank: 'axis' }
   ];
+
+  // Save expanded state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('paymentProofsExpanded', isFooterExpanded.toString());
+  }, [isFooterExpanded]);
 
   // Handle click outside to collapse footer
   useEffect(() => {
