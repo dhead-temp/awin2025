@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { ChevronRight, Trophy, Clock, Target } from 'lucide-react';
-import LiveWinnersList from './LiveWinnersList';
 import type { Page } from '../App';
 
 interface QuizPageProps {
@@ -69,13 +68,24 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
       setCurrentQuestion(currentQuestion + 1);
       setTimeLeft(30);
     } else {
-      // All questions answered, mark played then navigate to win page
-      onMarkAsPlayed();
-      onNavigate('win1');
+      // All questions answered, check if all answers are wrong
+      const allWrong = newAnswers.every((answer, index) => answer !== questions[index].correct);
+      
+      if (allWrong) {
+        // Show retry message instead of navigating to win page
+        setCurrentQuestion(-1); // Use -1 to indicate retry state
+      } else {
+        // Mark played then navigate to win page
+        onMarkAsPlayed();
+        onNavigate('win1');
+      }
     }
   };
 
   React.useEffect(() => {
+    // Don't start timer if in retry state
+    if (currentQuestion === -1) return;
+    
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
@@ -97,10 +107,47 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
 
   const progressPercentage = ((currentQuestion + 1) / questions.length) * 100;
 
+  // If all answers are wrong, show retry message
+  if (currentQuestion === -1) {
+    return (
+      <div className="min-h-screen bg-gray-50 pb-32 flex items-center justify-center">
+        <div className="max-w-2xl mx-auto px-4 text-center">
+          <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12">
+            <div className="w-20 h-20 bg-red-600 rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg">
+              <Trophy className="h-10 w-10 text-white" />
+            </div>
+            <h1 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 mb-2">All Answers Wrong!</h1>
+            <p className="text-gray-600 text-xs sm:text-sm mb-4 leading-relaxed">
+              You got all answers wrong. Retry playing the quiz to win prizes.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={() => {
+                  setCurrentQuestion(0);
+                  setAnswers([]);
+                  setTimeLeft(30);
+                }}
+                className="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-2 rounded-lg font-semibold hover:from-red-700 hover:to-red-800 hover:shadow-xl transition-all text-xs sm:text-sm"
+              >
+                Retry Quiz
+              </button>
+              <button
+                onClick={() => onNavigate('home')}
+                className="border-2 border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 hover:border-gray-400 transition-all text-xs sm:text-sm"
+              >
+                Go Home
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // If already played, show message instead of quiz
   if (hasPlayedQuiz) {
     return (
-      <div className="min-h-screen bg-gray-50 pb-24 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 pb-32 flex items-center justify-center">
         <div className="max-w-2xl mx-auto px-4 text-center">
           <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12">
             <div className="w-20 h-20 bg-blue-600 rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg">
@@ -131,7 +178,7 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-gray-50 pb-32">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Header */}
         <div className="text-center mb-6">
@@ -218,10 +265,6 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
             </div>
         )}
 
-        {/* Live Winners List */}
-        <div className="mt-6">
-          <LiveWinnersList />
-        </div>
       </div>
     </div>
   );

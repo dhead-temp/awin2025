@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Home, HelpCircle, User, Trophy, BookOpen, Award, Users, Trash2 } from 'lucide-react';
+import { Menu, X, Home, HelpCircle, User, Trophy, BookOpen, Trash2 } from 'lucide-react';
 
-export type Page = 'home' | 'quiz' | 'win' | 'win1' | 'account' | 'how-it-works' | 'rules' | 'winners' | 'faqs';
+export type Page = 'home' | 'quiz' | 'win' | 'win1' | 'account' | 'how-it-works';
 
 interface NavigationProps {}
 
@@ -11,14 +11,11 @@ export default function Navigation({}: NavigationProps) {
   const location = useLocation();
 
   const menuItems = [
-    { path: '/', label: 'Home', icon: Home },
+    { path: '/home', label: 'Home', icon: Home },
     { path: '/quiz', label: 'Play Quiz', icon: HelpCircle },
-    { path: '/win1', label: 'Win Page (New)', icon: Trophy },
+    { path: '/win1', label: 'Win Page', icon: Trophy },
     { path: '/account', label: 'My Account', icon: User },
     { path: '/how-it-works', label: 'How It Works', icon: BookOpen },
-    { path: '/rules', label: 'Rules', icon: Award },
-    { path: '/winners', label: 'Winners List', icon: Users },
-    { path: '/faqs', label: 'FAQs', icon: Trophy },
   ];
 
   const handleMenuClick = () => {
@@ -80,7 +77,7 @@ export default function Navigation({}: NavigationProps) {
                 <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
             <span className="text-sm sm:text-base font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
-              Answer & Get Real Money
+              Answer & Win Real Money
             </span>
             </div>
 

@@ -2,7 +2,6 @@ import React from 'react';
 import { Trophy, Users, ChevronRight, Zap, BookOpen, TrendingUp, Target } from 'lucide-react';
 import StatsCard from './StatsCard';
 import { Page } from '../App';
-import LiveWinnersList from './LiveWinnersList';
 
 interface HomePageProps {
   onNavigate: (page: Page) => void;
@@ -13,12 +12,12 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate, hasPlayedQuiz }) => {
 
   const features = [
     { icon: Trophy, title: 'Answer & Win', desc: 'Answer 3 simple questions and win instantly' },
-    { icon: Users, title: 'Refer Friends', desc: 'Earn ₹300 per referral + bonuses' },
+    { icon: Users, title: 'Refer Friends', desc: 'Earn ₹300 per referral + ₹2 per share' },
     { icon: TrendingUp, title: 'Grow Earnings', desc: 'Multiple ways to increase your income' }
   ];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pb-32">
       {/* Hero Section */}
       <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 to-blue-700">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
@@ -40,7 +39,7 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate, hasPlayedQuiz }) => {
               </span>
             </h1>
             <p className="text-sm sm:text-base text-white/90 mb-4 max-w-2xl mx-auto px-4 leading-relaxed">
-              Join thousands of winners who are earning money daily. Answer 3 questions, refer friends, and watch your earnings grow!
+              We earn from ads, sponsorships, and other mediums, then distribute earnings across users to create a win-win for all. No deposits required from users!
             </p>
             <button
               onClick={() => onNavigate('quiz')}
@@ -83,19 +82,12 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate, hasPlayedQuiz }) => {
         </div>
       </div>
 
-      {/* Live Winners List */}
-      <div className="py-6 md:py-8 bg-gradient-to-r from-blue-50 to-blue-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <LiveWinnersList />
-        </div>
-      </div>
-
       {/* CTA Section */}
       <div className="py-6 md:py-8 bg-gradient-to-r from-blue-600 to-blue-700">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-3">Ready to Start Winning?</h2>
           <p className="text-sm sm:text-base text-white/90 mb-4 leading-relaxed">
-            Join over 100,000 players and start earning money today. It's free to play!
+            Join over 100,000 players and start earning money today. We earn from ads and sponsorships, then share with you!
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
@@ -181,7 +173,7 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate, hasPlayedQuiz }) => {
             {[
               { q: 'How do I start earning?', a: 'Simply answer 3 questions to win your first reward, then invite friends to multiply your earnings.' },
               { q: 'What is the minimum withdrawal?', a: 'You need at least ₹800 to withdraw. Download Terabox app to unlock withdrawals.' },
-              { q: 'How much can I earn per referral?', a: 'Earn ₹300 per successful referral, ₹10 per link click, and ₹1 per share.' },
+              { q: 'How much can I earn per referral?', a: 'Earn ₹300 per successful referral, ₹10 per link click, and ₹2 per share.' },
               { q: 'When will I receive my money?', a: 'Withdrawals are processed within 45 days to your UPI account after verification.' }
             ].map((faq, index) => (
               <div key={index} className="bg-gray-50 rounded-lg p-3">
