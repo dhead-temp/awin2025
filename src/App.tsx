@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -30,11 +30,11 @@ export type Page =
 function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
+  const processedInviteCodes = useRef<Set<string>>(new Set());
   const [hasPlayedQuiz, setHasPlayedQuiz] = useState(() => {
     // Check if user has already played (stored in localStorage)
     return localStorage.getItem("hasPlayedQuiz") === "true";
   });
-  const [isQuizRewardClaimed, setIsQuizRewardClaimed] = useState(false);
   const [userStats, setUserStats] = useState(() => {
     // Initialize with zero earnings if user hasn't played quiz yet
     const hasPlayed = localStorage.getItem("hasPlayedQuiz") === "true";
@@ -46,15 +46,15 @@ function AppContent() {
     };
   });
   const [currentUser, setCurrentUser] = useState<{
-    id: number | null;
-    token: string | null;
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
     invitedBy: string | null;
-  }>(() => {
+  } | null>(() => {
     // Initialize from localStorage if available
     const savedUser = localStorage.getItem("currentUser");
-    return savedUser
-      ? JSON.parse(savedUser)
-      : { id: null, token: null, invitedBy: null };
+    return savedUser ? JSON.parse(savedUser) : null;
   });
 
   // Initialize Google Analytics
@@ -76,17 +76,17 @@ function AppContent() {
   useEffect(() => {
     const checkQuizRewardStatus = async () => {
       console.log("App: checkQuizRewardStatus called");
+      
       const savedUser = localStorage.getItem("currentUser");
       if (savedUser) {
         const userData = JSON.parse(savedUser);
         if (userData.id) {
           try {
-            const response = await apiService.getUser(userData.id);
+            const response = await apiService.getUser(parseInt(userData.id));
             if (response.status === "success" && response.data) {
               const claimed =
                 response.data.user.is_quiz_reward_claimed === "1" ||
                 response.data.user.is_quiz_reward_claimed === "true";
-              setIsQuizRewardClaimed(claimed);
               // Sync localStorage with database status
               if (claimed) {
                 setHasPlayedQuiz(true);
@@ -96,8 +96,7 @@ function AppContent() {
                 const localPlayed =
                   localStorage.getItem("hasPlayedQuiz") === "true";
                 if (localPlayed) {
-                  await apiService.updateQuizRewardStatus(userData.id, 0);
-                  setIsQuizRewardClaimed(true);
+                  await apiService.updateQuizRewardStatus(parseInt(userData.id), 0);
                 }
               }
             }
@@ -116,31 +115,46 @@ function AppContent() {
     const urlParams = new URLSearchParams(location.search);
     const inviteCode = urlParams.get("by");
 
-    if (inviteCode && inviteCode !== currentUser.invitedBy) {
+    if (inviteCode && inviteCode !== currentUser?.invitedBy && !processedInviteCodes.current.has(inviteCode)) {
+      // Mark this invite code as processed to prevent duplicate requests
+      processedInviteCodes.current.add(inviteCode);
+      
       // Track referral click
       trackReferralClick(inviteCode);
 
-      // Increment click count for the invite code
-      apiService.incrementClickCount(inviteCode).then((response) => {
-        if (response.status === "success") {
-          console.log(`Click count incremented for invite code: ${inviteCode}`);
-        } else {
-          console.error("Failed to increment click count:", response.message);
-        }
-      });
+      // Increment click count for the invite code with better error handling
+      apiService.incrementClickCount(inviteCode)
+        .then((response) => {
+          if (response.status === "success") {
+            console.log(`✅ Click count incremented successfully for invite code: ${inviteCode}`);
+          } else {
+            console.error(`❌ Failed to increment click count for ${inviteCode}:`, response.message);
+            // Remove from processed set if failed so it can be retried
+            processedInviteCodes.current.delete(inviteCode);
+          }
+        })
+        .catch((error) => {
+          console.error(`❌ Network error while incrementing click count for ${inviteCode}:`, error);
+          // Remove from processed set if failed so it can be retried
+          processedInviteCodes.current.delete(inviteCode);
+        });
 
       // Store the invite code for later use
       setCurrentUser((prev) => ({
-        ...prev,
+        id: prev?.id || "",
+        name: prev?.name || "",
+        email: prev?.email || "",
+        phone: prev?.phone || "",
         invitedBy: inviteCode,
       }));
     }
-  }, [location.search]); // Removed currentUser.invitedBy from dependencies to prevent infinite loop
+  }, [location.search]);
 
   const navigateTo = (page: Page) => {
     const pathMap: Record<Page, string> = {
       home: "/home",
       quiz: "/quiz",
+      win: "/win1", // Map win to win1 route
       win1: "/win1",
       account: "/account",
       "how-it-works": "/how-it-works",
@@ -155,12 +169,11 @@ function AppContent() {
 
   const markQuizAsPlayed = useCallback(async () => {
     console.log("App: markQuizAsPlayed called", {
-      currentUser: currentUser.id,
+      currentUser: currentUser?.id,
     });
     // Mark as played and store in localStorage to persist across sessions
     setHasPlayedQuiz(true);
     localStorage.setItem("hasPlayedQuiz", "true");
-    setIsQuizRewardClaimed(true);
 
     // Update user stats with quiz earnings
     setUserStats((prev) => ({
@@ -169,30 +182,33 @@ function AppContent() {
     }));
 
     // Update database if user exists
-    if (currentUser.id) {
+    if (currentUser?.id) {
       try {
-        await apiService.updateQuizRewardStatus(currentUser.id, 0); // shares will be updated separately
+        await apiService.updateQuizRewardStatus(parseInt(currentUser.id), 0); // shares will be updated separately
         console.log("Quiz reward status updated in database");
       } catch (error) {
         console.error("Failed to update quiz reward status:", error);
       }
     }
-  }, [currentUser.id]);
+  }, [currentUser?.id]);
 
   // Create user when withdraw button is clicked
   const createUser = async () => {
-    if (currentUser.id) {
+    if (currentUser?.id) {
       // User already exists
       return currentUser;
     }
 
     try {
-      const response = await apiService.createUser();
+      // Pass the referral code to the API
+      const response = await apiService.createUser(currentUser?.invitedBy || undefined);
       if (response.status === "success" && response.data) {
         const newUser = {
-          id: response.data.user_id,
-          token: response.data.token,
-          invitedBy: currentUser.invitedBy,
+          id: response.data.user_id.toString(),
+          name: "",
+          email: "",
+          phone: "",
+          invitedBy: currentUser?.invitedBy || null,
         };
 
         setCurrentUser(newUser);
@@ -212,7 +228,7 @@ function AppContent() {
 
   // Update current user in localStorage when it changes
   useEffect(() => {
-    if (currentUser.id || currentUser.token || currentUser.invitedBy) {
+    if (currentUser?.id || currentUser?.name || currentUser?.email || currentUser?.phone || currentUser?.invitedBy) {
       localStorage.setItem("currentUser", JSON.stringify(currentUser));
     }
   }, [currentUser]);

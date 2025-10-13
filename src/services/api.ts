@@ -41,6 +41,9 @@ interface UserWithTransactions {
   transactions: Transaction[];
 }
 
+// Global request cache to prevent duplicate API calls across components
+const requestCache = new Map<string, Promise<any>>();
+
 // API Service Class
 class ApiService {
   private async makeRequest<T>(
@@ -93,8 +96,29 @@ class ApiService {
   }
 
   // Create a new user
-  async createUser(): Promise<ApiResponse<{ user_id: number; token: string; ip: string }>> {
-    return this.makeRequest('create_user', 'GET');
+  async createUser(referralCode?: string): Promise<ApiResponse<{ user_id: number; token: string; ip: string }>> {
+    const url = new URL(API_BASE_URL);
+    url.searchParams.set('action', 'create_user');
+    if (referralCode) {
+      url.searchParams.set('ref', referralCode);
+    }
+    
+    try {
+      const response = await fetch(url.toString());
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error('Create user request failed:', error);
+      return {
+        status: 'error',
+        message: error instanceof Error ? error.message : 'Failed to create user',
+      };
+    }
   }
 
   // Update user data
@@ -107,9 +131,61 @@ class ApiService {
   // Get user details with transactions
   async getUser(userId: number): Promise<ApiResponse<UserWithTransactions>> {
     console.log('API: getUser called', { userId });
+    
+    // Create a unique cache key for this request
+    const cacheKey = `getUser_${userId}`;
+    
+    // Check if this request is already in progress
+    if (requestCache.has(cacheKey)) {
+      console.log('API: getUser request already in progress, returning cached promise', { userId });
+      return requestCache.get(cacheKey)!;
+    }
+    
+    // Create the request promise
+    const requestPromise = (async () => {
+      const url = new URL(API_BASE_URL);
+      url.searchParams.set('action', 'get_user');
+      url.searchParams.set('user_id', userId.toString());
+      
+      try {
+        const response = await fetch(url.toString());
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        return result;
+      } catch (error) {
+        console.error('API request failed:', error);
+        return {
+          status: 'error',
+          message: error instanceof Error ? error.message : 'Unknown error occurred',
+        };
+      } finally {
+        // Remove from cache when done (success or error)
+        requestCache.delete(cacheKey);
+      }
+    })();
+    
+    // Store the promise in cache
+    requestCache.set(cacheKey, requestPromise);
+    
+    return requestPromise;
+  }
+
+  // Increment click count for invite code using got_click endpoint
+  async incrementClickCount(inviteCode: string): Promise<ApiResponse> {
+    // First validate the invite code (which is the user's ID)
+    const userId = parseInt(inviteCode);
+    if (isNaN(userId)) {
+      return { status: 'error', message: 'Invalid invite code' };
+    }
+
+    // Use the got_click endpoint directly for better performance
     const url = new URL(API_BASE_URL);
-    url.searchParams.set('action', 'get_user');
-    url.searchParams.set('user_id', userId.toString());
+    url.searchParams.set('action', 'got_click');
+    url.searchParams.set('id', userId.toString());
     
     try {
       const response = await fetch(url.toString());
@@ -121,31 +197,12 @@ class ApiService {
       const result = await response.json();
       return result;
     } catch (error) {
-      console.error('API request failed:', error);
+      console.error('Click increment request failed:', error);
       return {
         status: 'error',
-        message: error instanceof Error ? error.message : 'Unknown error occurred',
+        message: error instanceof Error ? error.message : 'Failed to increment click count',
       };
     }
-  }
-
-  // Increment click count for invite code
-  async incrementClickCount(inviteCode: string): Promise<ApiResponse> {
-    // First get the user by invite code (which is the user's ID)
-    const userId = parseInt(inviteCode);
-    if (isNaN(userId)) {
-      return { status: 'error', message: 'Invalid invite code' };
-    }
-
-    // Get current user data
-    const userResponse = await this.getUser(userId);
-    if (userResponse.status === 'error') {
-      return userResponse;
-    }
-
-    // Increment clicks
-    const newClicks = (userResponse.data?.user.clicks || 0) + 1;
-    return this.updateUser(userId, { clicks: newClicks });
   }
 
   // Update quiz reward claimed status and shares

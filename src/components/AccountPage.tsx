@@ -110,16 +110,18 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
   }, [transactions, currentUser]);
 
   // Fetch user data on component mount
+  // Note: Global API request cache prevents duplicate calls across components
   useEffect(() => {
     const fetchUserData = async () => {
       console.log("AccountPage: fetchUserData called");
+      
       try {
         // Get current user from localStorage
         const savedUser = localStorage.getItem("currentUser");
         if (savedUser) {
           const userData = JSON.parse(savedUser);
           if (userData.id) {
-            const response = await apiService.getUser(userData.id);
+            const response = await apiService.getUser(parseInt(userData.id));
             if (response.status === "success" && response.data) {
               setCurrentUser(response.data.user);
               setTransactions(response.data.transactions);

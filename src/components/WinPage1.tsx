@@ -15,8 +15,10 @@ interface WinPage1Props {
     invitedBy: string | null;
   } | null;
   onCreateUser: () => Promise<{
-    id: number | null;
-    token: string | null;
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
     invitedBy: string | null;
   } | null>;
 }
