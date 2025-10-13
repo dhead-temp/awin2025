@@ -57,6 +57,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isQuizRewardClaimed, setIsQuizRewardClaimed] = useState(false);
+  const [isCheckingQuizStatus, setIsCheckingQuizStatus] = useState(true);
 
   const [txFilter] = useState<'all' | 'credit' | 'debit' | 'completed' | 'pending' | 'failed'>('all');
 
@@ -105,11 +106,17 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
               setTransactions(response.data.transactions);
               // Check if quiz reward has been claimed from database
               setIsQuizRewardClaimed(response.data.user.is_quiz_reward_claimed === '1' || response.data.user.is_quiz_reward_claimed === 'true');
+              setIsCheckingQuizStatus(false);
             }
+          } else {
+            setIsCheckingQuizStatus(false);
           }
+        } else {
+          setIsCheckingQuizStatus(false);
         }
       } catch (error) {
         console.error('Failed to fetch user data:', error);
+        setIsCheckingQuizStatus(false);
       } finally {
         setIsLoading(false);
       }
@@ -288,8 +295,18 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 pb-32">
-      {/* Locked State - Show if user hasn't claimed quiz reward */}
-      {!isQuizRewardClaimed ? (
+      {/* Loading State - Show while checking quiz status */}
+      {isCheckingQuizStatus ? (
+        <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6">
+          <div className="bg-white rounded-2xl shadow-sm p-6 sm:p-8 mb-4 sm:mb-6 border border-gray-100">
+            <div className="flex items-center justify-center py-8 sm:py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <span className="ml-3 text-gray-600">Loading...</span>
+            </div>
+          </div>
+        </div>
+      ) : !isQuizRewardClaimed ? (
+        /* Locked State - Show if user hasn't claimed quiz reward */
         <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6">
           <div className="bg-white rounded-2xl shadow-sm p-6 sm:p-8 mb-4 sm:mb-6 border border-gray-100 relative overflow-hidden">
             {/* Blurred background content */}
