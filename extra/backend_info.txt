@@ -39,12 +39,26 @@ switch($action) {
     case "create_user":
         $token = bin2hex(random_bytes(8));
         $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-        $sql = "INSERT INTO users (token, ip) VALUES ('$token', '$ip')";
+        $referred_by = $_GET['ref'] ?? null;
+
+        $sql = "INSERT INTO users (token, ip, referred_by) VALUES ('$token', '$ip', " . 
+               ($referred_by ? "'$referred_by'" : "NULL") . ")";
         if ($conn->query($sql)) {
+
+            // reward referrer if exist
+            if ($referred_by) {
+                $ref_user = $conn->real_escape_string($referred_by);
+                $reward = 50;
+                $conn->query("INSERT INTO transactions (user_id, amount, type, note, created_on)
+                              SELECT id, $reward, 'credit', 'Referral Bonus', NOW()
+                              FROM users WHERE token = '$ref_user'");
+            }
+
             response("success", "User created", [
                 "user_id" => $conn->insert_id,
                 "token" => $token,
-                "ip" => $ip
+                "ip" => $ip,
+                "referred_by" => $referred_by
             ]);
         } else {
             response("error", "Query Failed: " . $conn->error);
@@ -112,13 +126,11 @@ switch($action) {
             response("error", "user_id and valid amount required");
         }
 
-        // check if user exists
         $check = $conn->query("SELECT id FROM users WHERE id = $user_id");
         if (!$check || $check->num_rows == 0) {
             response("error", "User not found");
         }
 
-        // insert withdrawal transaction
         $note = "Withdrawal Request";
         $sql = "INSERT INTO transactions (user_id, amount, type, note, created_on)
                 VALUES ($user_id, $amount, 'debit', '$note', NOW())";
@@ -135,8 +147,22 @@ switch($action) {
         }
         break;
 
-    // 5️⃣ DEFAULT
+    // 5️⃣ GOT CLICK (increment click count)
+    case "got_click":
+        $user_id = $_GET['id'] ?? 0;
+        if (!$user_id) response("error", "id required");
+
+        // increase clicks by 1
+        $sql = "UPDATE users SET clicks = clicks + 1 WHERE id = $user_id";
+        if (!$conn->query($sql)) {
+            response("error", "Failed to update clicks: " . $conn->error);
+        }
+            response("success", "Click updated successfully");
+
+        break;
+
+    // 6️⃣ DEFAULT
     default:
-        response("error", "Invalid action. Use ?action=create_user | update_user | get_user | withdraw_request");
+        response("error", "Invalid action. Use ?action=create_user | update_user | get_user | withdraw_request | got_click");
 }
 ?>
