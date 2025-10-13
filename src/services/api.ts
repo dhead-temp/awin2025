@@ -2,7 +2,7 @@
 const API_BASE_URL = 'https://be7.in/winapi.php';
 
 // Domain configuration - easy to change
-export const DOMAIN = 'https://awin25.netlify.app/';
+export const DOMAIN = 'https://be6.in/a2';
 
 // API Response Types
 interface ApiResponse<T = any> {
