@@ -12,6 +12,7 @@ interface QuizPageProps {
 const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlayedQuiz }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [timeLeft, setTimeLeft] = useState(30);
   const [isTicking, setIsTicking] = useState(false);
   const [isQuizRewardClaimed, setIsQuizRewardClaimed] = useState(false);
@@ -74,26 +75,36 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
   ];
 
   const handleAnswer = (selectedIndex: number) => {
+    // Prevent multiple selections on the same question
+    if (selectedAnswer !== null) {
+      return;
+    }
+
+    setSelectedAnswer(selectedIndex);
     const newAnswers = [...answers, selectedIndex];
     setAnswers(newAnswers);
 
-    if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
-      setTimeLeft(30);
-    } else {
-      // All questions answered, check if all answers are wrong
-      const allWrong = newAnswers.every((answer, index) => answer !== questions[index].correct);
-      
-      if (allWrong) {
-        // Show retry message instead of navigating to win page
-        setCurrentQuestion(-1); // Use -1 to indicate retry state
+    // Add a small delay to show the selection before moving to next question
+    setTimeout(() => {
+      if (currentQuestion < questions.length - 1) {
+        setCurrentQuestion(currentQuestion + 1);
+        setSelectedAnswer(null); // Reset selection for next question
+        setTimeLeft(30);
       } else {
-        // Mark played then navigate to win page
-        trackQuizCompletion();
-        onMarkAsPlayed();
-        onNavigate('win1');
+        // All questions answered, check if all answers are wrong
+        const allWrong = newAnswers.every((answer, index) => answer !== questions[index].correct);
+        
+        if (allWrong) {
+          // Show retry message instead of navigating to win page
+          setCurrentQuestion(-1); // Use -1 to indicate retry state
+        } else {
+          // Mark played then navigate to win page
+          trackQuizCompletion();
+          onMarkAsPlayed();
+          onNavigate('win1');
+        }
       }
-    }
+    }, 500); // 500ms delay to show selection
   };
 
   React.useEffect(() => {
@@ -103,8 +114,10 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          // Time up, auto-select random answer
-          handleAnswer(Math.floor(Math.random() * 4));
+          // Time up, auto-select random answer if no answer selected yet
+          if (selectedAnswer === null) {
+            handleAnswer(Math.floor(Math.random() * 4));
+          }
           return 30;
         }
         // Trigger tick effect and sound
@@ -117,7 +130,7 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [currentQuestion, isQuizRewardClaimed]);
+  }, [currentQuestion, isQuizRewardClaimed, selectedAnswer]);
 
   const progressPercentage = ((currentQuestion + 1) / questions.length) * 100;
 
@@ -139,6 +152,7 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
                 onClick={() => {
                   setCurrentQuestion(0);
                   setAnswers([]);
+                  setSelectedAnswer(null);
                   setTimeLeft(30);
                 }}
                 className="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-2 rounded-lg font-semibold hover:from-red-700 hover:to-red-800 hover:shadow-xl transition-all text-xs sm:text-sm"
@@ -230,20 +244,42 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
           <div className="grid grid-cols-1 gap-2 sm:gap-3">
             {questions[currentQuestion].options.map((option, index) => {
               const optionLabel = String.fromCharCode(65 + index); // A, B, C, D
+              const isSelected = selectedAnswer === index;
+              const isDisabled = selectedAnswer !== null;
+              
               return (
                 <button
                   key={index}
                   onClick={() => handleAnswer(index)}
-                  className="bg-gray-50 hover:bg-blue-600 hover:text-white p-2.5 sm:p-3 rounded-lg text-left transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg group border border-gray-200 hover:border-blue-600 active:scale-[0.98]"
+                  disabled={isDisabled}
+                  className={`p-2.5 sm:p-3 rounded-lg text-left transition-all duration-200 transform group border ${
+                    isSelected
+                      ? 'bg-blue-600 text-white border-blue-600 scale-[1.02] shadow-lg'
+                      : isDisabled
+                      ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                      : 'bg-gray-50 hover:bg-blue-600 hover:text-white border-gray-200 hover:border-blue-600 hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]'
+                  }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <div className="w-5 h-5 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-bold mr-2 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold mr-2 transition-colors ${
+                        isSelected
+                          ? 'bg-blue-500 text-white'
+                          : isDisabled
+                          ? 'bg-gray-200 text-gray-400'
+                          : 'bg-blue-100 text-blue-700 group-hover:bg-blue-500 group-hover:text-white'
+                      }`}>
                         {optionLabel}
                       </div>
                       <span className="text-xs font-medium">{option}</span>
                     </div>
-                    <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity text-white" />
+                    <ChevronRight className={`h-3 w-3 transition-opacity ${
+                      isSelected
+                        ? 'opacity-100 text-white'
+                        : isDisabled
+                        ? 'opacity-0'
+                        : 'opacity-0 group-hover:opacity-100 text-white'
+                    }`} />
                   </div>
                 </button>
               );
