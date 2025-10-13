@@ -88,7 +88,6 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
     setTimeout(() => {
       if (currentQuestion < questions.length - 1) {
         setCurrentQuestion(currentQuestion + 1);
-        setSelectedAnswer(null); // Reset selection for next question
         setTimeLeft(30);
       } else {
         // All questions answered, check if all answers are wrong
@@ -106,6 +105,13 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
       }
     }, 500); // 500ms delay to show selection
   };
+
+  // Reset selectedAnswer when question changes (except for initial load)
+  React.useEffect(() => {
+    if (currentQuestion > 0) {
+      setSelectedAnswer(null);
+    }
+  }, [currentQuestion]);
 
   React.useEffect(() => {
     // Don't start timer if in retry state or if quiz reward already claimed
@@ -249,7 +255,7 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
               
               return (
                 <button
-                  key={index}
+                  key={`q${currentQuestion}-${index}`}
                   onClick={() => handleAnswer(index)}
                   disabled={isDisabled}
                   className={`p-2.5 sm:p-3 rounded-lg text-left transition-all duration-200 transform group border ${

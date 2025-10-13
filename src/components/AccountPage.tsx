@@ -75,39 +75,6 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
     "all" | "credit" | "debit" | "completed" | "pending" | "failed"
   >("all");
 
-  // Calculate real stats from transactions
-  const realStats = useMemo(() => {
-    if (!transactions.length) {
-      return {
-        referrals: 0,
-        totalEarnings: 0,
-        linkClicks: currentUser?.clicks || 0,
-        shares: currentUser?.shares || 0,
-      };
-    }
-
-    // Calculate referrals from transactions (look for referral bonus transactions)
-    const referrals = transactions.filter(
-      (tx) => tx.note?.includes("referral") || tx.note?.includes("Referral")
-    ).length;
-
-    // Calculate total earnings from credit transactions
-    const totalEarnings = transactions
-      .filter((tx) => tx.type === "credit")
-      .reduce(
-        (sum, tx) =>
-          sum +
-          (typeof tx.amount === "string" ? parseFloat(tx.amount) : tx.amount),
-        0
-      );
-
-    return {
-      referrals,
-      totalEarnings,
-      linkClicks: currentUser?.clicks || 0,
-      shares: currentUser?.shares || 0,
-    };
-  }, [transactions, currentUser]);
 
   // Fetch user data on component mount
   // Note: Global API request cache prevents duplicate calls across components
@@ -552,7 +519,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
               Withdraw Now
             </button>
             <div className="text-center text-white/70 text-xs mt-2 sm:mt-3">
-              See Payment Proofs
+              100% Secure 
             </div>
           </div>
 
@@ -640,9 +607,9 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
             />
             <StatsCard
               title="Referrals"
-              value={realStats.referrals}
+              value={currentUser?.invited_to || 0}
               subtitle="Earn ₹300 per referral"
-              subtitleValue={`Earned ₹${realStats.referrals * 300}`}
+              subtitleValue={`Earned ₹${(currentUser?.invited_to || 0) * 300}`}
               description="Everytime someone you refer completes the quiz, you earn ₹300."
               icon={Users}
               color="purple"

@@ -20,6 +20,7 @@ interface User {
   upi?: string;
   shares: number;
   clicks: number;
+  invited_to: number;
   is_terabox_done: boolean;
   is_quiz_reward_claimed: string;
   quiz_withdraw: boolean;

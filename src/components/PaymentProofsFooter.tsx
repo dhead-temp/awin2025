@@ -92,7 +92,7 @@ const PaymentProofsFooter: React.FC = () => {
                     <div className="w-5 h-5 bg-gradient-to-r from-emerald-500 to-green-500 rounded-full flex items-center justify-center shadow-lg">
                       <span className="text-white text-sm font-bold">₹</span>
                     </div>
-                    <h3 className="text-gray-800 font-bold text-sm">Live Payment Proofs</h3>
+                    <h3 className="text-gray-800 font-bold text-sm">Payment Proofs</h3>
                   </div>
                 </div>
                
