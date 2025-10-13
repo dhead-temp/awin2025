@@ -17,17 +17,11 @@ import {
   Link
 } from 'lucide-react';
 import { apiService, DOMAIN, User as ApiUser, Transaction } from '../services/api';
+import StatsCard from './StatsCard';
 
-interface AccountPageProps {
-  userStats: {
-    totalEarnings: number;
-    referrals: number;
-    linkClicks: number;
-    shares: number;
-  };
-}
+interface AccountPageProps {}
 
-const AccountPage: React.FC<AccountPageProps> = ({ userStats }) => {
+const AccountPage: React.FC<AccountPageProps> = () => {
   
   const [hasTerabox, setHasTerabox] = useState(false);
   const [showTeraboxModal, setShowTeraboxModal] = useState(false);
@@ -45,7 +39,6 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats }) => {
   const [isUpdatingContact, setIsUpdatingContact] = useState(false);
   const [isProcessingWithdrawal, setIsProcessingWithdrawal] = useState(false);
   const [withdrawalSuccess, setWithdrawalSuccess] = useState(false);
-  const [linkCopied, setLinkCopied] = useState(false);
   
   // Real user data from API
   const [currentUser, setCurrentUser] = useState<ApiUser | null>(null);
@@ -53,6 +46,35 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const [txFilter] = useState<'all' | 'credit' | 'debit' | 'completed' | 'pending' | 'failed'>('all');
+
+  // Calculate real stats from transactions
+  const realStats = useMemo(() => {
+    if (!transactions.length) {
+      return {
+        referrals: 0,
+        totalEarnings: 0,
+        linkClicks: currentUser?.clicks || 0,
+        shares: currentUser?.shares || 0
+      };
+    }
+
+    // Calculate referrals from transactions (look for referral bonus transactions)
+    const referrals = transactions.filter(tx => 
+      tx.note?.includes('referral') || tx.note?.includes('Referral')
+    ).length;
+
+    // Calculate total earnings from credit transactions
+    const totalEarnings = transactions
+      .filter(tx => tx.type === 'credit')
+      .reduce((sum, tx) => sum + (typeof tx.amount === 'string' ? parseFloat(tx.amount) : tx.amount), 0);
+
+    return {
+      referrals,
+      totalEarnings,
+      linkClicks: currentUser?.clicks || 0,
+      shares: currentUser?.shares || 0
+    };
+  }, [transactions, currentUser]);
 
   // Fetch user data on component mount
   useEffect(() => {
@@ -90,35 +112,14 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats }) => {
   };
 
   const referralLink = currentUser?.id ? `${DOMAIN}?by=${currentUser.id}` : `${DOMAIN}?by=new`;
-  const canWithdraw = (currentUser?.balance || 0) >= 100 && hasTerabox && currentUser?.upi;
+  const currentBalance = typeof currentUser?.balance === 'string' ? parseFloat(currentUser.balance) : (currentUser?.balance || 0);
+  const canWithdraw = currentBalance >= 100 && hasTerabox && currentUser?.upi;
 
   const copyReferralLink = () => {
     navigator.clipboard.writeText(referralLink);
-    setLinkCopied(true);
-    setTimeout(() => {
-      setLinkCopied(false);
-    }, 2000);
   };
 
 
-  const generateWhatsAppLink = () => {
-    const userId = currentUser?.id || 'new';
-    const referralUrl = `${DOMAIN}?by=${userId}`;
-    const message = encodeURIComponent(
-      `🎉 Amazing opportunity! Join me and earn money easily!\n\n${referralUrl}\n\nDon't miss out on this chance! 💰`
-    );
-    return `https://wa.me/?text=${message}`;
-  };
-
-  const handleShareClick = () => {
-    // Open WhatsApp with the referral link
-    const whatsappUrl = generateWhatsAppLink();
-    window.open(whatsappUrl, '_blank');
-    
-    // Show banner and increment shares after sharing
-    setShowShareBanner(true);
-    setUnclaimedShares(prev => prev + 1);
-  };
 
   const claimShareReward = async () => {
     if (!currentUser?.id || unclaimedShares <= 0) return;
@@ -205,7 +206,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats }) => {
     
     setIsProcessingWithdrawal(true);
     try {
-      const response = await apiService.createWithdrawalRequest(currentUser.id, currentUser.balance);
+      const response = await apiService.createWithdrawalRequest(currentUser.id, currentBalance);
       
       if (response.status === 'success') {
         // Fetch updated user data to get the new transaction
@@ -305,7 +306,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats }) => {
           </div>
 
           <div className="mb-4 sm:mb-6">
-            <div className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-1 sm:mb-2">₹{currentUser?.balance || 0}</div>
+            <div className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-1 sm:mb-2">₹{typeof currentUser?.balance === 'string' ? parseFloat(currentUser.balance).toFixed(2) : (currentUser?.balance || 0).toFixed(2)}</div>
             <div className="text-white/80 text-xs sm:text-sm">Available to withdraw</div>
           </div>
 
@@ -321,237 +322,88 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats }) => {
           </div>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4 sm:mb-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 sm:p-4 text-center">
-            <Share2 className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto mb-1 sm:mb-2" />
-            <div className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{currentUser?.shares || 0}</div>
-            <div className="text-xs text-gray-500">Shares</div>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 sm:p-4 text-center">
-            <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto mb-1 sm:mb-2" />
-            <div className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{currentUser?.clicks || 0}</div>
-            <div className="text-xs text-gray-500">Clicks</div>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 sm:p-4 text-center">
-            <Users className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 mx-auto mb-1 sm:mb-2" />
-            <div className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{userStats.referrals || 0}</div>
-            <div className="text-xs text-gray-500">Users</div>
-          </div>
-        </div>
+       
 
-
-
-        {/* Referral Section */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 mb-4 sm:mb-6">
-          <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
-              <Users className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-            </div>
-            <div>
-              <h2 className="text-sm sm:text-base font-bold text-gray-900">💰 Earning Opportunities</h2>
-              <p className="text-xs text-gray-500">Multiple ways to earn - from ₹2 to ₹900!</p>
-            </div>
-          </div>
-
-          {/* Earning Funnel */}
-          <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-4">
-            {/* Level 1 - Highest - Withdrawal Bonus */}
-            <div className="bg-gray-900 rounded-xl p-3 sm:p-4 text-white shadow-lg border border-gray-700">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-700 rounded-lg flex items-center justify-center">
-                    <Trophy className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400" />
-                  </div>
-                  <div>
-                    <div className="text-sm sm:text-base font-bold">First Withdrawal Bonus</div>
-                    <div className="text-xs text-gray-300">When they make First withdrawal</div>
-                  </div>
+        {/* Share Reward Banner */}
+        {showShareBanner && (
+          <div className="bg-white border-2 border-dashed border-orange-300 rounded-xl p-4 mb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                  <Trophy className="w-5 h-5 text-orange-600" />
                 </div>
-                <div className="text-right">
-                  <div className="text-lg sm:text-xl font-bold text-yellow-400">₹900</div>
-                  <div className="text-xs text-gray-300">Once Per User</div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">Share Rewards</h3>
+                  <p className="text-sm text-gray-600">{unclaimedShares} shares • ₹{unclaimedShares * 2}</p>
                 </div>
               </div>
-            </div>
-
-            {/* Level 2 - High - Invite Friends */}
-            <div className="bg-gray-800 rounded-xl p-3 sm:p-4 text-white shadow-md border border-gray-600">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-600 rounded-lg flex items-center justify-center">
-                    <Users className="w-3 h-3 sm:w-4 sm:h-4 text-blue-400" />
-                  </div>
-                  <div>
-                    <div className="text-sm sm:text-base font-bold">Invite Friends</div>
-                    <div className="text-xs text-gray-300">When they Visit Account Page</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-lg sm:text-xl font-bold text-blue-400">₹300</div>
-                  <div className="text-xs text-gray-300">per friend</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Level 3 - Medium - Unique Clicks */}
-            <div className="bg-gray-700 rounded-xl p-3 sm:p-4 text-white shadow-sm border border-gray-500">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-500 rounded-lg flex items-center justify-center">
-                    <Activity className="w-3 h-3 sm:w-4 sm:h-4 text-gray-300" />
-                  </div>
-                  <div>
-                    <div className="text-sm sm:text-base font-bold">Unique Clicks</div>
-                    <div className="text-xs text-gray-300">When they click your link</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-lg sm:text-xl font-bold text-gray-300">₹10</div>
-                  <div className="text-xs text-gray-300">per click</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Level 4 - Lowest - Share on WhatsApp */}
-            <div className="bg-gray-600 rounded-xl p-3 sm:p-4 text-white shadow-sm border border-gray-400">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-400 rounded-lg flex items-center justify-center">
-                    <Share2 className="w-3 h-3 sm:w-4 sm:h-4 text-gray-200" />
-                  </div>
-                  <div>
-                    <div className="text-sm sm:text-base font-bold">Share on WhatsApp</div>
-                    <div className="text-xs text-gray-300">When you share your link</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-lg sm:text-xl font-bold text-gray-200">₹2</div>
-                  <div className="text-xs text-gray-300">per share</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Share Reward Banner */}
-          {showShareBanner && (
-            <div className="relative bg-gray-50 border border-gray-200 rounded-2xl p-4 sm:p-6 mb-3 sm:mb-4 shadow-sm overflow-hidden">
-              {/* Background Pattern */}
-              <div className="absolute inset-0 opacity-5">
-                <div className="absolute top-4 right-4 w-20 h-20 bg-gray-400 rounded-full blur-xl"></div>
-                <div className="absolute bottom-4 left-4 w-16 h-16 bg-gray-500 rounded-full blur-xl"></div>
-              </div>
-              
-              <div className="relative">
-                {/* Mobile-first layout */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-5">
-                  {/* Trophy Icon */}
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-800 rounded-2xl flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300 flex-shrink-0">
-                    <Trophy className="w-7 h-7 sm:w-8 sm:h-8 text-yellow-400 drop-shadow-lg" />
-                  </div>
-                  
-                  {/* Content */}
-                  <div className="flex-1 min-w-0 w-full">
-                    {/* Header */}
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2 sm:mb-3">
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-lg sm:text-xl font-bold text-gray-900">🎉 Share Rewards Ready!</h3>
-                        <span className="px-2 py-1 bg-gray-800 text-white text-xs font-bold rounded-full shadow-md">
-                          NEW
-                        </span>
-                      </div>
-                    </div>
-                    
-                    {/* Description */}
-                    <p className="text-sm sm:text-base text-gray-700 mb-3 sm:mb-4">
-                      You have <span className="font-bold text-gray-800">{unclaimedShares} unclaimed share{unclaimedShares > 1 ? 's' : ''}</span> waiting for you!
-                    </p>
-                    
-                    {/* Value and Claim Button */}
-                    <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-3">
-                      {/* Value Card */}
-                      <div className="bg-white/90 backdrop-blur-sm rounded-xl px-4 py-3 shadow-md border border-gray-200 flex-shrink-0 xs:flex-1">
-                        <span className="text-xs text-gray-600 block mb-1">Total Value</span>
-                        <div className="text-xl sm:text-2xl font-bold text-gray-800">
-                          ₹{unclaimedShares * 2}
-                        </div>
-                      </div>
-                      
-                      {/* Claim Button */}
-                      <button
-                        onClick={claimShareReward}
-                        disabled={isClaimingReward}
-                        className={`px-6 py-3 rounded-xl font-bold text-sm transition-all transform hover:scale-105 active:scale-95 min-h-[48px] xs:flex-1 ${
-                          isClaimingReward
-                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                            : 'bg-gray-800 hover:bg-gray-900 text-white shadow-lg hover:shadow-xl'
-                        }`}
-                      >
-                        {isClaimingReward ? (
-                          <div className="flex items-center justify-center gap-2">
-                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                            <span>Adding...</span>
-                          </div>
-                        ) : (
-                          <div className="flex items-center justify-center gap-2">
-                            <span>💰</span>
-                            <span>Claim ₹{unclaimedShares * 2}</span>
-                          </div>
-                        )}
-                      </button>
-                    </div>
-                    
-                    {/* Status Message */}
-                    <p className="text-xs text-gray-500 mt-3 flex items-center gap-2">
-                      <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                      Instant credit to your balance - no waiting!
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Action Buttons - Mobile Optimized */}
-          <div className="flex flex-col xs:flex-row gap-3 mb-4 sm:mb-6">
-            {/* WhatsApp Share Button */}
-            <div className="flex-1 relative">
-              {/* Shining border animation */}
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-400 via-blue-300 to-blue-400 rounded-xl opacity-75 animate-pulse"></div>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent rounded-xl animate-pulse" style={{animationDuration: '2s'}}></div>
-              
               <button
-                onClick={handleShareClick}
-                className="relative w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-4 px-4 rounded-xl font-semibold shadow-xl hover:shadow-2xl transition-all flex items-center justify-center min-h-[52px] border-2 border-blue-300 z-10 transform hover:scale-105"
+                onClick={claimShareReward}
+                disabled={isClaimingReward}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  isClaimingReward
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-orange-500 hover:bg-orange-600 text-white'
+                }`}
               >
-                <Share2 className="h-5 w-5 mr-2 drop-shadow-sm" />
-                <span className="text-sm font-bold drop-shadow-sm">Share on WhatsApp</span>
+                {isClaimingReward ? 'Claiming...' : 'Claim'}
               </button>
             </div>
-            
-            {/* Copy Link Button */}
-            <button
-              onClick={copyReferralLink}
-              className={`xs:w-auto w-full py-4 px-4 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all flex items-center justify-center min-h-[52px] ${
-                linkCopied 
-                  ? 'bg-gray-700 text-white' 
-                  : 'bg-gray-600 hover:bg-gray-700 text-white'
-              }`}
-            >
-              {linkCopied ? (
-                <>
-                  <CheckCircle className="h-5 w-5 mr-2" />
-                  <span className="text-sm font-medium">Copied!</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="h-5 w-5 mr-2" />
-                  <span className="text-sm font-medium">Copy Link</span>
-                </>
-              )}
-            </button>
           </div>
+        )}
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <StatsCard
+            title="Shares"
+            value={currentUser?.shares || 0}
+            subtitle="Earn ₹2 on Every Share"
+            subtitleValue={`Earned ₹${(currentUser?.shares || 0) * 2}`}
+            actionButton={
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    setShowShareBanner(true);
+                    setUnclaimedShares(prev => prev + 1);
+                  }}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-2"
+                >
+                  <Share2 className="h-3 w-3" />
+                  Share Now
+                </button>
+                <button
+                  onClick={copyReferralLink}
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-700 py-2 px-2 rounded-lg transition-colors flex items-center justify-center"
+                >
+                  <Copy className="h-3 w-3" />
+                </button>
+              </div>
+            }
+            icon={Share2}
+            color="blue"
+          />
+          <StatsCard
+            title="Clicks"
+            value={currentUser?.clicks || 0}
+            subtitle="Earn ₹10 per click"
+            subtitleValue={`Earned ₹${(currentUser?.clicks || 0) * 10}` }
+            description="Every time someone clicks your link, you earn ₹10."
+            icon={Activity}
+            color="green"
+          />
+          <StatsCard
+            title="Referrals"
+            value={realStats.referrals}
+            subtitle="Earn ₹300 per referral"
+            subtitleValue={`Earned ₹${realStats.referrals * 300}`}
+            description="Everytime someone you refer completes the quiz, you earn ₹300."
+            icon={Users}
+            color="purple"
+          />
         </div>
+
+
+
 
         {/* Transaction History */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 mb-4 sm:mb-6">
@@ -620,7 +472,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats }) => {
                     <X className="w-5 h-5 sm:w-6 sm:h-6" />
                   </button>
                 </div>
-                <div className="text-2xl sm:text-3xl font-bold text-white">₹{currentUser?.balance || 0}</div>
+                <div className="text-2xl sm:text-3xl font-bold text-white">₹{typeof currentUser?.balance === 'string' ? parseFloat(currentUser.balance).toFixed(2) : (currentUser?.balance || 0).toFixed(2)}</div>
               </div>
 
               <div className="p-4 sm:p-5 space-y-3 sm:space-y-4">
@@ -716,7 +568,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats }) => {
                       <div>
                         <div className="text-amber-900 font-semibold mb-1 text-xs sm:text-sm">Insufficient Balance</div>
                         <div className="text-xs sm:text-sm text-amber-800">
-                          Minimum ₹100 required. You need ₹{100 - (currentUser?.balance || 0)} more.
+                          Minimum ₹100 required. You need ₹{(100 - (typeof currentUser?.balance === 'string' ? parseFloat(currentUser.balance) : (currentUser?.balance || 0))).toFixed(2)} more.
                         </div>
                       </div>
                     </div>
@@ -761,7 +613,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats }) => {
               <div className="flex-1 min-w-0">
                 <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-1">✅ Withdrawal Request Submitted Successfully!</h3>
                 <p className="text-xs sm:text-sm text-gray-700 mb-2">Your withdrawal request has been processed and is now under review.</p>
-                <p className="text-xs sm:text-sm text-gray-600 font-medium">💰 <span className="text-green-600">₹{currentUser?.balance || 0}</span> will be credited to your account by the <span className="font-semibold text-blue-600">5th day of the upcoming month</span>.</p>
+                <p className="text-xs sm:text-sm text-gray-600 font-medium">💰 <span className="text-green-600">₹{typeof currentUser?.balance === 'string' ? parseFloat(currentUser.balance).toFixed(2) : (currentUser?.balance || 0).toFixed(2)}</span> will be credited to your account by the <span className="font-semibold text-blue-600">5th day of the upcoming month</span>.</p>
                 <p className="text-xs text-gray-500 mt-2">You'll receive a confirmation notification once the payment is processed.</p>
               </div>
               <button

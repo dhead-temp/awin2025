@@ -1,5 +1,6 @@
 import React from 'react';
 import { Trophy, Users, ChevronRight, Zap, BookOpen, TrendingUp, Target } from 'lucide-react';
+import StatsCard from './StatsCard';
 import { Page } from '../App';
 import LiveWinnersList from './LiveWinnersList';
 
@@ -115,6 +116,56 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate, hasPlayedQuiz }) => {
             >
               <Target className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
               View Earnings
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Earning Stats Section */}
+      <div className="py-6 md:py-8 bg-gradient-to-br from-gray-50 to-blue-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-6">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Your Earning Potential</h2>
+            <p className="text-gray-600 text-sm">Multiple ways to maximize your income</p>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <StatsCard
+              title="Quiz Win"
+              value="₹453"
+              subtitle="One-time reward"
+              subtitleValue="Instant"
+              description="Answer 3 questions correctly and win ₹453 instantly."
+              icon={Trophy}
+              color="orange"
+            />
+            <StatsCard
+              title="Per Referral"
+              value="₹300"
+              subtitle="Earn per friend"
+              subtitleValue="Unlimited"
+              description="Invite friends to play. Earn ₹300 when they complete quiz."
+              icon={Users}
+              color="green"
+            />
+            <StatsCard
+              title="Per Click"
+              value="₹10"
+              subtitle="Link clicks"
+              subtitleValue="Daily"
+              description="Share your link anywhere. Earn ₹10 per click."
+              icon={TrendingUp}
+              color="blue"
+            />
+          </div>
+          
+          <div className="text-center">
+            <button
+              onClick={() => onNavigate('account')}
+              className="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl text-sm font-semibold transition-all"
+            >
+              <Target className="h-4 w-4 mr-2" />
+              Track Your Earnings
             </button>
           </div>
         </div>
