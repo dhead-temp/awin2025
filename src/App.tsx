@@ -9,12 +9,9 @@ import PromoStrip from './components/PromoStrip';
 import Footer from './components/Footer';
 import PaymentProofsFooter from './components/PaymentProofsFooter';
 import HowItWorksPage from './components/HowItWorksPage';
-import RulesPage from './components/RulesPage';
-import WinnersPage from './components/WinnersPage';
-import FaqsPage from './components/FaqsPage';
 import { apiService } from './services/api';
 
-export type Page = 'home' | 'quiz' | 'win' | 'win1' | 'account' | 'how-it-works' | 'rules' | 'winners' | 'faqs';
+export type Page = 'home' | 'quiz' | 'win' | 'win1' | 'account' | 'how-it-works';
 
 // Component to handle navigation logic
 function AppContent() {
@@ -69,14 +66,11 @@ function AppContent() {
 
   const navigateTo = (page: Page) => {
     const pathMap: Record<Page, string> = {
-      'home': '/',
+      'home': '/home',
       'quiz': '/quiz',
       'win1': '/win1',
       'account': '/account',
-      'how-it-works': '/how-it-works',
-      'rules': '/rules',
-      'winners': '/winners',
-      'faqs': '/faqs'
+      'how-it-works': '/how-it-works'
     };
     navigate(pathMap[page]);
   };
@@ -142,14 +136,12 @@ function AppContent() {
       
       <main>
         <Routes>
-          <Route path="/" element={<HomePage onNavigate={navigateTo} hasPlayedQuiz={hasPlayedQuiz} />} />
+          <Route path="/" element={<QuizPage onNavigate={navigateTo} onMarkAsPlayed={markQuizAsPlayed} hasPlayedQuiz={hasPlayedQuiz} />} />
+          <Route path="/home" element={<HomePage onNavigate={navigateTo} hasPlayedQuiz={hasPlayedQuiz} />} />
           <Route path="/quiz" element={<QuizPage onNavigate={navigateTo} onMarkAsPlayed={markQuizAsPlayed} hasPlayedQuiz={hasPlayedQuiz} />} />
           <Route path="/win1" element={<WinPage1 onNavigate={navigateTo} onMarkAsPlayed={markQuizAsPlayed} currentUser={currentUser} onCreateUser={createUser} />} />
-          <Route path="/account" element={<AccountPage userStats={userStats} />} />
+          <Route path="/account" element={<AccountPage userStats={userStats} hasPlayedQuiz={hasPlayedQuiz} onNavigate={navigateTo} />} />
           <Route path="/how-it-works" element={<HowItWorksPage />} />
-          <Route path="/rules" element={<RulesPage />} />
-          <Route path="/winners" element={<WinnersPage />} />
-          <Route path="/faqs" element={<FaqsPage />} />
         </Routes>
         <Footer />
       </main>

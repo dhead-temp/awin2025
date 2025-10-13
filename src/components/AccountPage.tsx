@@ -14,14 +14,25 @@ import {
   History,
   User,
   X,
-  Link
+  Link,
+  Play
 } from 'lucide-react';
 import { apiService, DOMAIN, User as ApiUser, Transaction } from '../services/api';
 import StatsCard from './StatsCard';
+import { Page } from '../App';
 
-interface AccountPageProps {}
+interface AccountPageProps {
+  userStats: {
+    totalEarnings: number;
+    referrals: number;
+    linkClicks: number;
+    shares: number;
+  };
+  hasPlayedQuiz: boolean;
+  onNavigate: (page: Page) => void;
+}
 
-const AccountPage: React.FC<AccountPageProps> = () => {
+const AccountPage: React.FC<AccountPageProps> = ({ userStats, hasPlayedQuiz, onNavigate }) => {
   
   const [hasTerabox, setHasTerabox] = useState(false);
   const [showTeraboxModal, setShowTeraboxModal] = useState(false);
@@ -274,7 +285,87 @@ const AccountPage: React.FC<AccountPageProps> = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 pb-32">
-      <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6">
+      {/* Locked State - Show if user hasn't played quiz */}
+      {!hasPlayedQuiz ? (
+        <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6">
+          <div className="bg-white rounded-2xl shadow-sm p-6 sm:p-8 mb-4 sm:mb-6 border border-gray-100 relative overflow-hidden">
+            {/* Blurred background content */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-blue-100 opacity-90 blur-sm">
+              <div className="p-4 sm:p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                      <User className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg sm:text-xl font-bold text-gray-900">My Account</h2>
+                      <p className="text-gray-600 text-sm">Track your earnings and referrals</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+                  <div className="bg-gradient-to-r from-orange-400 to-orange-500 rounded-xl p-3 sm:p-4 text-white">
+                    <div className="flex items-center justify-between mb-2">
+                      <Trophy className="h-5 w-5" />
+                    </div>
+                    <div className="text-lg sm:text-xl font-bold">₹{userStats.totalEarnings}</div>
+                    <div className="text-xs sm:text-sm opacity-90">Total Earnings</div>
+                  </div>
+                  <div className="bg-gradient-to-r from-green-400 to-green-500 rounded-xl p-3 sm:p-4 text-white">
+                    <div className="flex items-center justify-between mb-2">
+                      <Users className="h-5 w-5" />
+                    </div>
+                    <div className="text-lg sm:text-xl font-bold">{userStats.referrals}</div>
+                    <div className="text-xs sm:text-sm opacity-90">Referrals</div>
+                  </div>
+                  <div className="bg-gradient-to-r from-blue-400 to-blue-500 rounded-xl p-3 sm:p-4 text-white">
+                    <div className="flex items-center justify-between mb-2">
+                      <Activity className="h-5 w-5" />
+                    </div>
+                    <div className="text-lg sm:text-xl font-bold">{userStats.linkClicks}</div>
+                    <div className="text-xs sm:text-sm opacity-90">Clicks</div>
+                  </div>
+                  <div className="bg-gradient-to-r from-purple-400 to-purple-500 rounded-xl p-3 sm:p-4 text-white">
+                    <div className="flex items-center justify-between mb-2">
+                      <Share2 className="h-5 w-5" />
+                    </div>
+                    <div className="text-lg sm:text-xl font-bold">{userStats.shares}</div>
+                    <div className="text-xs sm:text-sm opacity-90">Shares</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Lock overlay */}
+            <div className="relative z-10 flex flex-col items-center justify-center text-center py-8 sm:py-12">
+              <div className="w-20 h-20 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center mb-6 shadow-lg">
+                <Lock className="h-10 w-10 text-white" />
+              </div>
+              
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3">
+                Account Locked
+              </h3>
+              
+              <p className="text-gray-600 text-sm sm:text-base mb-6 max-w-md leading-relaxed">
+                Complete the quiz first to unlock your account and start earning money!
+              </p>
+              
+              <button
+                onClick={() => onNavigate('quiz')}
+                className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all flex items-center space-x-2 shadow-lg hover:shadow-xl"
+              >
+                <Play className="h-5 w-5" />
+                <span>Play Quiz Now</span>
+              </button>
+              
+              <p className="text-gray-500 text-xs mt-4">
+                Win ₹453 instantly after completing the quiz!
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6">
 
         {/* Header - Profile */}
         <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-5 mb-4 sm:mb-6 border border-gray-100">
@@ -884,7 +975,8 @@ const AccountPage: React.FC<AccountPageProps> = () => {
           </div>
         )}
 
-      </div>
+        </div>
+      )}
     </div>
   );
 };
