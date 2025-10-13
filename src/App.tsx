@@ -10,6 +10,7 @@ import Footer from './components/Footer';
 import PaymentProofsFooter from './components/PaymentProofsFooter';
 import HowItWorksPage from './components/HowItWorksPage';
 import { apiService } from './services/api';
+import { initGA, trackPageView, trackReferralClick } from './utils/analytics';
 
 export type Page = 'home' | 'quiz' | 'win' | 'win1' | 'account' | 'how-it-works';
 
@@ -41,6 +42,20 @@ function AppContent() {
     const savedUser = localStorage.getItem('currentUser');
     return savedUser ? JSON.parse(savedUser) : { id: null, token: null, invitedBy: null };
   });
+
+  // Initialize Google Analytics
+  useEffect(() => {
+    // Only initialize in production or when GA_MEASUREMENT_ID is set
+    if (process.env.NODE_ENV === 'production' || process.env.REACT_APP_GA_MEASUREMENT_ID) {
+      const measurementId = process.env.REACT_APP_GA_MEASUREMENT_ID || 'G-XXXXXXXXXX';
+      initGA(measurementId);
+    }
+  }, []);
+
+  // Track page views on route changes
+  useEffect(() => {
+    trackPageView(location.pathname, document.title);
+  }, [location.pathname]);
 
   // Check quiz reward status from database
   useEffect(() => {
@@ -84,6 +99,9 @@ function AppContent() {
     const inviteCode = urlParams.get('by');
     
     if (inviteCode && inviteCode !== currentUser.invitedBy) {
+      // Track referral click
+      trackReferralClick(inviteCode);
+      
       // Increment click count for the invite code
       apiService.incrementClickCount(inviteCode).then(response => {
         if (response.status === 'success') {

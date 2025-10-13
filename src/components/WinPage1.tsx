@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Trophy, Gift, X, MessageCircle } from 'lucide-react';
 import type { Page } from '../App';
 import { DOMAIN, apiService } from '../services/api';
+import { trackWinPageView, trackUserRegistration } from '../utils/analytics';
 
 interface WinPage1Props {
   onNavigate: (page: Page) => void;
@@ -35,6 +36,9 @@ const WinPage1: React.FC<WinPage1Props> = ({ onNavigate, onMarkAsPlayed, current
       onMarkAsPlayed();
       setHasMarkedAsPlayed(true);
     }
+    
+    // Track win page view
+    trackWinPageView();
   }, [onMarkAsPlayed, hasMarkedAsPlayed]);
 
   // Check quiz reward status from database
@@ -71,6 +75,7 @@ const WinPage1: React.FC<WinPage1Props> = ({ onNavigate, onMarkAsPlayed, current
     const user = await onCreateUser();
     
     if (user && user.id) {
+      trackUserRegistration();
       setShowInviteModal(true);
     } else {
       console.error('Failed to create user for withdrawal');

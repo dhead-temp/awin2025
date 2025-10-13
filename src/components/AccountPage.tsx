@@ -20,6 +20,7 @@ import {
 import { apiService, DOMAIN, User as ApiUser, Transaction } from '../services/api';
 import StatsCard from './StatsCard';
 import { Page } from '../App';
+import { trackAccountView, trackShare, trackWithdrawalRequest } from '../utils/analytics';
 
 interface AccountPageProps {
   userStats: {
@@ -125,6 +126,11 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
     fetchUserData();
   }, []);
 
+  // Track account page view
+  useEffect(() => {
+    trackAccountView();
+  }, []);
+
   // User profile data
   const userProfile = {
     name: currentUser?.name || `user${currentUser?.id || 'new'}`,
@@ -164,7 +170,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
 
   const generateWhatsAppLink = () => {
     const message = encodeURIComponent(
-      `🎉 Win ₹453 instantly! Complete this quiz and earn money: ${referralLink}`
+      `Ye dekhna ${referralLink}`
     );
     return `https://wa.me/?text=${message}`;
   };
@@ -266,6 +272,9 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
       const response = await apiService.createWithdrawalRequest(currentUser.id, currentBalance);
       
       if (response.status === 'success') {
+        // Track withdrawal request
+        trackWithdrawalRequest(currentBalance);
+        
         // Fetch updated user data to get the new transaction
         const updatedUserResponse = await apiService.getUser(currentUser.id);
         
@@ -511,6 +520,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                 <button
                   onClick={() => {
                     window.open(generateWhatsAppLink(), '_blank');
+                    trackShare('whatsapp');
                     setShowShareBanner(true);
                     setUnclaimedShares(prev => prev + 1);
                   }}

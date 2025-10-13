@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronRight, Trophy, Clock, Target } from 'lucide-react';
 import type { Page } from '../App';
+import { trackQuizStart, trackQuizCompletion } from '../utils/analytics';
 
 interface QuizPageProps {
   onNavigate: (page: Page) => void;
@@ -19,6 +20,11 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
   useEffect(() => {
     const localPlayed = localStorage.getItem('hasPlayedQuiz') === 'true';
     setIsQuizRewardClaimed(localPlayed);
+    
+    // Track quiz start if not already played
+    if (!localPlayed) {
+      trackQuizStart();
+    }
   }, []);
 
   // Function to play tick sound
@@ -83,6 +89,7 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
         setCurrentQuestion(-1); // Use -1 to indicate retry state
       } else {
         // Mark played then navigate to win page
+        trackQuizCompletion();
         onMarkAsPlayed();
         onNavigate('win1');
       }
