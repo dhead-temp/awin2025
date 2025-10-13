@@ -12,7 +12,7 @@ interface QuizPageProps {
 const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlayedQuiz }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
-  const [timeLeft, setTimeLeft] = useState(300);
+  const [timeLeft, setTimeLeft] = useState(30);
   const [isTicking, setIsTicking] = useState(false);
   const [isQuizRewardClaimed, setIsQuizRewardClaimed] = useState(false);
 
