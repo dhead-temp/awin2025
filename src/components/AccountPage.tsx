@@ -39,6 +39,8 @@ const AccountPage: React.FC<AccountPageProps> = () => {
   const [isUpdatingContact, setIsUpdatingContact] = useState(false);
   const [isProcessingWithdrawal, setIsProcessingWithdrawal] = useState(false);
   const [withdrawalSuccess, setWithdrawalSuccess] = useState(false);
+  const [showWithdrawConfirmation, setShowWithdrawConfirmation] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
   
   // Real user data from API
   const [currentUser, setCurrentUser] = useState<ApiUser | null>(null);
@@ -115,8 +117,28 @@ const AccountPage: React.FC<AccountPageProps> = () => {
   const currentBalance = typeof currentUser?.balance === 'string' ? parseFloat(currentUser.balance) : (currentUser?.balance || 0);
   const canWithdraw = currentBalance >= 100 && hasTerabox && currentUser?.upi;
 
-  const copyReferralLink = () => {
-    navigator.clipboard.writeText(referralLink);
+  const copyReferralLink = async () => {
+    try {
+      await navigator.clipboard.writeText(referralLink);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000); // Reset after 2 seconds
+    } catch (err) {
+      console.error('Failed to copy: ', err);
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = referralLink;
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000);
+      } catch (fallbackErr) {
+        console.error('Fallback copy failed: ', fallbackErr);
+      }
+      document.body.removeChild(textArea);
+    }
   };
 
 
@@ -201,10 +223,17 @@ const AccountPage: React.FC<AccountPageProps> = () => {
     }
   };
 
-  const handleWithdrawal = async () => {
+  const handleWithdrawal = () => {
+    if (!currentUser?.id || !canWithdraw) return;
+    setShowWithdrawConfirmation(true);
+  };
+
+  const confirmWithdrawal = async () => {
     if (!currentUser?.id || !canWithdraw) return;
     
     setIsProcessingWithdrawal(true);
+    setShowWithdrawConfirmation(false);
+    
     try {
       const response = await apiService.createWithdrawalRequest(currentUser.id, currentBalance);
       
@@ -244,7 +273,7 @@ const AccountPage: React.FC<AccountPageProps> = () => {
   const isContactLinked = currentUser?.email || currentUser?.phone;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 pb-32">
       <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6">
 
         {/* Header - Profile */}
@@ -373,9 +402,18 @@ const AccountPage: React.FC<AccountPageProps> = () => {
                 </button>
                 <button
                   onClick={copyReferralLink}
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-700 py-2 px-2 rounded-lg transition-colors flex items-center justify-center"
+                  className={`py-2 px-2 rounded-lg transition-all duration-200 flex items-center justify-center ${
+                    copySuccess 
+                      ? 'bg-green-100 text-green-600 scale-110' 
+                      : 'bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-700 hover:scale-105'
+                  }`}
+                  title={copySuccess ? 'Copied!' : 'Copy referral link'}
                 >
-                  <Copy className="h-3 w-3" />
+                  {copySuccess ? (
+                    <CheckCircle className="h-3 w-3" />
+                  ) : (
+                    <Copy className="h-3 w-3" />
+                  )}
                 </button>
               </div>
             }
@@ -460,7 +498,7 @@ const AccountPage: React.FC<AccountPageProps> = () => {
 
         {/* Withdraw Modal */}
         {showTeraboxModal && (
-          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-3 sm:p-4 backdrop-blur-sm">
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60] p-3 sm:p-4 backdrop-blur-sm">
             <div className="bg-white rounded-2xl sm:rounded-3xl max-w-md w-full overflow-hidden shadow-2xl max-h-[90vh] overflow-y-auto">
               <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4 sm:p-5">
                 <div className="flex items-center justify-between mb-2">
@@ -603,6 +641,68 @@ const AccountPage: React.FC<AccountPageProps> = () => {
           </div>
         )}
 
+        {/* Withdraw Confirmation Modal */}
+        {showWithdrawConfirmation && (
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60] p-3 sm:p-4 backdrop-blur-sm">
+            <div className="bg-white rounded-2xl sm:rounded-3xl max-w-md w-full overflow-hidden shadow-2xl">
+              <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4 sm:p-5">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg sm:text-xl font-bold text-white">Confirm Withdrawal</h3>
+                  <button
+                    onClick={() => setShowWithdrawConfirmation(false)}
+                    className="text-white/80 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10"
+                  >
+                    <X className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </button>
+                </div>
+                <div className="text-2xl sm:text-3xl font-bold text-white">₹{typeof currentUser?.balance === 'string' ? parseFloat(currentUser.balance).toFixed(2) : (currentUser?.balance || 0).toFixed(2)}</div>
+              </div>
+
+              <div className="p-4 sm:p-5 space-y-4">
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 sm:p-4">
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 mt-0.5" />
+                    <div className="text-xs sm:text-sm text-blue-800">
+                      <div className="font-semibold mb-1">Please confirm your withdrawal details:</div>
+                      <ul className="space-y-1 text-xs">
+                        <li>• Amount: ₹{typeof currentUser?.balance === 'string' ? parseFloat(currentUser.balance).toFixed(2) : (currentUser?.balance || 0).toFixed(2)}</li>
+                        <li>• UPI ID: {currentUser?.upi || 'Not provided'}</li>
+                        <li>• Processing time: Within 24 hours</li>
+                        <li>• Payment date: 5th day of upcoming month</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 sm:p-4">
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 mt-0.5" />
+                    <div className="text-xs sm:text-sm text-amber-800">
+                      <div className="font-semibold mb-1">Important:</div>
+                      <p>Once confirmed, this withdrawal cannot be cancelled. Please ensure all details are correct.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-2 sm:gap-3 pt-2">
+                  <button
+                    onClick={() => setShowWithdrawConfirmation(false)}
+                    className="flex-1 py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl font-semibold border-2 border-gray-300 text-gray-700 hover:bg-gray-50 transition-all text-sm sm:text-base min-h-[44px]"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmWithdrawal}
+                    className="flex-1 py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl font-semibold bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg transition-all text-sm sm:text-base min-h-[44px]"
+                  >
+                    Confirm Withdrawal
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Withdrawal Success Message */}
         {withdrawalSuccess && (
           <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 sm:p-5 mb-4 sm:mb-6 shadow-sm">
@@ -628,7 +728,7 @@ const AccountPage: React.FC<AccountPageProps> = () => {
 
         {/* Transaction History Modal */}
         {showHistoryModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-3 sm:p-4">
             <div className="bg-white rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
               <div className="flex items-center justify-between p-3 sm:p-4 border-b">
                 <h3 className="text-sm sm:text-base lg:text-lg font-bold text-gray-900">All Transactions</h3>
@@ -678,7 +778,7 @@ const AccountPage: React.FC<AccountPageProps> = () => {
 
         {/* Email/Phone Update Modal */}
         {showEmailPhoneModal && (
-          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-3 sm:p-4 backdrop-blur-sm">
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60] p-3 sm:p-4 backdrop-blur-sm">
             <div className="bg-white rounded-2xl sm:rounded-3xl max-w-md w-full overflow-hidden shadow-2xl max-h-[90vh] overflow-y-auto">
               <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4 sm:p-5">
                 <div className="flex items-center justify-between mb-2">

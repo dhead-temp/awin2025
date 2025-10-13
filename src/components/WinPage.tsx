@@ -5,7 +5,6 @@ import { DOMAIN, apiService } from '../services/api';
 
 interface WinPageProps {
   onNavigate: (page: Page) => void;
-  onMarkAsPlayed: () => void;
   currentUser: {
     id: number | null;
     token: string | null;
@@ -18,7 +17,7 @@ interface WinPageProps {
   } | null>;
 }
 
-const WinPage: React.FC<WinPageProps> = ({ onNavigate, onMarkAsPlayed, currentUser, onCreateUser }) => {
+const WinPage: React.FC<WinPageProps> = ({ onNavigate, currentUser, onCreateUser }) => {
   const [showCelebration, setShowCelebration] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [invitedFriends, setInvitedFriends] = useState(0);
@@ -89,7 +88,7 @@ const WinPage: React.FC<WinPageProps> = ({ onNavigate, onMarkAsPlayed, currentUs
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 pb-32">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
         {/* Celebration Header */}
@@ -162,7 +161,7 @@ const WinPage: React.FC<WinPageProps> = ({ onNavigate, onMarkAsPlayed, currentUs
 
         {/* WhatsApp Invitation Modal */}
         {showInviteModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4">
             <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
