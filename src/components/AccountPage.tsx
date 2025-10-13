@@ -162,6 +162,13 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
     }
   };
 
+  const generateWhatsAppLink = () => {
+    const message = encodeURIComponent(
+      `🎉 Win ₹453 instantly! Complete this quiz and earn money: ${referralLink}`
+    );
+    return `https://wa.me/?text=${message}`;
+  };
+
 
 
   const claimShareReward = async () => {
@@ -503,6 +510,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
               <div className="flex gap-2">
                 <button
                   onClick={() => {
+                    window.open(generateWhatsAppLink(), '_blank');
                     setShowShareBanner(true);
                     setUnclaimedShares(prev => prev + 1);
                   }}
