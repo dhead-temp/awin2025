@@ -46,8 +46,8 @@ function AppContent() {
   // Initialize Google Analytics
   useEffect(() => {
     // Only initialize in production or when GA_MEASUREMENT_ID is set
-    if (process.env.NODE_ENV === 'production' || process.env.REACT_APP_GA_MEASUREMENT_ID) {
-      const measurementId = process.env.REACT_APP_GA_MEASUREMENT_ID || 'G-XXXXXXXXXX';
+    if (import.meta.env.PROD || import.meta.env.VITE_GA_MEASUREMENT_ID) {
+      const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID || 'G-XXXXXXXXXX';
       initGA(measurementId);
     }
   }, []);

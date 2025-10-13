@@ -16,18 +16,20 @@ Create a `.env` file in the project root:
 
 ```bash
 # Google Analytics Configuration
-REACT_APP_GA_MEASUREMENT_ID=G-XXXXXXXXXX
+VITE_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 ```
 
 Replace `G-XXXXXXXXXX` with your actual Measurement ID.
 
 ### 3. Update Analytics Configuration
 
-In `src/utils/analytics.ts`, update the `GA_MEASUREMENT_ID` constant:
+In `src/utils/analytics.ts`, the Measurement ID is automatically read from the environment variable:
 
 ```typescript
-export const GA_MEASUREMENT_ID = 'G-XXXXXXXXXX'; // Replace with your actual ID
+export const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID || 'G-XXXXXXXXXX';
 ```
+
+You can also update the fallback value if needed.
 
 ## Tracked Events
 
@@ -65,7 +67,7 @@ trackEvent('button_click', 'ui', 'header_menu', 1);
 ## Development vs Production
 
 - Analytics only initializes in production by default
-- To test in development, set `REACT_APP_GA_MEASUREMENT_ID` in your `.env` file
+- To test in development, set `VITE_GA_MEASUREMENT_ID` in your `.env` file
 - Analytics will initialize if the environment variable is present
 
 ## Privacy Considerations

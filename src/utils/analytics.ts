@@ -6,7 +6,7 @@ declare global {
 }
 
 // Google Analytics Measurement ID - Replace with your actual GA4 Measurement ID
-export const GA_MEASUREMENT_ID = 'G-XXXXXXXXXX'; // Replace with your actual ID
+export const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID || 'G-XXXXXXXXXX';
 
 // Initialize Google Analytics
 export const initGA = (measurementId: string) => {
