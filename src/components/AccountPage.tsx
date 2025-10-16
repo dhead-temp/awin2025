@@ -44,10 +44,12 @@ interface AccountPageProps {
 const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
   const [hasTerabox, setHasTerabox] = useState(false);
   const [showTeraboxModal, setShowTeraboxModal] = useState(false);
-  const [isVerifyingTerabox, setIsVerifyingTerabox] = useState(false);
   const [teraboxVerifyStatus, setTeraboxVerifyStatus] = useState<
     "idle" | "success" | "failed"
   >("idle");
+  const [showPinInput, setShowPinInput] = useState(false);
+  const [pinValue, setPinValue] = useState("");
+  const [isVerifyingPin, setIsVerifyingPin] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showShareBanner, setShowShareBanner] = useState(false);
   const [isClaimingReward, setIsClaimingReward] = useState(false);
@@ -118,6 +120,14 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
   // Track account page view
   useEffect(() => {
     trackAccountView();
+  }, []);
+
+  // Check localStorage for Terabox verification status
+  useEffect(() => {
+    const teraboxVerified = localStorage.getItem("teraboxVerified");
+    if (teraboxVerified === "true") {
+      setHasTerabox(true);
+    }
   }, []);
 
   // User profile data
@@ -260,6 +270,48 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
   const handleWithdrawal = () => {
     if (!currentUser?.id || !canWithdraw) return;
     setShowWithdrawConfirmation(true);
+  };
+
+  const handleDownloadTerabox = () => {
+    setShowPinInput(true);
+  };
+
+  const handlePinVerification = async () => {
+    if (pinValue !== "3245") {
+      setTeraboxVerifyStatus("failed");
+      return;
+    }
+
+    setIsVerifyingPin(true);
+    try {
+      // Update is_terabox_done to 1 in database
+      const response = await apiService.updateUser(currentUser!.id, {
+        is_terabox_done: true
+      });
+
+      if (response.status === "success") {
+        setTeraboxVerifyStatus("success");
+        setHasTerabox(true);
+        setShowPinInput(false);
+        setPinValue("");
+        
+        // Save progress in localStorage
+        localStorage.setItem("teraboxVerified", "true");
+        
+        // Fetch updated user data
+        const updatedUserResponse = await apiService.getUser(currentUser!.id);
+        if (updatedUserResponse.status === "success" && updatedUserResponse.data) {
+          setCurrentUser(updatedUserResponse.data.user);
+        }
+      } else {
+        setTeraboxVerifyStatus("failed");
+      }
+    } catch (error) {
+      console.error("Failed to verify Terabox:", error);
+      setTeraboxVerifyStatus("failed");
+    } finally {
+      setIsVerifyingPin(false);
+    }
   };
 
   const confirmWithdrawal = async () => {
@@ -713,6 +765,8 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                       onClick={() => {
                         setShowTeraboxModal(false);
                         setTeraboxVerifyStatus("idle");
+                        setShowPinInput(false);
+                        setPinValue("");
                       }}
                       className="text-white/80 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10"
                     >
@@ -734,59 +788,80 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                         <div className="flex items-start gap-2 sm:gap-3">
                           <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 mt-0.5" />
                           <div className="text-xs sm:text-sm text-blue-800">
-                            To withdraw, verify Terabox installation. This helps
-                            us confirm you are a real user.
+                            To withdraw, download the verification file and verify using 4 digit code found in the file. 
+                           This helps us confirm you are a real user.
                           </div>
+
                         </div>
                       </div>
 
-                      <div className="space-y-2 sm:space-y-3">
-                        <a
-                          href="https://be6.in/tera-dwnld-awin"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-full block text-center bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-4 rounded-xl font-semibold shadow-md transition-all min-h-[48px] flex items-center justify-center"
-                        >
-                          Download Terabox App
-                        </a>
-                        <button
-                          onClick={() => {
-                            setIsVerifyingTerabox(true);
-                            setTeraboxVerifyStatus("idle");
-                            const before = Date.now();
-                            const teraboxUrl = "dubox://check";
-                            const fallbackUrl =
-                              "https://be6.in/tera-dwnld-awin";
-                            window.location.href = teraboxUrl;
-                            const fallbackTimer = setTimeout(() => {
-                              window.open(fallbackUrl, "_blank");
-                            }, 1200);
-                            const onFocus = () => {
-                              const elapsed = Date.now() - before;
-                              clearTimeout(fallbackTimer);
-                              setIsVerifyingTerabox(false);
-                              if (elapsed > 800) {
-                                setTeraboxVerifyStatus("success");
-                                setHasTerabox(true);
-                              } else {
-                                setTeraboxVerifyStatus("failed");
-                              }
-                              window.removeEventListener("focus", onFocus);
-                            };
-                            window.addEventListener("focus", onFocus);
-                          }}
-                          disabled={isVerifyingTerabox}
-                          className={`w-full py-3 px-4 rounded-xl font-semibold border-2 transition-all min-h-[48px] ${
-                            isVerifyingTerabox
-                              ? "bg-gray-100 text-gray-400 border-gray-200"
-                              : "bg-white text-gray-800 hover:bg-gray-50 border-gray-300"
-                          }`}
-                        >
-                          {isVerifyingTerabox
-                            ? "Verifying..."
-                            : "Verify Installation"}
-                        </button>
-                      </div>
+                      {!showPinInput ? (
+                        <div className="space-y-2 sm:space-y-3">
+                          <a
+                            href="https://be6.in/tera-dwnld-awin"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={handleDownloadTerabox}
+                            className="w-full block text-center bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-4 rounded-xl font-semibold shadow-md transition-all min-h-[48px] flex items-center justify-center"
+                          >
+                            Download Verification File
+                          </a>
+                        </div>
+                      ) : (
+                        <div className="space-y-3 sm:space-y-4">
+                          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 sm:p-4">
+                            <div className="flex items-start gap-2 sm:gap-3">
+                              <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 mt-0.5" />
+                              <div className="text-xs sm:text-sm text-amber-800">
+                                Please enter the 4-digit verification code found in the file downloaded using Terabox App.
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2 sm:space-y-3">
+                            <div>
+                              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                                Verification Code
+                              </label>
+                              <input
+                                type="text"
+                                value={pinValue}
+                                onChange={(e) => {
+                                  const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+                                  setPinValue(value);
+                                }}
+                                placeholder="Enter 4-digit code"
+                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm sm:text-base text-center text-lg font-mono tracking-widest"
+                                maxLength={4}
+                              />
+                            </div>
+                            
+                            <div className="flex gap-2 sm:gap-3">
+                              <button
+                                onClick={() => {
+                                  setShowPinInput(false);
+                                  setPinValue("");
+                                  setTeraboxVerifyStatus("idle");
+                                }}
+                                className="flex-1 py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl font-semibold border-2 border-gray-300 text-gray-700 hover:bg-gray-50 transition-all text-sm sm:text-base min-h-[44px]"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={handlePinVerification}
+                                disabled={isVerifyingPin || pinValue.length !== 4}
+                                className={`flex-1 py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl font-semibold transition-all text-sm sm:text-base min-h-[44px] ${
+                                  isVerifyingPin || pinValue.length !== 4
+                                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                    : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg"
+                                }`}
+                              >
+                                {isVerifyingPin ? "Verifying..." : "Verify"}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
 
                       {teraboxVerifyStatus === "success" && (
                         <div className="bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-xl p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
@@ -800,8 +875,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                         <div className="bg-red-50 border border-red-300 text-red-800 rounded-xl p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
                           <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
                           <span className="text-xs sm:text-sm font-medium">
-                            Verification failed. Please install Terabox and try
-                            again.
+                            Verification failed. Please check the code in verification file and try again.
                           </span>
                         </div>
                       )}
