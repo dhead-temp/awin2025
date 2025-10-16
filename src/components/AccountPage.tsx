@@ -75,13 +75,12 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
     "all" | "credit" | "debit" | "completed" | "pending" | "failed"
   >("all");
 
-
   // Fetch user data on component mount
   // Note: Global API request cache prevents duplicate calls across components
   useEffect(() => {
     const fetchUserData = async () => {
       console.log("AccountPage: fetchUserData called");
-      
+
       try {
         // Get current user from localStorage
         const savedUser = localStorage.getItem("currentUser");
@@ -519,7 +518,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
               Withdraw Now
             </button>
             <div className="text-center text-white/70 text-xs mt-2 sm:mt-3">
-              100% Secure 
+              Withdraw to Bank Account Using UPI ID
             </div>
           </div>
 
