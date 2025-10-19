@@ -61,6 +61,12 @@ const WinPage1: React.FC<WinPage1Props> = ({
               response.data.user.is_quiz_reward_claimed === "1" ||
               response.data.user.is_quiz_reward_claimed === "true";
             setIsQuizRewardClaimed(claimed);
+            
+            // If reward is claimed, set invited friends to 3 to match the UI state
+            if (claimed) {
+              setInvitedFriends(3);
+              setShowInviteButton(false);
+            }
           }
         } catch (error) {
           console.error("Failed to check quiz reward status:", error);
