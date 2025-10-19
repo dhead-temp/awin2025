@@ -27,7 +27,7 @@ interface User {
   invited_by?: string;
   created_on: string;
   balance: number;
-  token?: string;
+  fcm_token?: string;
 }
 
 interface Transaction {
@@ -230,10 +230,10 @@ class ApiService {
   }
 
   // Update push notification token
-  async updatePushNotificationToken(userId: number, token: string): Promise<ApiResponse> {
-    console.log('API: updatePushNotificationToken called', { userId, token });
+  async updatePushNotificationToken(userId: number, fcm_token: string): Promise<ApiResponse> {
+    console.log('API: updatePushNotificationToken called', { userId, fcm_token });
     return this.updateUser(userId, {
-      token: token
+      fcm_token: fcm_token
     });
   }
 }
