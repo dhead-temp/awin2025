@@ -517,7 +517,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                         <CheckCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Notifications On
                       </button>
                     )}
-                    {navigator.userAgent.includes('Chrome') && (
+                    {/* {navigator.userAgent.includes('Chrome') && (
                       <button
                         onClick={() => setShowChromeDebug(true)}
                         className="inline-flex items-center gap-1 text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full text-xs font-medium hover:bg-blue-100 transition-colors"
@@ -525,7 +525,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                       >
                         <AlertCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Debug
                       </button>
-                    )}
+                    )} */}
                   </div>
                 </div>
               </div>
