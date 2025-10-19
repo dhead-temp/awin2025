@@ -17,6 +17,7 @@ import PaymentProofsFooter from "./components/PaymentProofsFooter";
 import HowItWorksPage from "./components/HowItWorksPage";
 import { apiService } from "./services/api";
 import { initGA, trackPageView, trackReferralClick } from "./utils/analytics";
+import { handlePushNotificationPermission, initializeFCM } from "./utils/pushNotifications";
 
 export type Page =
   | "home"
@@ -57,7 +58,7 @@ function AppContent() {
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
-  // Initialize Google Analytics
+  // Initialize Google Analytics and Firebase Cloud Messaging
   useEffect(() => {
     // Only initialize in production or when GA_MEASUREMENT_ID is set
     if (import.meta.env.PROD || import.meta.env.VITE_GA_MEASUREMENT_ID) {
@@ -65,6 +66,11 @@ function AppContent() {
         import.meta.env.VITE_GA_MEASUREMENT_ID || "G-LPN95FN4N0";
       initGA(measurementId);
     }
+    
+    // Initialize Firebase Cloud Messaging
+    initializeFCM().catch((error) => {
+      console.error('Failed to initialize FCM:', error);
+    });
   }, []);
 
   // Track page views on route changes
@@ -215,6 +221,14 @@ function AppContent() {
         localStorage.setItem("currentUser", JSON.stringify(newUser));
 
         console.log("User created successfully:", newUser);
+        
+        // Request push notification permission for newly created user
+        try {
+          await handlePushNotificationPermission(parseInt(newUser.id));
+        } catch (error) {
+          console.error("Failed to request push notification permission for new user:", error);
+        }
+        
         return newUser;
       } else {
         console.error("Failed to create user:", response.message);

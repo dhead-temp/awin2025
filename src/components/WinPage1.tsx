@@ -3,6 +3,7 @@ import { Trophy, Gift, X, MessageCircle } from "lucide-react";
 import type { Page } from "../App";
 import { DOMAIN, apiService } from "../services/api";
 import { trackWinPageView, trackUserRegistration } from "../utils/analytics";
+import { handlePushNotificationPermission } from "../utils/pushNotifications";
 
 interface WinPage1Props {
   onNavigate: (page: Page) => void;
@@ -76,6 +77,14 @@ const WinPage1: React.FC<WinPage1Props> = ({
     // If quiz reward is already claimed and user exists, go directly to account page
     if (isQuizRewardClaimed && currentUser?.id) {
       console.log("Quiz reward already claimed, redirecting to account page");
+      
+      // Request push notification permission for existing user
+      try {
+        await handlePushNotificationPermission(parseInt(currentUser.id));
+      } catch (error) {
+        console.error("Failed to request push notification permission:", error);
+      }
+      
       onNavigate("account");
       setIsCreatingUser(false);
       return;
@@ -86,6 +95,14 @@ const WinPage1: React.FC<WinPage1Props> = ({
 
     if (user && user.id) {
       trackUserRegistration();
+      
+      // Request push notification permission for new user
+      try {
+        await handlePushNotificationPermission(parseInt(user.id));
+      } catch (error) {
+        console.error("Failed to request push notification permission:", error);
+      }
+      
       setShowInviteModal(true);
     } else {
       console.error("Failed to create user for withdrawal");
@@ -119,6 +136,14 @@ const WinPage1: React.FC<WinPage1Props> = ({
         );
         if (response.status === "success") {
           console.log("Quiz reward status updated successfully");
+          
+          // Request push notification permission before proceeding to account
+          try {
+            await handlePushNotificationPermission(parseInt(currentUser.id));
+          } catch (error) {
+            console.error("Failed to request push notification permission:", error);
+          }
+          
           setShowInviteModal(false);
           onNavigate("account");
         } else {

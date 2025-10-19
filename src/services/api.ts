@@ -27,6 +27,7 @@ interface User {
   invited_by?: string;
   created_on: string;
   balance: number;
+  token?: string;
 }
 
 interface Transaction {
@@ -226,6 +227,14 @@ class ApiService {
   async createWithdrawalRequest(userId: number, amount: number): Promise<ApiResponse<{ transaction_id: number; amount: number; type: string; note: string }>> {
     const data = { user_id: userId, amount: amount };
     return this.makeRequest('withdraw_request', 'POST', data);
+  }
+
+  // Update push notification token
+  async updatePushNotificationToken(userId: number, token: string): Promise<ApiResponse> {
+    console.log('API: updatePushNotificationToken called', { userId, token });
+    return this.updateUser(userId, {
+      token: token
+    });
   }
 }
 

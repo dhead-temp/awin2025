@@ -7,4 +7,17 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          firebase: ['firebase/app', 'firebase/messaging']
+        }
+      }
+    }
+  },
+  server: {
+    https: false, // Set to true if you want HTTPS in development
+    port: 3000
+  }
 });

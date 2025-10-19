@@ -30,6 +30,7 @@ import {
   trackShare,
   trackWithdrawalRequest,
 } from "../utils/analytics";
+import { hasNotificationPermission, sendTestNotification } from "../utils/pushNotifications";
 
 interface AccountPageProps {
   userStats: {
@@ -501,9 +502,21 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                     {userProfile.name || "Your Account"}
                   </h1>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="inline-flex items-center gap-1 text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full text-xs font-medium">
-                      <Lock className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Secure
-                    </span>
+                   
+                    {hasNotificationPermission() && (
+                      <span className="inline-flex items-center gap-1 text-green-700 bg-green-50 px-2 py-0.5 rounded-full text-xs font-medium">
+                        <CheckCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Notifications On
+                      </span>
+                    )}
+                    {hasNotificationPermission() && currentUser?.id && (
+                      <button
+                        onClick={() => sendTestNotification(currentUser.id.toString())}
+                        className="inline-flex items-center gap-1 text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full text-xs font-medium hover:bg-blue-100 transition-colors"
+                        title="Send test notification"
+                      >
+                        <Activity className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Test
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
