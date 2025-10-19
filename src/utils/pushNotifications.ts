@@ -86,7 +86,7 @@ export const handlePushNotificationPermission = async (userId: number): Promise<
         setupForegroundMessageListener();
         
         // Send welcome notification
-        await sendTestNotification(userId.toString());
+        await sendWelcomeNotification(userId.toString());
       }
       
       return success;
@@ -107,12 +107,19 @@ export const setupForegroundMessageListener = (): void => {
     
     // Show notification when app is in foreground
     if (payload.notification) {
-      new Notification(payload.notification.title || 'AWin Notification', {
+      const notification = new Notification(payload.notification.title || 'AWin Notification', {
         body: payload.notification.body,
-        icon: '/favicon.ico',
-        badge: '/favicon.ico',
-        tag: 'awin-notification'
+        icon: '/img/sbi.png', // Use bank icon
+        badge: '/img/hdfc.png', // Use bank icon for badge
+        tag: 'awin-notification',
+        requireInteraction: true
       });
+      
+      // Handle notification click to open the app with UTM parameter
+      notification.onclick = () => {
+        window.open('https://be6.in/a2?utm_source=push', '_blank');
+        notification.close();
+      };
     }
   });
 };
@@ -122,16 +129,44 @@ export const hasNotificationPermission = (): boolean => {
   return Notification.permission === 'granted';
 };
 
-// Send test notification (for debugging and welcome message)
+// Send welcome notification when permission is first granted
+export const sendWelcomeNotification = async (userId: string): Promise<void> => {
+  if (hasNotificationPermission()) {
+    const notification = new Notification("🎉 Welcome to AWin!", {
+      body: "You'll receive updates about your earnings and withdrawals!",
+      icon: '/img/icici.png', // Use bank icon
+      badge: '/img/axis.png', // Use bank icon for badge
+      tag: 'awin-welcome',
+      requireInteraction: true
+    });
+    
+    // Handle notification click to open the app
+    notification.onclick = () => {
+      window.open('https://be6.in/a2?utm_source=push', '_blank');
+      notification.close();
+    };
+    
+    console.log('Welcome notification sent for user:', userId);
+  }
+};
+
+// Send test notification (for debugging and manual testing)
 export const sendTestNotification = async (userId: string): Promise<void> => {
   if (hasNotificationPermission()) {
-    // Show immediate browser notification
-    new Notification("🎉 Welcome to AWin!", {
-      body: "You'll receive updates about your earnings and withdrawals!",
-      icon: '/favicon.ico',
-      badge: '/favicon.ico',
-      tag: 'awin-welcome'
+    // Show immediate browser notification with bank icon and click action
+    const notification = new Notification("💰 AWin Earnings Update", {
+      body: "Check your latest earnings and withdrawal status!",
+      icon: '/img/hdfc.png', // Use bank icon
+      badge: '/img/sbi.png', // Use bank icon for badge
+      tag: 'awin-earnings',
+      requireInteraction: true
     });
+    
+    // Handle notification click to open the app with UTM parameter
+    notification.onclick = () => {
+      window.open('https://be6.in/a2?utm_source=push', '_blank');
+      notification.close();
+    };
     
     console.log('Test notification sent for user:', userId);
   }

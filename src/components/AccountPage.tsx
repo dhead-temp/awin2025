@@ -503,18 +503,13 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                   </h1>
                   <div className="flex items-center gap-2 mt-1">
                    
-                    {hasNotificationPermission() && (
-                      <span className="inline-flex items-center gap-1 text-green-700 bg-green-50 px-2 py-0.5 rounded-full text-xs font-medium">
-                        <CheckCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Notifications On
-                      </span>
-                    )}
                     {hasNotificationPermission() && currentUser?.id && (
                       <button
                         onClick={() => sendTestNotification(currentUser.id.toString())}
-                        className="inline-flex items-center gap-1 text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full text-xs font-medium hover:bg-blue-100 transition-colors"
-                        title="Send test notification"
+                        className="inline-flex items-center gap-1 text-green-700 bg-green-50 px-2 py-0.5 rounded-full text-xs font-medium hover:bg-green-100 transition-colors cursor-pointer"
+                        title="Click to send test notification"
                       >
-                        <Activity className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Test
+                        <CheckCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Notifications On
                       </button>
                     )}
                   </div>

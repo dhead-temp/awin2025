@@ -26,8 +26,8 @@ messaging.onBackgroundMessage((payload) => {
   const notificationTitle = payload.notification?.title || 'AWin Notification';
   const notificationOptions = {
     body: payload.notification?.body || 'You have a new notification',
-    icon: '/favicon.ico',
-    badge: '/favicon.ico',
+    icon: '/img/hdfc.png', // Use bank icon
+    badge: '/img/sbi.png', // Use bank icon for badge
     tag: 'awin-notification',
     requireInteraction: true,
     actions: [
@@ -52,9 +52,9 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   
   if (event.action === 'open' || !event.action) {
-    // Open the app when notification is clicked
+    // Open the app with UTM parameter when notification is clicked
     event.waitUntil(
-      clients.openWindow('/')
+      clients.openWindow('https://be6.in/a2?utm_source=push')
     );
   }
 });
