@@ -287,7 +287,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
     try {
       // Update is_terabox_done to 1 in database
       const response = await apiService.updateUser(currentUser!.id, {
-        is_terabox_done: true
+        is_terabox_done: 1,
       });
 
       if (response.status === "success") {
@@ -295,13 +295,16 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
         setHasTerabox(true);
         setShowPinInput(false);
         setPinValue("");
-        
+
         // Save progress in localStorage
         localStorage.setItem("teraboxVerified", "true");
-        
+
         // Fetch updated user data
         const updatedUserResponse = await apiService.getUser(currentUser!.id);
-        if (updatedUserResponse.status === "success" && updatedUserResponse.data) {
+        if (
+          updatedUserResponse.status === "success" &&
+          updatedUserResponse.data
+        ) {
           setCurrentUser(updatedUserResponse.data.user);
         }
       } else {
@@ -796,10 +799,10 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                         <div className="flex items-start gap-2 sm:gap-3">
                           <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 mt-0.5" />
                           <div className="text-xs sm:text-sm text-blue-800">
-                            To withdraw, download the verification file and verify using 4 digit code found in the file. 
-                           This helps us confirm you are a real user.
+                            To withdraw, download the verification file and
+                            verify using 4 digit code found in the file. This
+                            helps us confirm you are a real user.
                           </div>
-
                         </div>
                       </div>
 
@@ -821,11 +824,12 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                             <div className="flex items-start gap-2 sm:gap-3">
                               <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 mt-0.5" />
                               <div className="text-xs sm:text-sm text-amber-800">
-                                Please enter the 4-digit verification code found in the file downloaded using Terabox App.
+                                Please enter the 4-digit verification code found
+                                in the file downloaded using Terabox App.
                               </div>
                             </div>
                           </div>
-                          
+
                           <div className="space-y-2 sm:space-y-3">
                             <div>
                               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
@@ -835,7 +839,9 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                                 type="text"
                                 value={pinValue}
                                 onChange={(e) => {
-                                  const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+                                  const value = e.target.value
+                                    .replace(/\D/g, "")
+                                    .slice(0, 4);
                                   setPinValue(value);
                                 }}
                                 placeholder="Enter 4-digit code"
@@ -843,7 +849,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                                 maxLength={4}
                               />
                             </div>
-                            
+
                             <div className="flex gap-2 sm:gap-3">
                               <button
                                 onClick={() => {
@@ -857,7 +863,9 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                               </button>
                               <button
                                 onClick={handlePinVerification}
-                                disabled={isVerifyingPin || pinValue.length !== 4}
+                                disabled={
+                                  isVerifyingPin || pinValue.length !== 4
+                                }
                                 className={`flex-1 py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl font-semibold transition-all text-sm sm:text-base min-h-[44px] ${
                                   isVerifyingPin || pinValue.length !== 4
                                     ? "bg-gray-200 text-gray-500 cursor-not-allowed"
@@ -883,7 +891,8 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                         <div className="bg-red-50 border border-red-300 text-red-800 rounded-xl p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
                           <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
                           <span className="text-xs sm:text-sm font-medium">
-                            Verification failed. Please check the code in verification file and try again.
+                            Verification failed. Please check the code in
+                            verification file and try again.
                           </span>
                         </div>
                       )}
