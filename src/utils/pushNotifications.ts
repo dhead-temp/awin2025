@@ -11,16 +11,28 @@ export const isPushNotificationSupported = (): boolean => {
 // Request notification permission
 export const requestNotificationPermission = async (): Promise<NotificationPermission> => {
   if (!isPushNotificationSupported()) {
-    console.warn('Push notifications are not supported in this browser');
+    console.warn('❌ Push notifications are not supported in this browser');
     return 'denied';
   }
 
+  console.log('🔔 Requesting notification permission...');
+  console.log('Current permission:', Notification.permission);
+
   try {
     const permission = await Notification.requestPermission();
-    console.log('Notification permission:', permission);
+    console.log('📱 Notification permission result:', permission);
+    
+    if (permission === 'granted') {
+      console.log('✅ Notification permission granted!');
+    } else if (permission === 'denied') {
+      console.log('❌ Notification permission denied by user');
+    } else {
+      console.log('⏸️ Notification permission dismissed by user');
+    }
+    
     return permission;
   } catch (error) {
-    console.error('Error requesting notification permission:', error);
+    console.error('❌ Error requesting notification permission:', error);
     return 'denied';
   }
 };
@@ -28,19 +40,28 @@ export const requestNotificationPermission = async (): Promise<NotificationPermi
 // Get FCM token
 export const getFCMToken = async (): Promise<string | null> => {
   try {
+    // Check if VAPID key is properly configured
+    if (VAPID_KEY === "BEl62iUYgUivxIkv69yViEuiBIa40HI..." || !VAPID_KEY) {
+      console.error('❌ VAPID key not configured! Please get your VAPID key from Firebase Console');
+      return null;
+    }
+
+    console.log('🔑 Attempting to get FCM token with VAPID key...');
+    
     const token = await getToken(messaging, {
       vapidKey: VAPID_KEY
     });
     
     if (token) {
-      console.log('FCM Token:', token);
+      console.log('✅ FCM Token generated successfully:', token);
       return token;
     } else {
-      console.log('No registration token available.');
+      console.log('❌ No registration token available.');
       return null;
     }
   } catch (error) {
-    console.error('An error occurred while retrieving token:', error);
+    console.error('❌ Error retrieving FCM token:', error);
+    console.error('Error details:', error);
     return null;
   }
 };
@@ -175,9 +196,27 @@ export const sendTestNotification = async (userId: string): Promise<void> => {
 // Initialize FCM (call this when app starts)
 export const initializeFCM = async (): Promise<void> => {
   try {
+    console.log('🚀 Initializing Firebase Cloud Messaging...');
+    
+    // Check service worker registration
+    if ('serviceWorker' in navigator) {
+      const registration = await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js');
+      if (registration) {
+        console.log('✅ Service worker registered:', registration);
+      } else {
+        console.log('⚠️ Service worker not found, registering...');
+        try {
+          await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+          console.log('✅ Service worker registered successfully');
+        } catch (error) {
+          console.error('❌ Failed to register service worker:', error);
+        }
+      }
+    }
+    
     // Check if we already have permission
     if (hasNotificationPermission()) {
-      console.log('Notification permission already granted');
+      console.log('✅ Notification permission already granted');
       
       // Set up foreground message listener
       setupForegroundMessageListener();
@@ -185,10 +224,12 @@ export const initializeFCM = async (): Promise<void> => {
       // Try to get existing token
       const token = await getFCMToken();
       if (token) {
-        console.log('FCM initialized with existing token');
+        console.log('✅ FCM initialized with existing token');
       }
+    } else {
+      console.log('⏸️ Notification permission not granted yet');
     }
   } catch (error) {
-    console.error('Error initializing FCM:', error);
+    console.error('❌ Error initializing FCM:', error);
   }
 };

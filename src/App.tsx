@@ -98,11 +98,14 @@ function AppContent() {
                 setHasPlayedQuiz(true);
                 localStorage.setItem("hasPlayedQuiz", "true");
               } else {
-                // If database says not claimed but localStorage says played, sync to database
+                // If database says not claimed but localStorage says played, 
+                // just sync localStorage to match database (don't update database)
                 const localPlayed =
                   localStorage.getItem("hasPlayedQuiz") === "true";
                 if (localPlayed) {
-                  await apiService.updateQuizRewardStatus(parseInt(userData.id), 0);
+                  // Database is correct - user hasn't completed invitation process yet
+                  // Keep localStorage as is, don't update database
+                  console.log("Database shows quiz not claimed, keeping localStorage state");
                 }
               }
             }
@@ -187,15 +190,7 @@ function AppContent() {
       totalEarnings: prev.totalEarnings + 453,
     }));
 
-    // Update database if user exists
-    if (currentUser?.id) {
-      try {
-        await apiService.updateQuizRewardStatus(parseInt(currentUser.id), 0); // shares will be updated separately
-        console.log("Quiz reward status updated in database");
-      } catch (error) {
-        console.error("Failed to update quiz reward status:", error);
-      }
-    }
+    // Note: Database update will happen when user completes invitation process (3+ shares)
   }, [currentUser?.id]);
 
   // Create user when withdraw button is clicked
@@ -285,7 +280,6 @@ function AppContent() {
             element={
               <WinPage1
                 onNavigate={navigateTo}
-                onMarkAsPlayed={markQuizAsPlayed}
                 currentUser={currentUser}
                 onCreateUser={createUser}
               />

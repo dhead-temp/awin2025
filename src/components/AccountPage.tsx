@@ -31,6 +31,7 @@ import {
   trackWithdrawalRequest,
 } from "../utils/analytics";
 import { hasNotificationPermission, sendTestNotification } from "../utils/pushNotifications";
+import ChromeNotificationDebug from "./ChromeNotificationDebug";
 
 interface AccountPageProps {
   userStats: {
@@ -66,6 +67,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
   const [showWithdrawConfirmation, setShowWithdrawConfirmation] =
     useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [showChromeDebug, setShowChromeDebug] = useState(false);
 
   // Real user data from API
   const [currentUser, setCurrentUser] = useState<ApiUser | null>(null);
@@ -287,7 +289,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
     try {
       // Update is_terabox_done to 1 in database
       const response = await apiService.updateUser(currentUser!.id, {
-        is_terabox_done: 1,
+        is_terabox_done: true,
       });
 
       if (response.status === "success") {
@@ -513,6 +515,15 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                         title="Click to send test notification"
                       >
                         <CheckCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Notifications On
+                      </button>
+                    )}
+                    {navigator.userAgent.includes('Chrome') && (
+                      <button
+                        onClick={() => setShowChromeDebug(true)}
+                        className="inline-flex items-center gap-1 text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full text-xs font-medium hover:bg-blue-100 transition-colors"
+                        title="Debug Chrome notifications"
+                      >
+                        <AlertCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Debug
                       </button>
                     )}
                   </div>
@@ -1311,6 +1322,11 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
             </div>
           )}
         </div>
+      )}
+
+      {/* Chrome Debug Modal */}
+      {showChromeDebug && (
+        <ChromeNotificationDebug onClose={() => setShowChromeDebug(false)} />
       )}
     </div>
   );

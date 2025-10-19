@@ -7,7 +7,6 @@ import { handlePushNotificationPermission } from "../utils/pushNotifications";
 
 interface WinPage1Props {
   onNavigate: (page: Page) => void;
-  onMarkAsPlayed: () => void;
   currentUser: {
     id: string;
     name: string;
@@ -26,29 +25,22 @@ interface WinPage1Props {
 
 const WinPage1: React.FC<WinPage1Props> = ({
   onNavigate,
-  onMarkAsPlayed,
   currentUser,
   onCreateUser,
 }) => {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [invitedFriends, setInvitedFriends] = useState(0);
   const [isCreatingUser, setIsCreatingUser] = useState(false);
-  const [hasMarkedAsPlayed, setHasMarkedAsPlayed] = useState(false);
   const [isQuizRewardClaimed, setIsQuizRewardClaimed] = useState(false);
   const [showInviteButton, setShowInviteButton] = useState(true);
 
   const baseQuizWinnings = 453;
 
-  // Mark quiz as played when component mounts (user reached win page)
+  // Track win page view when component mounts
   useEffect(() => {
-    if (!hasMarkedAsPlayed) {
-      onMarkAsPlayed();
-      setHasMarkedAsPlayed(true);
-    }
-
     // Track win page view
     trackWinPageView();
-  }, [onMarkAsPlayed, hasMarkedAsPlayed]);
+  }, []);
 
   // Check quiz reward status from database
   useEffect(() => {
