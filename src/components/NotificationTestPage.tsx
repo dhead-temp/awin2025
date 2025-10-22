@@ -12,6 +12,7 @@ import {
 } from '../utils/pushNotifications';
 import { apiService } from '../services/api';
 import { runNotificationDiagnostics, createTestNotification, getNotificationTroubleshootingTips } from '../utils/notificationDiagnostics';
+import { testBackgroundNotifications, simulateBackgroundNotification, getBackgroundNotificationStatus } from '../utils/backgroundNotificationTest';
 
 interface TestResult {
   name: string;
@@ -449,6 +450,15 @@ const NotificationTestPage: React.FC = () => {
                   {currentUser ? '✅ Logged In' : '⚠️ Not Logged In'}
                 </div>
               </div>
+              <div className="bg-white rounded p-3">
+                <div className="text-sm text-gray-600">Background Status</div>
+                <div className={`font-semibold ${
+                  getBackgroundNotificationStatus().includes('✅') ? 'text-green-600' : 
+                  getBackgroundNotificationStatus().includes('❌') ? 'text-red-600' : 'text-yellow-600'
+                }`}>
+                  {getBackgroundNotificationStatus()}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -534,6 +544,64 @@ const NotificationTestPage: React.FC = () => {
               className="bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
             >
               🔧 Test Constructor
+            </button>
+            
+            <button
+              onClick={async () => {
+                addTestResult({
+                  name: 'Background Test',
+                  status: 'pending',
+                  message: 'Testing background notifications...'
+                });
+
+                const results = await testBackgroundNotifications();
+                results.forEach(result => {
+                  addTestResult({
+                    name: result.test,
+                    status: result.status === 'pass' ? 'success' : result.status === 'fail' ? 'error' : 'warning',
+                    message: result.message,
+                    details: result.details
+                  });
+                });
+              }}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
+            >
+              🔄 Test Background
+            </button>
+            
+            <button
+              onClick={async () => {
+                addTestResult({
+                  name: 'Background Simulation',
+                  status: 'pending',
+                  message: 'Simulating background notification...'
+                });
+
+                try {
+                  const success = await simulateBackgroundNotification();
+                  addTestResult({
+                    name: 'Background Simulation',
+                    status: success ? 'success' : 'error',
+                    message: success 
+                      ? '✅ Background notification simulation sent' 
+                      : '❌ Background notification simulation failed',
+                    details: success 
+                      ? 'Check your notification area for the test notification' 
+                      : 'Check Service Worker registration and permissions'
+                  });
+                } catch (error) {
+                  addTestResult({
+                    name: 'Background Simulation',
+                    status: 'error',
+                    message: '❌ Background simulation failed',
+                    details: error instanceof Error ? error.message : 'Unknown error'
+                  });
+                }
+              }}
+              disabled={permissionStatus !== 'granted'}
+              className="bg-teal-600 hover:bg-teal-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
+            >
+              🎭 Simulate Background
             </button>
             
             <button
