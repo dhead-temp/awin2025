@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Home, HelpCircle, User, Trophy, BookOpen, Trash2, Bell } from 'lucide-react';
+import { Menu, X, Home, HelpCircle, User, Trophy, BookOpen, Trash2, LogOut } from 'lucide-react';
 import { trackUniqueHamburgerExpanded } from '../utils/analytics';
 
 export type Page = 'home' | 'quiz' | 'win' | 'win1' | 'account' | 'how-it-works';
@@ -17,7 +17,6 @@ export default function Navigation({}: NavigationProps) {
     { path: '/win1', label: 'Win Page', icon: Trophy },
     { path: '/account', label: 'My Account', icon: User },
     { path: '/how-it-works', label: 'How It Works', icon: BookOpen },
-    { path: '/notification-test', label: '🔔 Test Notifications', icon: Bell },
   ];
 
   const handleMenuClick = () => {
@@ -138,8 +137,8 @@ export default function Navigation({}: NavigationProps) {
                   }}
                   className="w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors text-red-600 hover:bg-red-50 border-t border-gray-200 mt-3 pt-3"
                 >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  <span className="font-medium text-sm">Clear Data (Testing)</span>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  <span className="font-medium text-sm">Logout</span>
                 </button>
               </div>
             </div>

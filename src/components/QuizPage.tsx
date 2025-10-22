@@ -320,6 +320,73 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
         )}
 
       </div>
+
+      {/* Want More Money Section */}
+      <div className="bg-blue-100 rounded-xl p-5 mb-6 shadow-lg border border-blue-200">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-10 h-10 bg-blue-500 rounded-full mb-3">
+            <Trophy className="h-5 w-5 text-white" />
+          </div>
+          
+          <h3 className="text-blue-800 font-bold text-lg mb-2">
+            💰 Want More Money?
+          </h3>
+          <p className="text-blue-700 text-sm mb-3">
+            Refer friends and earn ₹300 each
+          </p>
+          
+          <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+            <p className="text-blue-800 text-xs">
+              🎯 Unlimited referrals • 💸 Instant payouts • 🏆 No limits
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* FAQ Section */}
+      <div className="bg-white rounded-xl shadow-sm p-5 mb-6 border border-gray-200">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">
+          Frequently Asked Questions
+        </h3>
+        
+        <div className="space-y-3">
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <h4 className="font-medium text-gray-800 text-sm mb-2">
+              How it Works?
+            </h4>
+            <p className="text-gray-600 text-xs leading-relaxed">
+              Complete quizzes, invite friends, and earn money. It's simple - play, share, and withdraw your winnings directly to your bank account via UPI.
+            </p>
+          </div>
+
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <h4 className="font-medium text-gray-800 text-sm mb-2">
+              How can we give out Money?
+            </h4>
+            <p className="text-gray-600 text-xs leading-relaxed">
+              We partner with advertisers and sponsors who pay us for user engagement. This allows us to reward our users with real money for their participation.
+            </p>
+          </div>
+
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <h4 className="font-medium text-gray-800 text-sm mb-2">
+              How much you can earn?
+            </h4>
+            <p className="text-gray-600 text-xs leading-relaxed">
+              Earn ₹453 from quiz completion + ₹300 for each friend you refer. No limits on referrals - invite as many friends as you want and keep earning!
+            </p>
+          </div>
+
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <h4 className="font-medium text-gray-800 text-sm mb-2">
+              Will I really get money?
+            </h4>
+            <p className="text-gray-600 text-xs leading-relaxed">
+              Yes! We guarantee real money transfers. Complete the requirements, and your earnings will be transferred directly to your bank account via UPI within 24 hours.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
