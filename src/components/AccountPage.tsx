@@ -405,7 +405,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
   const isContactLinked = currentUser?.email || currentUser?.phone;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 pb-32">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 pb-0">
       {/* Loading State - Show while checking quiz status */}
       {isCheckingQuizStatus ? (
         <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6">

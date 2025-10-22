@@ -247,7 +247,7 @@ function AppContent() {
       <Navigation />
       <PromoStrip />
 
-      <main className="pb-32">
+      <main className="pb-20">
         <Routes>
           <Route
             path="/"
