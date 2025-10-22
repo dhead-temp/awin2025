@@ -204,28 +204,7 @@ const NotificationTestPage: React.FC = () => {
       });
 
       try {
-        // Use a simple test notification without requiring user ID
-        if (!('serviceWorker' in navigator)) {
-          throw new Error('Service Worker not supported');
-        }
-
-        const registration = await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js');
-        if (!registration) {
-          throw new Error('Service Worker not registered');
-        }
-
-        await registration.showNotification("🧪 AWin Test Notification", {
-          body: "This is a test notification from AWin!",
-          icon: '/img/hdfc.png',
-          badge: '/img/sbi.png',
-          tag: 'awin-test',
-          requireInteraction: true,
-          actions: [
-            { action: 'open', title: 'Open App' },
-            { action: 'close', title: 'Close' }
-          ]
-        });
-
+        await sendTestNotification(currentUser?.id || 'test-user');
         addTestResult({
           name: 'Test Notification',
           status: 'success',
@@ -249,7 +228,7 @@ const NotificationTestPage: React.FC = () => {
       });
     }
 
-    // Test 6: API Integration (optional - only if user exists)
+    // Test 6: API Integration (if user exists)
     if (currentUser?.id) {
       addTestResult({
         name: 'API Integration',
@@ -280,9 +259,9 @@ const NotificationTestPage: React.FC = () => {
     } else {
       addTestResult({
         name: 'API Integration',
-        status: 'success',
-        message: '✅ Skipping API test - not required for notification testing',
-        details: 'API integration is optional for basic notification testing'
+        status: 'warning',
+        message: '⚠️ Skipping API test - no user logged in',
+        details: 'Create a user account first to test API integration'
       });
     }
 
@@ -441,8 +420,7 @@ const NotificationTestPage: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-800 mb-2">🔔 Notification System Test</h1>
           <p className="text-gray-600 mb-6">
             This page helps diagnose issues with the push notification system. 
-            <strong>No account required</strong> - you can test notifications without logging in.
-            Run tests to check browser support, permissions, FCM setup, and basic notification functionality.
+            Run tests to check browser support, permissions, FCM setup, and API integration.
           </p>
 
           {/* Current Status */}
@@ -467,8 +445,8 @@ const NotificationTestPage: React.FC = () => {
               </div>
               <div className="bg-white rounded p-3">
                 <div className="text-sm text-gray-600">User Status</div>
-                <div className={`font-semibold ${currentUser ? 'text-green-600' : 'text-blue-600'}`}>
-                  {currentUser ? '✅ Logged In' : 'ℹ️ Not Required'}
+                <div className={`font-semibold ${currentUser ? 'text-green-600' : 'text-yellow-600'}`}>
+                  {currentUser ? '✅ Logged In' : '⚠️ Not Logged In'}
                 </div>
               </div>
             </div>

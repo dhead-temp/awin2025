@@ -41,7 +41,14 @@ import {
   trackUniqueAccountCodeVerified,
   trackUniqueAccountWithdrawSuccess,
 } from "../utils/analytics";
-import { hasNotificationPermission, sendTestNotification } from "../utils/pushNotifications";
+import { 
+  hasNotificationPermission, 
+  sendTestNotification,
+  sendEarningsNotification,
+  sendWithdrawalNotification,
+  sendReferralNotification,
+  sendQuizCompletionNotification
+} from "../utils/pushNotifications";
 import ChromeNotificationDebug from "./ChromeNotificationDebug";
 
 interface AccountPageProps {
@@ -537,13 +544,29 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                   <div className="flex items-center gap-2 mt-1">
                    
                     {hasNotificationPermission() && currentUser?.id && (
-                      <button
-                        onClick={() => sendTestNotification(currentUser.id.toString())}
-                        className="inline-flex items-center gap-1 text-green-700 bg-green-50 px-2 py-0.5 rounded-full text-xs font-medium hover:bg-green-100 transition-colors cursor-pointer"
-                        title="Click to send test notification"
-                      >
-                        <CheckCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Notifications On
-                      </button>
+                      <div className="flex flex-wrap gap-1">
+                        <button
+                          onClick={() => sendTestNotification(currentUser.id.toString())}
+                          className="inline-flex items-center gap-1 text-green-700 bg-green-50 px-2 py-0.5 rounded-full text-xs font-medium hover:bg-green-100 transition-colors cursor-pointer"
+                          title="Click to send test notification"
+                        >
+                          <CheckCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Notifications On
+                        </button>
+                        <button
+                          onClick={() => sendEarningsNotification(100)}
+                          className="inline-flex items-center gap-1 text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full text-xs font-medium hover:bg-blue-100 transition-colors cursor-pointer"
+                          title="Test earnings notification"
+                        >
+                          💰 Earnings
+                        </button>
+                        <button
+                          onClick={() => sendWithdrawalNotification(500)}
+                          className="inline-flex items-center gap-1 text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full text-xs font-medium hover:bg-purple-100 transition-colors cursor-pointer"
+                          title="Test withdrawal notification"
+                        >
+                          💳 Withdrawal
+                        </button>
+                      </div>
                     )}
                     {/* {navigator.userAgent.includes('Chrome') && (
                       <button
