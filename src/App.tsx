@@ -15,6 +15,7 @@ import PromoStrip from "./components/PromoStrip";
 import Footer from "./components/Footer";
 import PaymentProofsFooter from "./components/PaymentProofsFooter";
 import HowItWorksPage from "./components/HowItWorksPage";
+import NotificationTestPage from "./components/NotificationTestPage";
 import { apiService } from "./services/api";
 import { initGA, trackPageView, trackReferralClick } from "./utils/analytics";
 import { handlePushNotificationPermission, initializeFCM } from "./utils/pushNotifications";
@@ -25,7 +26,8 @@ export type Page =
   | "win"
   | "win1"
   | "account"
-  | "how-it-works";
+  | "how-it-works"
+  | "notification-test";
 
 // Component to handle navigation logic
 function AppContent() {
@@ -167,6 +169,7 @@ function AppContent() {
       win1: "/win1",
       account: "/account",
       "how-it-works": "/how-it-works",
+      "notification-test": "/notification-test",
     };
     navigate(pathMap[page]);
   };
@@ -292,6 +295,7 @@ function AppContent() {
             }
           />
           <Route path="/how-it-works" element={<HowItWorksPage />} />
+          <Route path="/notification-test" element={<NotificationTestPage />} />
         </Routes>
         <Footer />
       </main>

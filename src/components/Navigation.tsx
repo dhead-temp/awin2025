@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Home, HelpCircle, User, Trophy, BookOpen, Trash2 } from 'lucide-react';
+import { Menu, X, Home, HelpCircle, User, Trophy, BookOpen, Trash2, Bell } from 'lucide-react';
 import { trackUniqueHamburgerExpanded } from '../utils/analytics';
 
 export type Page = 'home' | 'quiz' | 'win' | 'win1' | 'account' | 'how-it-works';
@@ -17,6 +17,7 @@ export default function Navigation({}: NavigationProps) {
     { path: '/win1', label: 'Win Page', icon: Trophy },
     { path: '/account', label: 'My Account', icon: User },
     { path: '/how-it-works', label: 'How It Works', icon: BookOpen },
+    { path: '/notification-test', label: '🔔 Test Notifications', icon: Bell },
   ];
 
   const handleMenuClick = () => {
