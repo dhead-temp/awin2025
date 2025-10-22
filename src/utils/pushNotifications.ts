@@ -152,22 +152,45 @@ export const hasNotificationPermission = (): boolean => {
 
 // Send welcome notification when permission is first granted
 export const sendWelcomeNotification = async (userId: string): Promise<void> => {
-  if (hasNotificationPermission()) {
-    const notification = new Notification("🎉 Welcome to AWin!", {
+  if (!hasNotificationPermission()) {
+    console.warn('❌ Notification permission not granted');
+    return;
+  }
+
+  try {
+    // Check if Service Worker is available
+    if (!('serviceWorker' in navigator)) {
+      throw new Error('Service Worker not supported');
+    }
+
+    // Get the service worker registration
+    const registration = await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js');
+    if (!registration) {
+      throw new Error('Service Worker not registered');
+    }
+
+    // Use Service Worker to show notification
+    await registration.showNotification("🎉 Welcome to AWin!", {
       body: "You'll receive updates about your earnings and withdrawals!",
       icon: '/img/icici.png', // Use bank icon
       badge: '/img/axis.png', // Use bank icon for badge
       tag: 'awin-welcome',
-      requireInteraction: true
+      requireInteraction: true,
+      actions: [
+        {
+          action: 'open',
+          title: 'Open App'
+        },
+        {
+          action: 'close',
+          title: 'Close'
+        }
+      ]
     });
     
-    // Handle notification click to open the app
-    notification.onclick = () => {
-      window.open('https://be6.in/a2?utm_source=push', '_blank');
-      notification.close();
-    };
-    
-    console.log('Welcome notification sent for user:', userId);
+    console.log('✅ Welcome notification sent for user:', userId);
+  } catch (error) {
+    console.error('❌ Failed to send welcome notification:', error);
   }
 };
 
@@ -184,35 +207,35 @@ export const sendTestNotification = async (userId: string): Promise<void> => {
       throw new Error('Notifications require HTTPS in production');
     }
 
-    // Check if Notification constructor is available
-    if (typeof Notification === 'undefined') {
-      throw new Error('Notification API not supported');
+    // Check if Service Worker is available
+    if (!('serviceWorker' in navigator)) {
+      throw new Error('Service Worker not supported');
     }
 
-    // Show immediate browser notification with bank icon and click action
-    const notification = new Notification("💰 AWin Earnings Update", {
+    // Get the service worker registration
+    const registration = await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js');
+    if (!registration) {
+      throw new Error('Service Worker not registered');
+    }
+
+    // Use Service Worker to show notification
+    await registration.showNotification("💰 AWin Earnings Update", {
       body: "Check your latest earnings and withdrawal status!",
       icon: '/img/hdfc.png', // Use bank icon
       badge: '/img/sbi.png', // Use bank icon for badge
       tag: 'awin-earnings',
-      requireInteraction: true
+      requireInteraction: true,
+      actions: [
+        {
+          action: 'open',
+          title: 'Open App'
+        },
+        {
+          action: 'close',
+          title: 'Close'
+        }
+      ]
     });
-    
-    // Handle notification click to open the app with UTM parameter
-    notification.onclick = () => {
-      window.open('https://be6.in/a2?utm_source=push', '_blank');
-      notification.close();
-    };
-
-    // Handle notification close
-    notification.onclose = () => {
-      console.log('Test notification closed');
-    };
-
-    // Handle notification error
-    notification.onerror = (error) => {
-      console.error('Notification error:', error);
-    };
     
     console.log('✅ Test notification sent for user:', userId);
   } catch (error) {

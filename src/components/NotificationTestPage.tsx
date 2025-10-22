@@ -334,7 +334,7 @@ const NotificationTestPage: React.FC = () => {
     addTestResult({
       name: 'Manual Test',
       status: 'pending',
-      message: 'Sending manual test notification...'
+      message: 'Sending manual test notification via Service Worker...'
     });
 
     try {
@@ -343,40 +343,40 @@ const NotificationTestPage: React.FC = () => {
         throw new Error('Notifications require HTTPS in production');
       }
 
-      // Check if Notification constructor is available
-      if (typeof Notification === 'undefined') {
-        throw new Error('Notification API not supported');
+      // Check if Service Worker is available
+      if (!('serviceWorker' in navigator)) {
+        throw new Error('Service Worker not supported');
       }
 
-      // Create notification directly with proper error handling
-      const notification = new Notification("💰 AWin Test Notification", {
+      // Get the service worker registration
+      const registration = await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js');
+      if (!registration) {
+        throw new Error('Service Worker not registered');
+      }
+
+      // Use Service Worker to show notification
+      await registration.showNotification("💰 AWin Test Notification", {
         body: "This is a test notification from AWin!",
         icon: '/img/hdfc.png',
         badge: '/img/sbi.png',
         tag: 'awin-test',
-        requireInteraction: true
+        requireInteraction: true,
+        actions: [
+          {
+            action: 'open',
+            title: 'Open App'
+          },
+          {
+            action: 'close',
+            title: 'Close'
+          }
+        ]
       });
-
-      // Handle notification click
-      notification.onclick = () => {
-        window.open('https://be6.in/a2?utm_source=push', '_blank');
-        notification.close();
-      };
-
-      // Handle notification close
-      notification.onclose = () => {
-        console.log('Test notification closed');
-      };
-
-      // Handle notification error
-      notification.onerror = (error) => {
-        console.error('Notification error:', error);
-      };
 
       addTestResult({
         name: 'Manual Test',
         status: 'success',
-        message: '✅ Manual test notification sent',
+        message: '✅ Manual test notification sent via Service Worker',
         details: 'Check your notification area'
       });
     } catch (error) {

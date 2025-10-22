@@ -115,7 +115,7 @@ export const getNotificationTroubleshootingTips = (): string[] => {
 };
 
 export const createTestNotification = (): Promise<boolean> => {
-  return new Promise((resolve) => {
+  return new Promise(async (resolve) => {
     try {
       if (Notification.permission !== 'granted') {
         console.error('❌ Notification permission not granted');
@@ -129,27 +129,42 @@ export const createTestNotification = (): Promise<boolean> => {
         return;
       }
 
-      const notification = new Notification("🧪 AWin Test", {
+      // Check if Service Worker is available
+      if (!('serviceWorker' in navigator)) {
+        console.error('❌ Service Worker not supported');
+        resolve(false);
+        return;
+      }
+
+      // Get the service worker registration
+      const registration = await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js');
+      if (!registration) {
+        console.error('❌ Service Worker not registered');
+        resolve(false);
+        return;
+      }
+
+      // Use Service Worker to show notification
+      await registration.showNotification("🧪 AWin Test", {
         body: "This is a test notification",
         icon: '/img/hdfc.png',
-        tag: 'awin-test'
+        tag: 'awin-test',
+        actions: [
+          {
+            action: 'open',
+            title: 'Open App'
+          },
+          {
+            action: 'close',
+            title: 'Close'
+          }
+        ]
       });
 
-      notification.onclick = () => {
-        notification.close();
-        resolve(true);
-      };
-
-      notification.onerror = () => {
-        console.error('❌ Notification error occurred');
-        resolve(false);
-      };
-
-      // Auto-resolve after 5 seconds if no error
+      // Auto-resolve after 3 seconds
       setTimeout(() => {
-        notification.close();
         resolve(true);
-      }, 5000);
+      }, 3000);
 
     } catch (error) {
       console.error('❌ Failed to create notification:', error);
