@@ -11,6 +11,7 @@ import {
   updateUserPushToken
 } from '../utils/pushNotifications';
 import { apiService } from '../services/api';
+import { runNotificationDiagnostics, createTestNotification, getNotificationTroubleshootingTips } from '../utils/notificationDiagnostics';
 
 interface TestResult {
   name: string;
@@ -62,6 +63,25 @@ const NotificationTestPage: React.FC = () => {
       details: isSupported 
         ? 'Notification API, Service Worker, and PushManager are available'
         : 'Missing required APIs: Notification, ServiceWorker, or PushManager'
+    });
+
+    // Test 1.5: Secure Context Check
+    addTestResult({
+      name: 'Secure Context',
+      status: 'pending',
+      message: 'Checking secure context for notifications...'
+    });
+
+    const isSecure = window.isSecureContext || window.location.hostname === 'localhost';
+    addTestResult({
+      name: 'Secure Context',
+      status: isSecure ? 'success' : 'error',
+      message: isSecure 
+        ? '✅ Secure context available' 
+        : '❌ Notifications require HTTPS in production',
+      details: isSecure 
+        ? `Secure context: ${window.isSecureContext}, Hostname: ${window.location.hostname}`
+        : 'Use HTTPS or localhost for notifications to work'
     });
 
     // Test 2: Service Worker Registration
@@ -318,7 +338,41 @@ const NotificationTestPage: React.FC = () => {
     });
 
     try {
-      await sendTestNotification(currentUser?.id || 'manual-test');
+      // Check if we're in a secure context
+      if (!window.isSecureContext && window.location.hostname !== 'localhost') {
+        throw new Error('Notifications require HTTPS in production');
+      }
+
+      // Check if Notification constructor is available
+      if (typeof Notification === 'undefined') {
+        throw new Error('Notification API not supported');
+      }
+
+      // Create notification directly with proper error handling
+      const notification = new Notification("💰 AWin Test Notification", {
+        body: "This is a test notification from AWin!",
+        icon: '/img/hdfc.png',
+        badge: '/img/sbi.png',
+        tag: 'awin-test',
+        requireInteraction: true
+      });
+
+      // Handle notification click
+      notification.onclick = () => {
+        window.open('https://be6.in/a2?utm_source=push', '_blank');
+        notification.close();
+      };
+
+      // Handle notification close
+      notification.onclose = () => {
+        console.log('Test notification closed');
+      };
+
+      // Handle notification error
+      notification.onerror = (error) => {
+        console.error('Notification error:', error);
+      };
+
       addTestResult({
         name: 'Manual Test',
         status: 'success',
@@ -409,6 +463,29 @@ const NotificationTestPage: React.FC = () => {
             </button>
             
             <button
+              onClick={async () => {
+                addTestResult({
+                  name: 'Quick Diagnostic',
+                  status: 'pending',
+                  message: 'Running quick diagnostic...'
+                });
+
+                const diagnostics = runNotificationDiagnostics();
+                diagnostics.forEach(diag => {
+                  addTestResult({
+                    name: diag.test,
+                    status: diag.status === 'pass' ? 'success' : diag.status === 'fail' ? 'error' : 'warning',
+                    message: diag.message,
+                    details: diag.details
+                  });
+                });
+              }}
+              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
+            >
+              🔍 Quick Diagnostic
+            </button>
+            
+            <button
               onClick={requestPermission}
               disabled={permissionStatus === 'granted'}
               className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
@@ -422,6 +499,41 @@ const NotificationTestPage: React.FC = () => {
               className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
             >
               📤 Send Test Notification
+            </button>
+            
+            <button
+              onClick={async () => {
+                addTestResult({
+                  name: 'Constructor Test',
+                  status: 'pending',
+                  message: 'Testing Notification constructor...'
+                });
+
+                try {
+                  const success = await createTestNotification();
+                  addTestResult({
+                    name: 'Constructor Test',
+                    status: success ? 'success' : 'error',
+                    message: success 
+                      ? '✅ Notification constructor works' 
+                      : '❌ Notification constructor failed',
+                    details: success 
+                      ? 'Constructor is accessible and working' 
+                      : 'Check secure context and browser support'
+                  });
+                } catch (error) {
+                  addTestResult({
+                    name: 'Constructor Test',
+                    status: 'error',
+                    message: '❌ Constructor test failed',
+                    details: error instanceof Error ? error.message : 'Unknown error'
+                  });
+                }
+              }}
+              disabled={permissionStatus !== 'granted'}
+              className="bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
+            >
+              🔧 Test Constructor
             </button>
             
             <button
@@ -475,12 +587,9 @@ const NotificationTestPage: React.FC = () => {
           <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
             <h3 className="text-lg font-semibold text-yellow-800 mb-2">🔧 Troubleshooting Tips</h3>
             <ul className="text-yellow-700 space-y-1 text-sm">
-              <li>• Make sure you're using HTTPS (required for notifications)</li>
-              <li>• Check browser console for detailed error messages</li>
-              <li>• Ensure Firebase configuration is correct</li>
-              <li>• Verify VAPID key is properly set in Firebase Console</li>
-              <li>• Service worker must be accessible at /firebase-messaging-sw.js</li>
-              <li>• Some browsers block notifications in private/incognito mode</li>
+              {getNotificationTroubleshootingTips().map((tip, index) => (
+                <li key={index}>{tip}</li>
+              ))}
             </ul>
           </div>
         </div>

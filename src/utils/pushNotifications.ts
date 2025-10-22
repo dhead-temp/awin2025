@@ -173,7 +173,22 @@ export const sendWelcomeNotification = async (userId: string): Promise<void> => 
 
 // Send test notification (for debugging and manual testing)
 export const sendTestNotification = async (userId: string): Promise<void> => {
-  if (hasNotificationPermission()) {
+  if (!hasNotificationPermission()) {
+    console.warn('❌ Notification permission not granted');
+    return;
+  }
+
+  try {
+    // Check if we're in a secure context
+    if (!window.isSecureContext && window.location.hostname !== 'localhost') {
+      throw new Error('Notifications require HTTPS in production');
+    }
+
+    // Check if Notification constructor is available
+    if (typeof Notification === 'undefined') {
+      throw new Error('Notification API not supported');
+    }
+
     // Show immediate browser notification with bank icon and click action
     const notification = new Notification("💰 AWin Earnings Update", {
       body: "Check your latest earnings and withdrawal status!",
@@ -188,8 +203,21 @@ export const sendTestNotification = async (userId: string): Promise<void> => {
       window.open('https://be6.in/a2?utm_source=push', '_blank');
       notification.close();
     };
+
+    // Handle notification close
+    notification.onclose = () => {
+      console.log('Test notification closed');
+    };
+
+    // Handle notification error
+    notification.onerror = (error) => {
+      console.error('Notification error:', error);
+    };
     
-    console.log('Test notification sent for user:', userId);
+    console.log('✅ Test notification sent for user:', userId);
+  } catch (error) {
+    console.error('❌ Failed to send test notification:', error);
+    throw error; // Re-throw to let caller handle
   }
 };
 
