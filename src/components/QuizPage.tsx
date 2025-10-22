@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronRight, Trophy, Clock, Target } from 'lucide-react';
 import type { Page } from '../App';
-import { trackQuizStart, trackQuizCompletion } from '../utils/analytics';
+import { trackQuizStart, trackQuizCompletion, trackQuestionAnswered } from '../utils/analytics';
 
 interface QuizPageProps {
   onNavigate: (page: Page) => void;
@@ -83,6 +83,10 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
     setSelectedAnswer(selectedIndex);
     const newAnswers = [...answers, selectedIndex];
     setAnswers(newAnswers);
+
+    // Track individual question answer
+    const isCorrect = selectedIndex === questions[currentQuestion].correct;
+    trackQuestionAnswered(currentQuestion + 1, isCorrect);
 
     // Add a small delay to show the selection before moving to next question
     setTimeout(() => {

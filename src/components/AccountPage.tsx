@@ -29,6 +29,17 @@ import {
   trackAccountView,
   trackShare,
   trackWithdrawalRequest,
+  trackUniqueAccountUpdateOpened,
+  trackUniqueAccountShare,
+  trackUniqueHamburgerExpanded,
+  trackUniqueViewedTransactionHistory,
+  trackUniqueAccountInviteLinkCopied,
+  trackUniqueAccountWithdrawClick,
+  trackUniqueAccountDownloadClick,
+  trackUniqueAccountCodeEntered,
+  trackUniqueAccountCodeVerifyClick,
+  trackUniqueAccountCodeVerified,
+  trackUniqueAccountWithdrawSuccess,
 } from "../utils/analytics";
 import { hasNotificationPermission, sendTestNotification } from "../utils/pushNotifications";
 import ChromeNotificationDebug from "./ChromeNotificationDebug";
@@ -154,6 +165,9 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
   const canWithdraw = currentBalance >= 100 && hasTerabox && currentUser?.upi;
 
   const copyReferralLink = async () => {
+    // Track unique invite link copied
+    trackUniqueAccountInviteLinkCopied();
+    
     try {
       await navigator.clipboard.writeText(referralLink);
       setCopySuccess(true);
@@ -272,19 +286,29 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
 
   const handleWithdrawal = () => {
     if (!currentUser?.id || !canWithdraw) return;
+    // Track unique withdraw click
+    trackUniqueAccountWithdrawClick();
     setShowWithdrawConfirmation(true);
   };
 
   const handleDownloadTerabox = () => {
+    // Track unique download click
+    trackUniqueAccountDownloadClick();
     setShowPinInput(true);
   };
 
   const handlePinVerification = async () => {
+    // Track unique code entered
+    trackUniqueAccountCodeEntered();
+    
     if (pinValue !== "3245") {
       setTeraboxVerifyStatus("failed");
       return;
     }
 
+    // Track unique code verify click
+    trackUniqueAccountCodeVerifyClick();
+    
     setIsVerifyingPin(true);
     try {
       // Update is_terabox_done to 1 in database
@@ -293,6 +317,8 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
       });
 
       if (response.status === "success") {
+        // Track unique code verified
+        trackUniqueAccountCodeVerified();
         setTeraboxVerifyStatus("success");
         setHasTerabox(true);
         setShowPinInput(false);
@@ -345,6 +371,8 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
         ) {
           setCurrentUser(updatedUserResponse.data.user);
           setTransactions(updatedUserResponse.data.transactions);
+          // Track unique withdrawal success
+          trackUniqueAccountWithdrawSuccess();
           setWithdrawalSuccess(true);
           setShowTeraboxModal(false);
         }
@@ -532,7 +560,10 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
 
               {/* Link Email/Phone Link */}
               <button
-                onClick={() => setShowEmailPhoneModal(true)}
+                onClick={() => {
+                  trackUniqueAccountUpdateOpened();
+                  setShowEmailPhoneModal(true);
+                }}
                 className={`inline-flex items-center gap-1 sm:gap-2 font-medium text-xs sm:text-sm transition-colors px-2 py-1.5 rounded-lg ${
                   isContactLinked
                     ? "text-gray-500 hover:text-gray-600 hover:bg-gray-50"
@@ -564,7 +595,10 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                 </h2>
               </div>
               <button
-                onClick={() => setShowHistoryModal(true)}
+                onClick={() => {
+                  trackUniqueViewedTransactionHistory();
+                  setShowHistoryModal(true);
+                }}
                 className="text-white/90 hover:text-white bg-white/10 hover:bg-white/20 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm inline-flex items-center gap-1 sm:gap-2 transition-all"
               >
                 <History className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -641,6 +675,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                     onClick={() => {
                       window.open(generateWhatsAppLink(), "_blank");
                       trackShare("whatsapp");
+                      trackUniqueAccountShare();
                       setShowShareBanner(true);
                       setUnclaimedShares((prev) => prev + 1);
                     }}
@@ -699,7 +734,10 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                 </h2>
               </div>
               <button
-                onClick={() => setShowHistoryModal(true)}
+                onClick={() => {
+                  trackUniqueViewedTransactionHistory();
+                  setShowHistoryModal(true);
+                }}
                 className="text-blue-600 hover:text-blue-700 text-xs sm:text-sm font-medium px-2 py-1 rounded-lg hover:bg-blue-50 transition-all"
               >
                 View All

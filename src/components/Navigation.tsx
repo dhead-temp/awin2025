@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Home, HelpCircle, User, Trophy, BookOpen, Trash2 } from 'lucide-react';
+import { trackUniqueHamburgerExpanded } from '../utils/analytics';
 
 export type Page = 'home' | 'quiz' | 'win' | 'win1' | 'account' | 'how-it-works';
 
@@ -83,7 +84,13 @@ export default function Navigation({}: NavigationProps) {
 
             {/* Hamburger Menu Button */}
             <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onClick={() => {
+                setIsMenuOpen(!isMenuOpen);
+                // Track unique hamburger expanded when menu is opened
+                if (!isMenuOpen) {
+                  trackUniqueHamburgerExpanded();
+                }
+              }}
               className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
             >
               {isMenuOpen ? (

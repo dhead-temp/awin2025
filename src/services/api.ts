@@ -71,7 +71,12 @@ class ApiService {
           // Ensure numeric fields are sent as numbers, not strings
           if (key === 'shares' || key === 'clicks' || key === 'balance') {
             formData.append(key, String(Number(value)));
-          } else {
+          } 
+          // Handle boolean fields for database compatibility
+          else if (key === 'is_terabox_done' || key === 'is_quiz_reward_claimed' || key === 'quiz_withdraw') {
+            formData.append(key, value ? '1' : '0');
+          } 
+          else {
             formData.append(key, String(value));
           }
         });

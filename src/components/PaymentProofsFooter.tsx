@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronUp, ChevronDown } from 'lucide-react';
+import { trackExpandedPaymentProofs } from '../utils/analytics';
 
 const PaymentProofsFooter: React.FC = () => {
   const [isFooterExpanded, setIsFooterExpanded] = useState(() => {
@@ -329,7 +330,10 @@ const PaymentProofsFooter: React.FC = () => {
             <div className="relative">
               {/* Expand Button - Positioned above and overlapping */}
               <button
-                onClick={() => setIsFooterExpanded(true)}
+                onClick={() => {
+                  trackExpandedPaymentProofs();
+                  setIsFooterExpanded(true);
+                }}
                 className="absolute -top-14 right-0 bg-white/90 backdrop-blur-sm hover:bg-white text-gray-700 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 border border-gray-300/50 z-10 flex items-center space-x-2 shadow-lg hover:shadow-xl"
               >
                 <span>Expand</span>
@@ -337,7 +341,10 @@ const PaymentProofsFooter: React.FC = () => {
               </button>
               
               {/* Main Container */}
-              <div className="cursor-pointer" onClick={() => setIsFooterExpanded(true)}>
+              <div className="cursor-pointer" onClick={() => {
+                trackExpandedPaymentProofs();
+                setIsFooterExpanded(true);
+              }}>
                 <div className="flex items-center space-x-4">
                   {/* Circular Icon Placeholder */}
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500 ease-in-out transform ${isAnimating ? 'scale-75 opacity-50' : 'scale-100 opacity-100'} shadow-lg`}>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Trophy, Share2, Crown, X, MessageCircle } from 'lucide-react';
 import type { Page } from '../App';
 import { DOMAIN, apiService } from '../services/api';
+import { trackWinPageView, trackWinPageWithdrawClick, trackUniqueInviteClickOnWinPage, trackUniqueProceedFromWinPage } from '../utils/analytics';
 
 interface WinPageProps {
   onNavigate: (page: Page) => void;
@@ -26,6 +27,9 @@ const WinPage: React.FC<WinPageProps> = ({ onNavigate, currentUser, onCreateUser
   const baseQuizWinnings = 453;
 
   const handleWithdrawClick = async () => {
+    // Track withdraw button click
+    trackWinPageWithdrawClick();
+    
     setIsCreatingUser(true);
     
     // Create user if not exists
@@ -42,6 +46,9 @@ const WinPage: React.FC<WinPageProps> = ({ onNavigate, currentUser, onCreateUser
   };
 
   const handleInviteFriend = () => {
+    // Track unique invite click
+    trackUniqueInviteClickOnWinPage();
+    
     setTimeout(() => {
       const newCount = invitedFriends + 1;
       setInvitedFriends(newCount);
@@ -49,6 +56,9 @@ const WinPage: React.FC<WinPageProps> = ({ onNavigate, currentUser, onCreateUser
   };
 
   const handleProceedToAccount = async () => {
+    // Track unique proceed from win page
+    trackUniqueProceedFromWinPage();
+    
     if (invitedFriends >= 3 && currentUser.id) {
       // Update quiz reward claimed status and shares count
       try {
@@ -78,6 +88,9 @@ const WinPage: React.FC<WinPageProps> = ({ onNavigate, currentUser, onCreateUser
   };
 
   useEffect(() => {
+    // Track win page view
+    trackWinPageView();
+    
     // Trigger celebration briefly when page loads
     const t1 = setTimeout(() => setShowCelebration(true), 200);
     const t2 = setTimeout(() => setShowCelebration(false), 2500);

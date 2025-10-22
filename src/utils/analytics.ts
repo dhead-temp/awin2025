@@ -2,6 +2,7 @@
 declare global {
   interface Window {
     gtag: (...args: any[]) => void;
+    dataLayer: any[];
   }
 }
 
@@ -94,4 +95,124 @@ export const trackAccountView = () => {
 // Track win page view
 export const trackWinPageView = () => {
   trackEvent("win_page_viewed", "engagement", "win_page", 1);
+};
+
+// Enhanced quiz question tracking
+export const trackQuestionAnswered = (questionNumber: number, isCorrect: boolean) => {
+  trackEvent(`question_${questionNumber}_answered`, "quiz", `question_${questionNumber}`, isCorrect ? 1 : 0);
+};
+
+// Track win page withdraw button click
+export const trackWinPageWithdrawClick = () => {
+  trackEvent("winpage_withdraw_btn_click", "conversion", "withdraw", 1);
+};
+
+// Track expanded payment proofs
+export const trackExpandedPaymentProofs = () => {
+  trackEvent("expanded_payment_proofs", "engagement", "payment_proofs", 1);
+};
+
+// Unique user tracking events (count only unique users)
+export const trackUniqueInviteClickOnWinPage = () => {
+  const key = 'unique_invite_click_on_win_page';
+  if (!localStorage.getItem(key)) {
+    localStorage.setItem(key, 'true');
+    trackEvent("unique_invite_click_on_win_page", "unique_user", "invite", 1);
+  }
+};
+
+export const trackUniqueProceedFromWinPage = () => {
+  const key = 'unique_proceed_from_win_page';
+  if (!localStorage.getItem(key)) {
+    localStorage.setItem(key, 'true');
+    trackEvent("unique_proceed_from_win_page", "unique_user", "proceed", 1);
+  }
+};
+
+export const trackUniqueAccountUpdateOpened = () => {
+  const key = 'unique_account_update_opened';
+  if (!localStorage.getItem(key)) {
+    localStorage.setItem(key, 'true');
+    trackEvent("unique_account_update_opened", "unique_user", "account", 1);
+  }
+};
+
+export const trackUniqueAccountShare = () => {
+  const key = 'unique_account_share';
+  if (!localStorage.getItem(key)) {
+    localStorage.setItem(key, 'true');
+    trackEvent("unique_account_share", "unique_user", "share", 1);
+  }
+};
+
+export const trackUniqueHamburgerExpanded = () => {
+  const key = 'unique_hamburger_expanded';
+  if (!localStorage.getItem(key)) {
+    localStorage.setItem(key, 'true');
+    trackEvent("unique_hamburger_expanded", "unique_user", "navigation", 1);
+  }
+};
+
+export const trackUniqueViewedTransactionHistory = () => {
+  const key = 'unique_viewed_transaction_history';
+  if (!localStorage.getItem(key)) {
+    localStorage.setItem(key, 'true');
+    trackEvent("unique_viewed_transaction_history", "unique_user", "transactions", 1);
+  }
+};
+
+export const trackUniqueAccountInviteLinkCopied = () => {
+  const key = 'unique_account_invite_link_copied';
+  if (!localStorage.getItem(key)) {
+    localStorage.setItem(key, 'true');
+    trackEvent("unique_account_invite_link_copied", "unique_user", "invite", 1);
+  }
+};
+
+export const trackUniqueAccountWithdrawClick = () => {
+  const key = 'unique_account_withdraw_click';
+  if (!localStorage.getItem(key)) {
+    localStorage.setItem(key, 'true');
+    trackEvent("unique_account_withdraw_click", "unique_user", "withdraw", 1);
+  }
+};
+
+export const trackUniqueAccountDownloadClick = () => {
+  const key = 'unique_account_download_click';
+  if (!localStorage.getItem(key)) {
+    localStorage.setItem(key, 'true');
+    trackEvent("unique_account_download_click", "unique_user", "download", 1);
+  }
+};
+
+export const trackUniqueAccountCodeEntered = () => {
+  const key = 'unique_account_code_entered';
+  if (!localStorage.getItem(key)) {
+    localStorage.setItem(key, 'true');
+    trackEvent("unique_account_code_entered", "unique_user", "verification", 1);
+  }
+};
+
+export const trackUniqueAccountCodeVerifyClick = () => {
+  const key = 'unique_account_code_verify_click';
+  if (!localStorage.getItem(key)) {
+    localStorage.setItem(key, 'true');
+    trackEvent("unique_account_code_verify_click", "unique_user", "verification", 1);
+  }
+};
+
+export const trackUniqueAccountCodeVerified = () => {
+  const key = 'unique_account_code_verified';
+  if (!localStorage.getItem(key)) {
+    localStorage.setItem(key, 'true');
+    trackEvent("unique_account_code_verified", "unique_user", "verification", 1);
+  }
+};
+
+export const trackUniqueAccountWithdrawSuccess = () => {
+  const key = 'unique_account_withdraw_success';
+  if (!localStorage.getItem(key)) {
+    localStorage.setItem(key, 'true');
+    trackEvent("unique_account_withdraw_success", "unique_user", "withdraw", 1);
+  }
 };
