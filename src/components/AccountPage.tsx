@@ -1360,11 +1360,19 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
             Refer friends and earn ₹300 each
           </p>
           
-          <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+          <div className="bg-blue-50 rounded-lg p-3 border border-blue-200 mb-4">
             <p className="text-blue-800 text-xs">
               🎯 Unlimited referrals • 💸 Instant payouts • 🏆 No limits
             </p>
           </div>
+          
+          <button
+            onClick={() => onNavigate("account1")}
+            className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-6 py-3 rounded-xl font-semibold transition-all flex items-center space-x-2 shadow-lg hover:shadow-xl mx-auto"
+          >
+            <Trophy className="h-5 w-5" />
+            <span>View Tasks & Rewards</span>
+          </button>
         </div>
       </div>
 

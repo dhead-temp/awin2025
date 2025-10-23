@@ -58,3 +58,32 @@ self.addEventListener('notificationclick', (event) => {
     );
   }
 });
+
+// PWA Installation Detection
+self.addEventListener('install', (event) => {
+  console.log('PWA Service Worker installing...');
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+  console.log('PWA Service Worker activating...');
+  event.waitUntil(self.clients.claim());
+});
+
+// Handle PWA installation
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'PWA_INSTALLED') {
+    console.log('PWA installation detected');
+    // Notify the main thread about PWA installation
+    event.waitUntil(
+      self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+          client.postMessage({
+            type: 'PWA_INSTALLED',
+            timestamp: new Date().toISOString()
+          });
+        });
+      })
+    );
+  }
+});

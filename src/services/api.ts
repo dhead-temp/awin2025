@@ -28,6 +28,14 @@ interface User {
   created_on: string;
   balance: number;
   fcm_token?: string;
+  last_share_to_group?: string;
+  last_share_to_story?: string;
+  last_share_to_ig?: string;
+  last_share_to_fb?: string;
+  last_adstera_time?: string;
+  last_monetag_time?: string;
+  installed_pwa?: number;
+  is_comet_browser?: number;
 }
 
 interface Transaction {

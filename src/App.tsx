@@ -10,6 +10,7 @@ import HomePage from "./components/HomePage";
 import QuizPage from "./components/QuizPage";
 import WinPage1 from "./components/WinPage1";
 import AccountPage from "./components/AccountPage";
+import AccountPage1 from "./components/AccountPage1";
 import Navigation from "./components/Navigation";
 import PromoStrip from "./components/PromoStrip";
 import Footer from "./components/Footer";
@@ -25,6 +26,7 @@ export type Page =
   | "win"
   | "win1"
   | "account"
+  | "account1"
   | "how-it-works";
 
 // Component to handle navigation logic
@@ -166,6 +168,7 @@ function AppContent() {
       win: "/win1", // Map win to win1 route
       win1: "/win1",
       account: "/account",
+      account1: "/account1",
       "how-it-works": "/how-it-works",
     };
     navigate(pathMap[page]);
@@ -289,6 +292,12 @@ function AppContent() {
             path="/account"
             element={
               <AccountPage userStats={userStats} onNavigate={navigateTo} />
+            }
+          />
+          <Route
+            path="/account1"
+            element={
+              <AccountPage1 userStats={userStats} onNavigate={navigateTo} />
             }
           />
           <Route path="/how-it-works" element={<HowItWorksPage />} />

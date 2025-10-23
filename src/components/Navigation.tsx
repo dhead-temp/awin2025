@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Home, HelpCircle, User, Trophy, BookOpen, Trash2, LogOut } from 'lucide-react';
 import { trackUniqueHamburgerExpanded } from '../utils/analytics';
 
-export type Page = 'home' | 'quiz' | 'win' | 'win1' | 'account' | 'how-it-works';
+export type Page = 'home' | 'quiz' | 'win' | 'win1' | 'account' | 'account1' | 'how-it-works';
 
 interface NavigationProps {}
 
@@ -16,6 +16,7 @@ export default function Navigation({}: NavigationProps) {
     { path: '/quiz', label: 'Play Quiz', icon: HelpCircle },
     { path: '/win1', label: 'Win Page', icon: Trophy },
     { path: '/account', label: 'My Account', icon: User },
+    { path: '/account1', label: 'Tasks & Rewards', icon: Trophy },
     { path: '/how-it-works', label: 'How It Works', icon: BookOpen },
   ];
 

@@ -1,0 +1,25 @@
+i made a duplicate copy of account page named accountpage1, make it working.
+and make a modal comes from bottom like inviting user on win screen. which guide about the task which he clicked. i have added new tasks to earn more. earning from each tasks is mentions in triggers in extra folder db structure file. these tasks are seperated from primary task which already exist with categrisations. like Daily Doubles, One Time Tasks,  When sharing to group,story,ig,fb, ask for proof to upload, no need to upload anywhere, just save the upload time and  wrong or fake screenshots can make your account got blocked and all earning with vanished and after upload success show Reward Added and can be reviewed manually by team. after just submit then also set the timestamp of it in db. also need same kind of proof in commet and installed pwa auto detect and set to 1 if done. 
+also make pwa complient tropphy icon as app icon. 
+in adstrea and monetag timing gap should be atleast 8 hour for next click and in modal show have you do signup on the website which got opened? ask question yes, no then if yes then upload screenshot. same warning type. in comet browser ask extra question, have you installed it? yes, i dont have pc, if not pc please try on friends pc copy link. and send to friend on whatsapp. if yes then have you signup there? if no please signup with acccount in comet, if yes have you started 2 chats atleast with comet assistant? if no then do it if yes then ask to clock photo and upload. same warning, and after upload give reward by setting value to 1 in backend. 
+
+make it do optimized way in coding. 
+--
+tasks like 
+      
+            "last_share_to_group": null,
+            "last_share_to_story": null,
+            "last_share_to_ig": null,
+            "last_share_to_fb": null,
+            "last_adstera_time": null,
+            "last_monetag_time": null,
+
+            "installed_pwa": "0",
+            "is_comet_browser": "0",
+         ---
+         in myaccount1 tasks options
+in comet task, its not giving links to open or copy the comet referal link. 
+when doing any task which need upload proof simply show button I Have Done this Task button in the modal,  if clicked show upload, and upload warning and submit button etc. 
+also in pwa only check installation, show install button first then show check, if success then got credited. why button to cancel and submit button in it. 
+
+also the modal should come/gone with animation coming from bottom or going to bottom. 
