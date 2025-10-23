@@ -214,6 +214,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
         icon: Share2,
         color: "green",
         requiresProof: true,
+        cooldown: 8, // 8 hours
         steps: [
           "Share your referral link to a WhatsApp group"
         ]
@@ -226,6 +227,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
         icon: Camera,
         color: "purple",
         requiresProof: true,
+        cooldown: 8, // 8 hours
         steps: [
           "Share your referral link to your WhatsApp status"
         ]
@@ -238,6 +240,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
         icon: Camera,
         color: "pink",
         requiresProof: true,
+        cooldown: 8, // 8 hours
         steps: [
           "Share your referral link to your Instagram story"
         ]
@@ -250,6 +253,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
         icon: Share2,
         color: "blue",
         requiresProof: true,
+        cooldown: 8, // 8 hours
         steps: [
           "Share your referral link to Facebook"
         ]
@@ -785,6 +789,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
     } as Record<string, boolean>;
   }, [currentUser]);
 
+
   const isTaskCompleted = useCallback((taskId: string) => {
     return taskCompletionMap[taskId] || false;
   }, [taskCompletionMap]);
@@ -804,7 +809,21 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
     
     if (!task?.cooldown) return false;
     
-    const lastTime = currentUser[`last_${taskId}_time` as keyof typeof currentUser] as string;
+    // Use the correct database column names for sharing tasks
+    let lastTime: string | null = null;
+    if (taskId === 'share_to_group') {
+      lastTime = currentUser.last_share_to_group || null;
+    } else if (taskId === 'share_to_story') {
+      lastTime = currentUser.last_share_to_story || null;
+    } else if (taskId === 'share_to_ig') {
+      lastTime = currentUser.last_share_to_ig || null;
+    } else if (taskId === 'share_to_fb') {
+      lastTime = currentUser.last_share_to_fb || null;
+    } else {
+      // For other tasks, use the generic pattern
+      lastTime = currentUser[`last_${taskId}_time` as keyof typeof currentUser] as string || null;
+    }
+    
     if (!lastTime) return false;
     
     const lastTimeDate = new Date(lastTime);
@@ -829,7 +848,21 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
     
     if (!task?.cooldown) return 0;
     
-    const lastTime = currentUser[`last_${taskId}_time` as keyof typeof currentUser] as string;
+    // Use the correct database column names for sharing tasks
+    let lastTime: string | null = null;
+    if (taskId === 'share_to_group') {
+      lastTime = currentUser.last_share_to_group || null;
+    } else if (taskId === 'share_to_story') {
+      lastTime = currentUser.last_share_to_story || null;
+    } else if (taskId === 'share_to_ig') {
+      lastTime = currentUser.last_share_to_ig || null;
+    } else if (taskId === 'share_to_fb') {
+      lastTime = currentUser.last_share_to_fb || null;
+    } else {
+      // For other tasks, use the generic pattern
+      lastTime = currentUser[`last_${taskId}_time` as keyof typeof currentUser] as string || null;
+    }
+    
     if (!lastTime) return 0;
     
     const lastTimeDate = new Date(lastTime);
@@ -838,6 +871,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
     
     return Math.max(0, task.cooldown - hoursDiff);
   };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 pb-0">
@@ -1167,6 +1201,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                   const cooldownTimeLeft = getCooldownTimeLeft(task.id);
                   const IconComponent = task.icon;
                   
+                  
                   return (
                     <div
                       key={task.id}
@@ -1209,7 +1244,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                           <div className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg border border-gray-200">
                             <div className="flex items-center gap-2 text-gray-500">
                               <CheckCircle className="w-4 h-4" />
-                              <span className="text-sm">Done - Got ₹{task.reward}</span>
+                              <span className="text-sm"></span>
                             </div>
                             {task.cooldown && (
                               <div className="text-xs text-white bg-blue-600 px-3 py-1.5 rounded-full font-medium shadow-sm">
