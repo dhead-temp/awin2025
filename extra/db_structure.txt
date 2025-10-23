@@ -1,13 +1,4 @@
 
---
--- Database: `u240376517_awin`
---
-
--- --------------------------------------------------------
-
---
--- Table structure for table `transactions`
---
 
 CREATE TABLE `transactions` (
   `id` int(11) NOT NULL,
@@ -15,8 +6,26 @@ CREATE TABLE `transactions` (
   `amount` decimal(10,2) NOT NULL,
   `type` enum('credit','debit') NOT NULL,
   `note` text DEFAULT NULL,
-  `created_on` timestamp NULL DEFAULT current_timestamp()
+  `created_on` timestamp NULL DEFAULT current_timestamp(),
+  `notified` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0 = not sent, 1 = sent, 2 = failed'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `transactions_with_token`
+-- (See below for the actual view)
+--
+CREATE TABLE `transactions_with_token` (
+`id` int(11)
+,`user_id` int(11)
+,`amount` decimal(10,2)
+,`type` enum('credit','debit')
+,`note` text
+,`created_on` timestamp
+,`notified` tinyint(1)
+,`fcm_token` varchar(2550)
+);
 
 -- --------------------------------------------------------
 
@@ -26,37 +35,95 @@ CREATE TABLE `transactions` (
 
 CREATE TABLE `users` (
   `id` int(11) NOT NULL,
-  `token` varchar(100) NOT NULL,
   `name` varchar(100) DEFAULT NULL,
   `email` varchar(150) DEFAULT NULL,
   `phone` varchar(20) DEFAULT NULL,
+  `upi` varchar(20) DEFAULT NULL,
   `shares` int(11) DEFAULT 0,
   `clicks` int(11) DEFAULT 0,
+  `invited_to` int(255) DEFAULT 0,
   `is_terabox_done` tinyint(1) DEFAULT 0,
   `is_quiz_reward_claimed` tinyint(1) DEFAULT 0,
   `invited_by` varchar(100) DEFAULT NULL,
-  `created_on` timestamp NULL DEFAULT current_timestamp()
-  'ip'
+  `created_on` timestamp NULL DEFAULT current_timestamp(),
+  `ip` varchar(200) DEFAULT NULL,
+  `token` varchar(100) NOT NULL,
+  `fcm_token` varchar(2550) DEFAULT NULL,
+  `last_notification_1` timestamp NULL DEFAULT NULL,
+  `last_notification_2` timestamp NULL DEFAULT NULL,
+  `last_share_to_group` datetime DEFAULT NULL,
+  `last_share_to_ig` datetime DEFAULT NULL,
+  `last_share_to_fb` datetime DEFAULT NULL,
+  `last_adstera_time` datetime DEFAULT NULL,
+  `last_monetag_time` datetime DEFAULT NULL,
+  `last_reward_ad` datetime DEFAULT NULL,
+  `installed_pwa` tinyint(1) DEFAULT 0,
+  `is_comet_browser` tinyint(1) DEFAULT 0,
+  `is_account_blocked` tinyint(1) DEFAULT 0,
+  `last_share_to_story` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `users`
---
-
-INSERT INTO `users` (`id`, `token`, `name`, `email`, `phone`, `shares`, `clicks`, `is_terabox_done`, `is_quiz_reward_claimed`, `invited_by`, `created_on`) VALUES
-(1, '', NULL, NULL, NULL, 0, 0, 0, 0, NULL, '2025-10-02 12:31:37');
 
 --
 -- Triggers `users`
 --
 DELIMITER $$
+CREATE TRIGGER `after_invited_to_update` AFTER UPDATE ON `users` FOR EACH ROW BEGIN
+    DECLARE diff INT;
+    DECLARE userToken VARCHAR(255);
+
+    -- Calculate difference
+    SET diff = NEW.invited_to - OLD.invited_to;
+
+    -- Get user's fcm_token
+    SELECT fcm_token INTO userToken FROM users WHERE id = NEW.id;
+
+    -- If invited_to increased
+    IF diff > 0 THEN
+        INSERT INTO transactions (user_id, amount, type, note, created_on, notified)
+        VALUES (
+            NEW.id,
+            diff * 300,
+            'credit',
+            CONCAT('Referral Signed Up (', diff, ' new invites)'),
+            NOW(),
+            IF(userToken IS NULL OR userToken = '', 2, 0)
+        );
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
 CREATE TRIGGER `after_user_clicks_update` AFTER UPDATE ON `users` FOR EACH ROW BEGIN
     DECLARE diff INT;
+    DECLARE userToken VARCHAR(255);
+
+    -- Calculate difference
     SET diff = NEW.clicks - OLD.clicks;
 
+    -- Get user's fcm_token
+    SELECT fcm_token INTO userToken FROM users WHERE id = NEW.id;
+
+    -- If clicks increased
     IF diff > 0 THEN
-        INSERT INTO transactions (user_id, amount, type, note, created_on)
-        VALUES (NEW.id, diff * 10, 'credit', CONCAT('Auto Click Reward (', diff, ' clicks)'), NOW());
+        INSERT INTO transactions (user_id, amount, type, note, created_on, notified)
+        VALUES (
+            NEW.id,
+            diff * 10,
+            'credit',
+            CONCAT('Link Click (', diff, ' clicks)'),
+            NOW(),
+            IF(userToken IS NULL OR userToken = '', 2, 0)
+        );
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `after_user_quiz_reward` AFTER UPDATE ON `users` FOR EACH ROW BEGIN
+    -- If quiz reward claimed turned true (from 0 to 1)
+    IF NEW.is_quiz_reward_claimed = 1 AND OLD.is_quiz_reward_claimed = 0 THEN
+        INSERT INTO transactions (user_id, amount, type, note, created_on,notified)
+        VALUES (NEW.id, 453, 'credit', 'Quiz Reward Claimed', NOW(),2);
     END IF;
 END
 $$
@@ -64,15 +131,117 @@ DELIMITER ;
 DELIMITER $$
 CREATE TRIGGER `after_user_shares_update` AFTER UPDATE ON `users` FOR EACH ROW BEGIN
     DECLARE diff INT;
+    DECLARE userToken VARCHAR(255);
+
+    -- Calculate difference
     SET diff = NEW.shares - OLD.shares;
 
+    -- Get user's fcm_token
+    SELECT fcm_token INTO userToken FROM users WHERE id = NEW.id;
+
+    -- If shares increased
     IF diff > 0 THEN
-        INSERT INTO transactions (user_id, amount, type, note, created_on)
-        VALUES (NEW.id, diff * 2, 'credit', CONCAT('Auto Share Reward (', diff, ' shares)'), NOW());
+        INSERT INTO transactions (user_id, amount, type, note, created_on, notified)
+        VALUES (
+            NEW.id,
+            diff * 2,
+            'credit',
+            CONCAT('Link Share (', diff, ' shares)'),
+            NOW(),
+            IF(userToken IS NULL OR userToken = '', 2, 0)
+        );
     END IF;
 END
 $$
 DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `after_user_update` AFTER UPDATE ON `users` FOR EACH ROW BEGIN
+    -- last_share_to_group
+    IF (NEW.last_share_to_group IS NOT NULL AND 
+        (OLD.last_share_to_group IS NULL OR NEW.last_share_to_group <> OLD.last_share_to_group)) THEN
+        INSERT INTO transactions (user_id, amount, type, note, created_on, notified)
+        VALUES (NEW.id, 100, 'credit', 'Shared to Group', NOW(), 0);
+    END IF;
+
+    -- last_share_to_ig
+    IF (NEW.last_share_to_ig IS NOT NULL AND 
+        (OLD.last_share_to_ig IS NULL OR NEW.last_share_to_ig <> OLD.last_share_to_ig)) THEN
+        INSERT INTO transactions (user_id, amount, type, note, created_on, notified)
+        VALUES (NEW.id, 100, 'credit', 'Shared to Instagram', NOW(), 0);
+    END IF;
+
+    -- last_share_to_fb
+    IF (NEW.last_share_to_fb IS NOT NULL AND 
+        (OLD.last_share_to_fb IS NULL OR NEW.last_share_to_fb <> OLD.last_share_to_fb)) THEN
+        INSERT INTO transactions (user_id, amount, type, note, created_on, notified)
+        VALUES (NEW.id, 100, 'credit', 'Shared to Facebook', NOW(), 0);
+    END IF;
+
+    -- last_share_to_story
+    IF (NEW.last_share_to_story IS NOT NULL AND 
+        (OLD.last_share_to_story IS NULL OR NEW.last_share_to_story <> OLD.last_share_to_story)) THEN
+        INSERT INTO transactions (user_id, amount, type, note, created_on, notified)
+        VALUES (NEW.id, 100, 'credit', 'Shared to Story', NOW(), 0);
+    END IF;
+
+    -- last_adstera_time
+    IF (NEW.last_adstera_time IS NOT NULL AND 
+        (OLD.last_adstera_time IS NULL OR NEW.last_adstera_time <> OLD.last_adstera_time)) THEN
+        INSERT INTO transactions (user_id, amount, type, note, created_on, notified)
+        VALUES (NEW.id, 50, 'credit', 'Signup Task 1', NOW(), 0);
+    END IF;
+
+    -- last_monetag_time
+    IF (NEW.last_monetag_time IS NOT NULL AND 
+        (OLD.last_monetag_time IS NULL OR NEW.last_monetag_time <> OLD.last_monetag_time)) THEN
+        INSERT INTO transactions (user_id, amount, type, note, created_on, notified)
+        VALUES (NEW.id, 50, 'credit', 'Signup Task 2', NOW(), 0);
+    END IF;
+
+    -- last_reward_ad
+    IF (NEW.last_reward_ad IS NOT NULL AND 
+        (OLD.last_reward_ad IS NULL OR NEW.last_reward_ad <> OLD.last_reward_ad)) THEN
+        INSERT INTO transactions (user_id, amount, type, note, created_on, notified)
+        VALUES (NEW.id, 20, 'credit', 'Reward Ad', NOW(), 0);
+    END IF;
+
+    -- installed_pwa
+    IF (NEW.installed_pwa = 1 AND OLD.installed_pwa <> 1) THEN
+        INSERT INTO transactions (user_id, amount, type, note, created_on, notified)
+        VALUES (NEW.id, 200, 'credit', 'Installed App', NOW(), 0);
+    END IF;
+
+    -- is_comet_browser
+    IF (NEW.is_comet_browser = 1 AND OLD.is_comet_browser <> 1) THEN
+        INSERT INTO transactions (user_id, amount, type, note, created_on, notified)
+        VALUES (NEW.id, 600, 'credit', 'Tried Comet Browser', NOW(), 0);
+    END IF;
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `user_overview`
+-- (See below for the actual view)
+--
+CREATE TABLE `user_overview` (
+`id` int(11)
+,`token` varchar(100)
+,`name` varchar(100)
+,`upi` varchar(20)
+,`email` varchar(150)
+,`phone` varchar(20)
+,`shares` int(11)
+,`clicks` int(11)
+,`is_terabox_done` tinyint(1)
+,`is_quiz_reward_claimed` tinyint(1)
+,`invited_by` varchar(100)
+,`created_on` timestamp
+,`balance` decimal(32,2)
+,`invited_user_count` bigint(21)
+);
 
 -- --------------------------------------------------------
 
@@ -82,16 +251,29 @@ DELIMITER ;
 --
 CREATE TABLE `user_view` (
 `id` int(11)
-,`token` varchar(100)
-,`name` varchar(100)
-,`email` varchar(150)
-,`phone` varchar(20)
 ,`shares` int(11)
 ,`clicks` int(11)
+,`invited_to` int(255)
 ,`is_terabox_done` tinyint(1)
 ,`is_quiz_reward_claimed` tinyint(1)
 ,`invited_by` varchar(100)
+,`NAME` varchar(100)
+,`upi` varchar(20)
+,`email` varchar(150)
+,`phone` varchar(20)
+,`token` varchar(100)
+,`fcm_token` varchar(2550)
 ,`created_on` timestamp
+,`last_share_to_group` datetime
+,`last_share_to_story` datetime
+,`last_share_to_ig` datetime
+,`last_share_to_fb` datetime
+,`last_adstera_time` datetime
+,`last_monetag_time` datetime
+,`last_reward_ad` datetime
+,`installed_pwa` tinyint(1)
+,`is_comet_browser` tinyint(1)
+,`is_account_blocked` tinyint(1)
 ,`balance` decimal(32,2)
 );
 
@@ -127,7 +309,25 @@ ALTER TABLE `transactions`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `transactions_with_token`
+--
+DROP TABLE IF EXISTS `transactions_with_token`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`u240376517_awin`@`127.0.0.1` SQL SECURITY DEFINER VIEW `transactions_with_token`  AS SELECT `t`.`id` AS `id`, `t`.`user_id` AS `user_id`, `t`.`amount` AS `amount`, `t`.`type` AS `type`, `t`.`note` AS `note`, `t`.`created_on` AS `created_on`, `t`.`notified` AS `notified`, `u`.`fcm_token` AS `fcm_token` FROM (`transactions` `t` left join `users` `u` on(`t`.`user_id` = `u`.`id`)) ORDER BY `t`.`id` DESC ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `user_overview`
+--
+DROP TABLE IF EXISTS `user_overview`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`u240376517_awin`@`127.0.0.1` SQL SECURITY DEFINER VIEW `user_overview`  AS SELECT `u`.`id` AS `id`, `u`.`token` AS `token`, `u`.`name` AS `name`, `u`.`upi` AS `upi`, `u`.`email` AS `email`, `u`.`phone` AS `phone`, `u`.`shares` AS `shares`, `u`.`clicks` AS `clicks`, `u`.`is_terabox_done` AS `is_terabox_done`, `u`.`is_quiz_reward_claimed` AS `is_quiz_reward_claimed`, `u`.`invited_by` AS `invited_by`, `u`.`created_on` AS `created_on`, ifnull(sum(case when `t`.`type` = 'credit' then `t`.`amount` when `t`.`type` = 'debit' then -`t`.`amount` else 0 end),0) AS `balance`, (select count(0) from `users` `subu` where `subu`.`invited_by` = `u`.`token` and `subu`.`is_quiz_reward_claimed` = 1) AS `invited_user_count` FROM (`users` `u` left join `transactions` `t` on(`u`.`id` = `t`.`user_id`)) GROUP BY `u`.`id` ;
 
 -- --------------------------------------------------------
 
@@ -136,7 +336,7 @@ ALTER TABLE `users`
 --
 DROP TABLE IF EXISTS `user_view`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`u240376517_awin`@`127.0.0.1` SQL SECURITY DEFINER VIEW `user_view`  AS SELECT `u`.`id` AS `id`, `u`.`token` AS `token`, `u`.`name` AS `name`, `u`.`email` AS `email`, `u`.`phone` AS `phone`, `u`.`shares` AS `shares`, `u`.`clicks` AS `clicks`, `u`.`is_terabox_done` AS `is_terabox_done`, `u`.`is_quiz_reward_claimed` AS `is_quiz_reward_claimed`, `u`.`invited_by` AS `invited_by`, `u`.`created_on` AS `created_on`, ifnull(sum(case when `t`.`type` = 'credit' then `t`.`amount` when `t`.`type` = 'debit' then -`t`.`amount` else 0 end),0) AS `balance` FROM (`users` `u` left join `transactions` `t` on(`u`.`id` = `t`.`user_id`)) GROUP BY `u`.`id` ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`u240376517_awin`@`127.0.0.1` SQL SECURITY DEFINER VIEW `user_view`  AS SELECT `u`.`id` AS `id`, `u`.`shares` AS `shares`, `u`.`clicks` AS `clicks`, `u`.`invited_to` AS `invited_to`, `u`.`is_terabox_done` AS `is_terabox_done`, `u`.`is_quiz_reward_claimed` AS `is_quiz_reward_claimed`, `u`.`invited_by` AS `invited_by`, `u`.`name` AS `NAME`, `u`.`upi` AS `upi`, `u`.`email` AS `email`, `u`.`phone` AS `phone`, `u`.`token` AS `token`, `u`.`fcm_token` AS `fcm_token`, `u`.`created_on` AS `created_on`, `u`.`last_share_to_group` AS `last_share_to_group`, `u`.`last_share_to_story` AS `last_share_to_story`, `u`.`last_share_to_ig` AS `last_share_to_ig`, `u`.`last_share_to_fb` AS `last_share_to_fb`, `u`.`last_adstera_time` AS `last_adstera_time`, `u`.`last_monetag_time` AS `last_monetag_time`, `u`.`last_reward_ad` AS `last_reward_ad`, `u`.`installed_pwa` AS `installed_pwa`, `u`.`is_comet_browser` AS `is_comet_browser`, `u`.`is_account_blocked` AS `is_account_blocked`, ifnull(sum(case when `t`.`type` = 'credit' then `t`.`amount` when `t`.`type` = 'debit' then -`t`.`amount` else 0 end),0) AS `balance` FROM (`users` `u` left join `transactions` `t` on(`u`.`id` = `t`.`user_id`)) GROUP BY `u`.`id` ;
 
 --
 -- Constraints for dumped tables

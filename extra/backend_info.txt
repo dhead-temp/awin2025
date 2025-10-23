@@ -34,36 +34,82 @@ function response($status, $message, $data = null) {
 $action = $_GET['action'] ?? '';
 
 switch($action) {
-
     // 1️⃣ CREATE USER
-    case "create_user":
-        $token = bin2hex(random_bytes(8));
-        $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-        $referred_by = $_GET['ref'] ?? null;
+ case "create_user":
+    // 1️⃣ Generate token and get IP/ref
+    $token = bin2hex(random_bytes(8));
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    $invited_by = isset($_GET['ref']) && $_GET['ref'] !== '' ? (int)$_GET['ref'] : null;
 
-        $sql = "INSERT INTO users (token, ip, referred_by) VALUES ('$token', '$ip', " . 
-               ($referred_by ? "'$referred_by'" : "NULL") . ")";
-        if ($conn->query($sql)) {
+    // 2️⃣ Start transaction
+    $conn->begin_transaction();
 
-            // reward referrer if exist
-            if ($referred_by) {
-                $ref_user = $conn->real_escape_string($referred_by);
-                $reward = 50;
-                $conn->query("INSERT INTO transactions (user_id, amount, type, note, created_on)
-                              SELECT id, $reward, 'credit', 'Referral Bonus', NOW()
-                              FROM users WHERE token = '$ref_user'");
+    try {
+        $inviter_exists = false;
+
+        // 3️⃣ Check if inviter exists
+        if ($invited_by) {
+            $chk = $conn->prepare("SELECT id FROM users WHERE id = ? LIMIT 1");
+            $chk->bind_param("i", $invited_by);
+            $chk->execute();
+            $chk->store_result();
+            if ($chk->num_rows === 1) {
+                $inviter_exists = true;
+            } else {
+                // inviter not found, treat as null
+                $invited_by = null;
             }
-
-            response("success", "User created", [
-                "user_id" => $conn->insert_id,
-                "token" => $token,
-                "ip" => $ip,
-                "referred_by" => $referred_by
-            ]);
-        } else {
-            response("error", "Query Failed: " . $conn->error);
+            $chk->close();
         }
-        break;
+
+        // 4️⃣ Insert new user
+        if ($inviter_exists) {
+            $stmt = $conn->prepare("INSERT INTO users (token, ip, invited_by) VALUES (?, ?, ?)");
+            $stmt->bind_param("ssi", $token, $ip, $invited_by);
+        } else {
+            $stmt = $conn->prepare("INSERT INTO users (token, ip, invited_by) VALUES (?, ?, NULL)");
+            $stmt->bind_param("ss", $token, $ip);
+        }
+
+        if (!$stmt->execute()) {
+            $conn->rollback();
+            response("error", "Insert failed: " . $stmt->error);
+            $stmt->close();
+            break;
+        }
+
+        $new_user_id = $stmt->insert_id;
+        $stmt->close();
+
+        // 5️⃣ Increment inviter count safely
+        if ($inviter_exists) {
+            $upd = $conn->prepare("UPDATE users SET invited_to = invited_to + 1 WHERE id = ?");
+            $upd->bind_param("i", $invited_by);
+            if (!$upd->execute()) {
+                $conn->rollback();
+                $upd->close();
+                response("error", "Failed to update inviter count: " . $conn->error);
+                break;
+            }
+            $upd->close();
+        }
+
+        // 6️⃣ Commit transaction
+        $conn->commit();
+
+        // 7️⃣ Send success response
+        response("success", "User created", [
+            "user_id"    => $new_user_id,
+            "token"      => $token,
+            "ip"         => $ip,
+            "invited_by" => $inviter_exists ? (string)$invited_by : null
+        ]);
+    } catch (Exception $e) {
+        $conn->rollback();
+        response("error", "Exception: " . $e->getMessage());
+    }
+    break;
+
 
     // 2️⃣ UPDATE USER
     case "update_user":
