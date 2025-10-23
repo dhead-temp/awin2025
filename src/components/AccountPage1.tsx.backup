@@ -24,6 +24,7 @@ import {
   Link,
   Play,
   Camera,
+  Clock,
   Globe,
   Smartphone,
   ExternalLink,
@@ -189,7 +190,6 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
     "all" | "credit" | "debit" | "completed" | "pending" | "failed"
   >("all");
 
-
   // Task definitions with earnings from database triggers
   interface Task {
     id: string;
@@ -288,7 +288,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
     "Signup Tasks": [
       {
         id: "adstera_signup",
-        title: "Signup Task 1",
+        title: `${EXTERNAL_SERVICES.adstera.name} Signup`,
         description: `Sign up on ${EXTERNAL_SERVICES.adstera.name} website`,
         reward: 50,
         icon: ExternalLink,
@@ -299,7 +299,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
       },
       {
         id: "monetag_signup",
-        title: "Signup Task 2",
+        title: `${EXTERNAL_SERVICES.monetag.name} Signup`,
         description: `Sign up on ${EXTERNAL_SERVICES.monetag.name} website`,
         reward: 50,
         icon: ExternalLink,
@@ -789,6 +789,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
     } as Record<string, boolean>;
   }, [currentUser]);
 
+
   const isTaskCompleted = useCallback((taskId: string) => {
     return taskCompletionMap[taskId] || false;
   }, [taskCompletionMap]);
@@ -808,20 +809,21 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
     
     if (!task?.cooldown) return false;
     
-    // Map task IDs to their corresponding database field names
-    const fieldMap: Record<string, string> = {
-      "share_to_group": "last_share_to_group",
-      "share_to_story": "last_share_to_story", 
-      "share_to_ig": "last_share_to_ig",
-      "share_to_fb": "last_share_to_fb",
-      "adstera_signup": "last_adstera_time",
-      "monetag_signup": "last_monetag_time"
-    };
+    // Use the correct database column names for sharing tasks
+    let lastTime: string | null = null;
+    if (taskId === 'share_to_group') {
+      lastTime = currentUser.last_share_to_group || null;
+    } else if (taskId === 'share_to_story') {
+      lastTime = currentUser.last_share_to_story || null;
+    } else if (taskId === 'share_to_ig') {
+      lastTime = currentUser.last_share_to_ig || null;
+    } else if (taskId === 'share_to_fb') {
+      lastTime = currentUser.last_share_to_fb || null;
+    } else {
+      // For other tasks, use the generic pattern
+      lastTime = currentUser[`last_${taskId}_time` as keyof typeof currentUser] as string || null;
+    }
     
-    const fieldName = fieldMap[taskId];
-    if (!fieldName) return false;
-    
-    const lastTime = currentUser[fieldName as keyof typeof currentUser] as string;
     if (!lastTime) return false;
     
     const lastTimeDate = new Date(lastTime);
@@ -846,20 +848,21 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
     
     if (!task?.cooldown) return 0;
     
-    // Map task IDs to their corresponding database field names
-    const fieldMap: Record<string, string> = {
-      "share_to_group": "last_share_to_group",
-      "share_to_story": "last_share_to_story", 
-      "share_to_ig": "last_share_to_ig",
-      "share_to_fb": "last_share_to_fb",
-      "adstera_signup": "last_adstera_time",
-      "monetag_signup": "last_monetag_time"
-    };
+    // Use the correct database column names for sharing tasks
+    let lastTime: string | null = null;
+    if (taskId === 'share_to_group') {
+      lastTime = currentUser.last_share_to_group || null;
+    } else if (taskId === 'share_to_story') {
+      lastTime = currentUser.last_share_to_story || null;
+    } else if (taskId === 'share_to_ig') {
+      lastTime = currentUser.last_share_to_ig || null;
+    } else if (taskId === 'share_to_fb') {
+      lastTime = currentUser.last_share_to_fb || null;
+    } else {
+      // For other tasks, use the generic pattern
+      lastTime = currentUser[`last_${taskId}_time` as keyof typeof currentUser] as string || null;
+    }
     
-    const fieldName = fieldMap[taskId];
-    if (!fieldName) return 0;
-    
-    const lastTime = currentUser[fieldName as keyof typeof currentUser] as string;
     if (!lastTime) return 0;
     
     const lastTimeDate = new Date(lastTime);
@@ -869,73 +872,6 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
     return Math.max(0, task.cooldown - hoursDiff);
   };
 
-  // Get all tasks from all categories (excluding sharing tasks)
-  const getAllTasks = useMemo(() => {
-    const allTasks: Task[] = [];
-    Object.values(taskCategories).forEach(category => {
-      allTasks.push(...category);
-    });
-    // Exclude sharing tasks from main tasks list
-    return allTasks.filter(task => 
-      !["share_to_group", "share_to_story", "share_to_ig", "share_to_fb"].includes(task.id)
-    );
-  }, []);
-
-  // Get main tasks (show completed signup tasks in faded style, hide completed Comet Browser and PWA tasks)
-  const getPendingTasks = useMemo(() => {
-    return getAllTasks
-      .filter(task => {
-        // Hide completed Comet Browser and PWA tasks completely
-        if (isTaskCompleted(task.id) && ["comet_browser", "pwa_install"].includes(task.id)) {
-          return false;
-        }
-        // Show all other tasks (pending and completed signup tasks)
-        return true;
-      })
-      .sort((a, b) => {
-        // Sort by completion status first (pending first), then by reward
-        const aCompleted = isTaskCompleted(a.id);
-        const bCompleted = isTaskCompleted(b.id);
-        if (aCompleted !== bCompleted) {
-          return aCompleted ? 1 : -1;
-        }
-        return b.reward - a.reward;
-      });
-  }, [getAllTasks, isTaskCompleted]);
-
-  // Get all tasks (including sharing tasks) for sharing section
-  const getAllTasksIncludingSharing = useMemo(() => {
-    const allTasks: Task[] = [];
-    Object.values(taskCategories).forEach(category => {
-      allTasks.push(...category);
-    });
-    return allTasks;
-  }, []);
-
-  // Get sharing tasks (both pending and completed, but completed ones will be faded)
-  const getPendingSharingTasks = useMemo(() => {
-    return getAllTasksIncludingSharing
-      .filter(task => ["share_to_group", "share_to_story", "share_to_ig", "share_to_fb"].includes(task.id))
-      .sort((a, b) => {
-        // Sort by completion status first (pending first), then by reward
-        const aCompleted = isTaskCompleted(a.id);
-        const bCompleted = isTaskCompleted(b.id);
-        if (aCompleted !== bCompleted) {
-          return aCompleted ? 1 : -1;
-        }
-        return b.reward - a.reward;
-      });
-  }, [getAllTasksIncludingSharing, isTaskCompleted]);
-
-  // Get completed tasks (excluding sharing tasks and tasks that should be hidden when completed)
-  const getCompletedTasks = useMemo(() => {
-    return getAllTasks
-      .filter(task => {
-        // Only show completed tasks that are not sharing tasks and not the ones that should be hidden
-        return isTaskCompleted(task.id) && !["comet_browser", "pwa_install"].includes(task.id);
-      })
-      .sort((a, b) => b.reward - a.reward);
-  }, [getAllTasks, isTaskCompleted]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 pb-0">
@@ -1241,161 +1177,103 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
             />
           </div>
 
-          {/* Earning Tasks */}
-          <div className=" mb-4">
+          {/* Task Categories */}
+          {Object.entries(taskCategories).map(([categoryName, tasks]) => {
+            const completedCount = tasks.filter(task => isTaskCompleted(task.id)).length;
             
-            {/* Task List */}
-            <div className="space-y-2">
-              {getPendingTasks.map((task) => {
-                const isCompleted = isTaskCompleted(task.id);
-                const isOnCooldown = isTaskOnCooldown(task.id);
-                const cooldownTimeLeft = getCooldownTimeLeft(task.id);
-                const IconComponent = task.icon;
-                
-                return (
-                  <div
-                    key={task.id}
-                    onClick={() => !isCompleted && !isOnCooldown && openTaskModal(task.id)}
-                    className={`flex items-center gap-3 p-3 rounded-lg border transition-all ${
-                      isCompleted
-                        ? "bg-gray-50 border-gray-200 cursor-default opacity-60"
-                        : isOnCooldown
-                        ? "bg-yellow-50 border-yellow-200 cursor-default"
-                        : task.id === "comet_browser"
-                        ? "bg-gradient-to-r from-orange-50 to-red-50 border-orange-300 hover:border-orange-400 hover:shadow-xl cursor-pointer active:scale-98"
-                        : "bg-white border-gray-200 hover:border-blue-300 hover:shadow-md cursor-pointer active:scale-98"
-                    }`}
-                  >
-                    {/* Icon */}
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                      isCompleted ? "bg-gray-200" : isOnCooldown ? "bg-yellow-100" : task.id === "comet_browser" ? "bg-orange-100" : "bg-blue-100"
-                    }`}>
-                      {isCompleted ? (
-                        <CheckCircle className={`w-5 h-5 text-gray-500`} />
-                      ) : (
-                        <IconComponent className={`w-5 h-5 ${
-                          isOnCooldown ? "text-yellow-600" : task.id === "comet_browser" ? "text-orange-600" : "text-blue-600"
-                        }`} />
-                      )}
-                    </div>
-                    
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1 min-w-0">
-                          <h3 className={`font-semibold text-sm ${
-                            isCompleted ? "text-gray-500" : "text-gray-900"
-                          }`}>
-                            {task.title}
-                          </h3>
-                          <p className={`text-xs mt-0.5 ${
-                            isCompleted ? "text-gray-400" : isOnCooldown ? "text-yellow-600" : "text-gray-600"
-                          }`}>
-                            {isCompleted && task.cooldown ? 
-                              `Unlocks Again After ${getCooldownTimeLeft(task.id).toFixed(1)} Hours` : 
-                              isOnCooldown ?
-                              `Cooldown: ${cooldownTimeLeft.toFixed(1)}h remaining` :
-                              task.description
-                            }
-                          </p>
+            return (
+              <div key={categoryName} className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 mb-4">
+                {/* Category Header */}
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-lg font-bold text-gray-900">
+                  {categoryName}
+                </h2>
+                  <div className="text-xs text-gray-500">
+                    {completedCount}/{tasks.length}
+                </div>
+              </div>
+              
+                {/* Task Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {tasks.map((task) => {
+                  const isCompleted = isTaskCompleted(task.id);
+                  const isOnCooldown = isTaskOnCooldown(task.id);
+                  const cooldownTimeLeft = getCooldownTimeLeft(task.id);
+                  const IconComponent = task.icon;
+                  
+                  
+                  return (
+                    <div
+                      key={task.id}
+                        className={`relative p-3 rounded-lg border transition-all ${
+                        isCompleted
+                          ? "bg-gray-100 border-gray-300"
+                          : isOnCooldown
+                          ? "bg-yellow-50 border-yellow-200"
+                          : "bg-gray-50 border-gray-200 hover:border-gray-300"
+                      }`}
+                    >
+                        {/* Row 1: Icon, Title, Description */}
+                        <div className="flex items-center gap-3 mb-3">
+                          {/* Icon */}
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                          isCompleted ? "bg-gray-200" : isOnCooldown ? "bg-yellow-100" : "bg-gray-100"
+                        }`}>
+                            <IconComponent className={`w-4 h-4 ${
+                            isCompleted ? "text-gray-500" : isOnCooldown ? "text-yellow-600" : "text-gray-600"
+                          }`} />
                         </div>
                         
-                        {/* Reward */}
-                        <div className="ml-3">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            isCompleted 
-                              ? "bg-gray-200 text-gray-500" 
-                              : "bg-green-100 text-green-700"
-                          }`}>
-                            ₹{task.reward}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Sharing Tasks Section */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
-            <div className="flex items-center gap-2 mb-4">
-              <Share2 className="w-5 h-5 text-blue-600" />
-              <h2 className="text-lg font-bold text-gray-900">Sharing Tasks</h2>
-            </div>
-
-            {/* Sharing Task List */}
-            <div className="space-y-2">
-              {getPendingSharingTasks.map((task) => {
-                const isCompleted = isTaskCompleted(task.id);
-                const isOnCooldown = isTaskOnCooldown(task.id);
-                const cooldownTimeLeft = getCooldownTimeLeft(task.id);
-                const IconComponent = task.icon;
-                
-                return (
-                  <div
-                    key={task.id}
-                    onClick={() => !isCompleted && !isOnCooldown && openTaskModal(task.id)}
-                    className={`flex items-center gap-3 p-3 rounded-lg border transition-all ${
-                      isCompleted
-                        ? "bg-gray-50 border-gray-200 cursor-default opacity-60"
-                        : isOnCooldown
-                        ? "bg-yellow-50 border-yellow-200 cursor-default"
-                        : "bg-white border-gray-200 hover:border-blue-300 hover:shadow-md cursor-pointer active:scale-98"
-                    }`}
-                  >
-                    {/* Icon */}
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                      isCompleted ? "bg-gray-200" : isOnCooldown ? "bg-yellow-100" : task.id === "comet_browser" ? "bg-orange-100" : "bg-blue-100"
-                    }`}>
-                      {isCompleted ? (
-                        <CheckCircle className={`w-5 h-5 text-gray-500`} />
-                      ) : (
-                        <IconComponent className={`w-5 h-5 ${
-                          isOnCooldown ? "text-yellow-600" : task.id === "comet_browser" ? "text-orange-600" : "text-blue-600"
-                        }`} />
-                      )}
-                    </div>
-                    
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
-                          <h3 className={`font-semibold text-sm ${
+                          <h3 className={`font-semibold text-sm mb-1 ${
                             isCompleted ? "text-gray-500" : "text-gray-900"
                           }`}>
-                            {task.title}
-                          </h3>
-                          <p className={`text-xs mt-0.5 ${
-                            isCompleted ? "text-gray-400" : isOnCooldown ? "text-yellow-600" : "text-gray-600"
+                              {task.title}
+                            </h3>
+                          <p className={`text-xs line-clamp-2 ${
+                            isCompleted ? "text-gray-400" : "text-gray-600"
                           }`}>
-                            {isCompleted && task.cooldown ? 
-                              `Unlocks Again After ${getCooldownTimeLeft(task.id).toFixed(1)} Hours` : 
-                              isOnCooldown ?
-                              `Cooldown: ${cooldownTimeLeft.toFixed(1)}h remaining` :
-                              task.description
-                            }
+                            {task.description}
                           </p>
-                        </div>
-                        
-                        {/* Reward */}
-                        <div className="ml-3">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            isCompleted 
-                              ? "bg-gray-200 text-gray-500" 
-                              : "bg-green-100 text-green-700"
-                          }`}>
-                            ₹{task.reward}
-                          </span>
-                        </div>
+                            </div>
+                          </div>
+                          
+                      {/* Row 2: Earn Amount - Full Width */}
+                      <div className="w-full">
+                          {isCompleted ? (
+                          <div className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg border border-gray-200">
+                            <div className="flex items-center gap-2 text-gray-500">
+                              <CheckCircle className="w-4 h-4" />
+                              <span className="text-sm"></span>
+                            </div>
+                            {task.cooldown && (
+                              <div className="text-xs text-white bg-blue-600 px-3 py-1.5 rounded-full font-medium shadow-sm">
+                                Unlock Again after {task.cooldown}h
+                              </div>
+                            )}
+                            </div>
+                          ) : isOnCooldown ? (
+                          <div className="flex items-center justify-center gap-2 py-2 px-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                              <Clock className="w-4 h-4 text-yellow-600" />
+                            <span className="text-sm font-semibold text-yellow-700">Cooldown: {cooldownTimeLeft.toFixed(1)}h</span>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => openTaskModal(task.id)}
+                              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                            >
+                            <Trophy className="w-4 h-4" />
+                            <span>Earn ₹{task.reward}</span>
+                            </button>
+                          )}
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
-          </div>
+            );
+          })}
 
           {/* Transaction History */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 mb-4 sm:mb-6">
@@ -1813,58 +1691,6 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                 >
                   <X className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
-              </div>
-            </div>
-          )}
-
-          {/* Completed Tasks Section - Only show if there are completed tasks */}
-          {getCompletedTasks.length > 0 && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
-              <div className="flex items-center gap-2 mb-4">
-                <CheckCircle className="w-5 h-5 text-green-600" />
-                <h2 className="text-lg font-bold text-gray-900">Completed Tasks</h2>
-              </div>
-
-              {/* Completed Task List */}
-              <div className="space-y-2">
-                {getCompletedTasks.map((task) => {
-                  
-                  return (
-                    <div
-                      key={task.id}
-                      className="flex items-center gap-3 p-3 rounded-lg border bg-gray-50 border-gray-200 cursor-default"
-                    >
-                      {/* Icon */}
-                      <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 bg-gray-200">
-                        <CheckCircle className="w-5 h-5 text-gray-500" />
-                      </div>
-                      
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-sm text-gray-500">
-                              {task.title}
-                            </h3>
-                            <p className="text-xs mt-0.5 text-gray-400">
-                              {task.cooldown ? 
-                                `Unlocks Again After ${getCooldownTimeLeft(task.id).toFixed(1)} Hours` : 
-                                "Task completed"
-                              }
-                            </p>
-                          </div>
-                          
-                          {/* Reward */}
-                          <div className="ml-3">
-                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-200 text-gray-500">
-                              ₹{task.reward}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
               </div>
             </div>
           )}
@@ -2361,7 +2187,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                               }`}
                             >
-                              Yes, I Have Done All The Steps
+                              Yes, I Have Done the Steps, I Have Done All The Steps
                             </button>
                             <button
                               onClick={() => setTaskAnswers({...taskAnswers, installed: "no"})}
