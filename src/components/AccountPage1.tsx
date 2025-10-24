@@ -914,7 +914,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
         // Hide completed Comet Browser and PWA tasks completely
         if (
           isTaskCompleted(task.id) &&
-          ["comet_browser", "pwa_install"].includes(task.id)
+          ["comet_browser", "install_pwa"].includes(task.id)
         ) {
           return false;
         }
@@ -970,7 +970,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
         // Only show completed tasks that are not sharing tasks and not PWA tasks that should be hidden
         return (
           isTaskCompleted(task.id) &&
-          !["pwa_install"].includes(task.id)
+          !["install_pwa"].includes(task.id)
         );
       })
       .sort((a, b) => b.reward - a.reward);
