@@ -66,17 +66,25 @@ const EXTERNAL_SERVICES = {
     whatsappMessage: "Check out Comet Browser: https://be6.in/comet",
   },
   adstera: {
-    name: "Adstera",
+    name: "Signup Link 1",
     url: "https://be6.in/mov68_monetag",
     description: "Advertising platform",
-    steps: ["Visit the Adstera website", "Sign up for an account"],
+    steps: [
+      "Visit this website",
+      "Sign up for an account",
+      "Browse Website for 3 Minutes",
+    ]
   },
   monetag: {
-    name: "Monetag",
+    name: "Signup Link 2",
     url: "https://be6.in/mov68_monetag",
     description: "Monetization platform",
-    steps: ["Visit the Monetag website", "Sign up for an account"],
-  },
+    steps: [
+      "Visit this website",
+      "Sign up for an account",
+      "Browse Website for 3 Minutes",
+    ]
+    },
 };
 
 // Optimized reusable components
@@ -955,14 +963,14 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
       });
   }, [getAllTasksIncludingSharing, isTaskCompleted]);
 
-  // Get completed tasks (excluding sharing tasks and tasks that should be hidden when completed)
+  // Get completed tasks (excluding sharing tasks and PWA tasks that should be hidden when completed)
   const getCompletedTasks = useMemo(() => {
     return getAllTasks
       .filter((task) => {
-        // Only show completed tasks that are not sharing tasks and not the ones that should be hidden
+        // Only show completed tasks that are not sharing tasks and not PWA tasks that should be hidden
         return (
           isTaskCompleted(task.id) &&
-          !["comet_browser", "pwa_install"].includes(task.id)
+          !["pwa_install"].includes(task.id)
         );
       })
       .sort((a, b) => b.reward - a.reward);
@@ -1376,7 +1384,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
           </div>
 
           {/* Sharing Tasks Section */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 py-4 px-2 mb-4">
             <div className="flex items-center gap-2 mb-4">
               <Share2 className="w-5 h-5 text-blue-600" />
               <h2 className="text-lg font-bold text-gray-900">Sharing Tasks</h2>
@@ -2813,12 +2821,22 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                         <div className="space-y-4">
                           <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
                             <h4 className="font-semibold text-orange-900 mb-2">
-                              {service.name} Signup
+                              {service.name}
                             </h4>
                             <p className="text-sm text-orange-800 mb-3">
-                              {service.description}. Visit the website and sign
-                              up for an account.
+                              {service.description}. Visit the Sponsor Website and Spent Some Time There.
                             </p>
+                            
+                            {/* Steps */}
+                            <div className="mb-4">
+                              <h5 className="font-semibold text-orange-900 mb-2">Steps:</h5>
+                              <ol className="list-decimal list-inside space-y-1 text-sm text-orange-800">
+                                {service.steps.map((step, index) => (
+                                  <li key={index}>{step}</li>
+                                ))}
+                              </ol>
+                            </div>
+                            
                             <a
                               href={service.url}
                               target="_blank"
@@ -2848,7 +2866,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                                     : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                                 }`}
                               >
-                                Yes
+                                Yes, I Have Done the Steps
                               </button>
                               <button
                                 onClick={() =>
