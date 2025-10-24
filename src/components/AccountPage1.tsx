@@ -259,8 +259,8 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
     "One Time Tasks": [
       {
         id: "install_pwa",
-        title: "Install PWA App",
-        description: "Install this app as a Progressive Web App",
+        title: "Install Awin App",
+        description: "Install & get real money instantly",
         reward: 200,
         icon: Smartphone,
         color: "blue",
@@ -1874,12 +1874,11 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                         <div className="flex items-center gap-2 mb-2">
                           <Smartphone className="w-5 h-5 text-green-600" />
                           <h4 className="font-semibold text-green-900">
-                            PWA Installation
+                            Awin Web App Installation
                           </h4>
                         </div>
                         <p className="text-sm text-green-800 mb-3">
-                          Install AWIN as a PWA (Progressive Web App) on your
-                          device to earn ₹{getCurrentTask()?.reward}.
+                          Install Awin Web App on your device to earn ₹{getCurrentTask()?.reward}.
                         </p>
 
                         {/* Install Button - Show First */}
@@ -1937,7 +1936,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                             className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
                           >
                             <Smartphone className="w-4 h-4" />
-                            Install AWIN App
+                            Install Now
                           </button>
                         </div>
                       </div>
