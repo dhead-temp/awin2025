@@ -174,7 +174,7 @@ const AccountPageRefactored: React.FC<AccountPageProps> = ({ userStats, onNaviga
       share_to_story: currentUser.shared_to_story === 1,
       share_to_ig: currentUser.shared_to_ig === 1,
       share_to_fb: currentUser.shared_to_fb === 1,
-      install_pwa: currentUser.installed_pwa === 1,
+      install_pwa: String(currentUser.installed_pwa) === "1",
     };
     
     return taskCompletionMap[taskId] || false;
