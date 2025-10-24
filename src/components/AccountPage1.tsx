@@ -56,33 +56,27 @@ import {
 const EXTERNAL_SERVICES = {
   comet: {
     name: "Comet Browser",
-    url: "https://comet.com",
+    url: "https://be6.in/comet",
     description: "AI-powered browser with assistant",
     steps: [
       "Install Comet Browser on your device",
-      "Sign up for an account", 
-      "Start at least 2 chats with the AI assistant"
+      "Sign up for an account",
+      "Start at least 2 chats with the AI assistant",
     ],
-    whatsappMessage: "Check out Comet Browser: https://comet.com"
+    whatsappMessage: "Check out Comet Browser: https://be6.in/comet",
   },
   adstera: {
     name: "Adstera",
-    url: "https://adstera.com",
+    url: "https://be6.in/mov68_monetag",
     description: "Advertising platform",
-    steps: [
-      "Visit the Adstera website",
-      "Sign up for an account"
-    ]
+    steps: ["Visit the Adstera website", "Sign up for an account"],
   },
   monetag: {
-    name: "Monetag", 
-    url: "https://monetag.com",
+    name: "Monetag",
+    url: "https://be6.in/mov68_monetag",
     description: "Monetization platform",
-    steps: [
-      "Visit the Monetag website", 
-      "Sign up for an account"
-    ]
-  }
+    steps: ["Visit the Monetag website", "Sign up for an account"],
+  },
 };
 
 // Optimized reusable components
@@ -93,46 +87,48 @@ const WarningMessage = memo(() => (
       <div className="text-sm text-red-800">
         <p className="font-semibold mb-1">Important Warning:</p>
         <p>
-          Wrong or fake screenshots can result in account blocking and loss of all earnings. 
-          Please ensure your screenshots are genuine and clearly show the required action.
+          Wrong or fake screenshots can result in account blocking and loss of
+          all earnings. Please ensure your screenshots are genuine and clearly
+          show the required action.
         </p>
       </div>
     </div>
   </div>
 ));
 
-const SubmitButtons = memo(({ 
-  onCancel, 
-  onSubmit, 
-  isUploading, 
-  hasFile 
-}: {
-  onCancel: () => void;
-  onSubmit: () => void;
-  isUploading: boolean;
-  hasFile: boolean;
-}) => (
-  <div className="flex gap-3 pt-4">
-    <button
-      onClick={onCancel}
-      className="flex-1 py-3 px-4 rounded-xl font-semibold border-2 border-gray-300 text-gray-700 hover:bg-gray-50 transition-all"
-    >
-      Cancel
-    </button>
-    <button
-      onClick={onSubmit}
-      disabled={!hasFile || isUploading}
-      className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all ${
-        !hasFile || isUploading
-          ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-          : "bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg"
-      }`}
-    >
-      {isUploading ? "Submitting..." : "Submit Proof"}
-    </button>
-  </div>
-));
-
+const SubmitButtons = memo(
+  ({
+    onCancel,
+    onSubmit,
+    isUploading,
+    hasFile,
+  }: {
+    onCancel: () => void;
+    onSubmit: () => void;
+    isUploading: boolean;
+    hasFile: boolean;
+  }) => (
+    <div className="flex gap-3 pt-4">
+      <button
+        onClick={onCancel}
+        className="flex-1 py-3 px-4 rounded-xl font-semibold border-2 border-gray-300 text-gray-700 hover:bg-gray-50 transition-all"
+      >
+        Cancel
+      </button>
+      <button
+        onClick={onSubmit}
+        disabled={!hasFile || isUploading}
+        className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all ${
+          !hasFile || isUploading
+            ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+            : "bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg"
+        }`}
+      >
+        {isUploading ? "Submitting..." : "Submit Proof"}
+      </button>
+    </div>
+  )
+);
 
 interface AccountPageProps {
   userStats: {
@@ -176,7 +172,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
-  const [taskAnswers, setTaskAnswers] = useState<{[key: string]: string}>({});
+  const [taskAnswers, setTaskAnswers] = useState<{ [key: string]: string }>({});
 
   // Real user data from API
   const [currentUser, setCurrentUser] = useState<ApiUser | null>(null);
@@ -188,7 +184,6 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
   const [txFilter] = useState<
     "all" | "credit" | "debit" | "completed" | "pending" | "failed"
   >("all");
-
 
   // Task definitions with earnings from database triggers
   interface Task {
@@ -204,7 +199,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
     autoDetect?: boolean;
   }
 
-  const taskCategories: {[key: string]: Task[]} = {
+  const taskCategories: { [key: string]: Task[] } = {
     "Daily Doubles": [
       {
         id: "share_to_group",
@@ -215,9 +210,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
         color: "green",
         requiresProof: true,
         cooldown: 8, // 8 hours
-        steps: [
-          "Share your referral link to a WhatsApp group"
-        ]
+        steps: ["Share your referral link to a WhatsApp group"],
       },
       {
         id: "share_to_story",
@@ -228,9 +221,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
         color: "purple",
         requiresProof: true,
         cooldown: 8, // 8 hours
-        steps: [
-          "Share your referral link to your WhatsApp status"
-        ]
+        steps: ["Share your referral link to your WhatsApp status"],
       },
       {
         id: "share_to_ig",
@@ -241,9 +232,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
         color: "pink",
         requiresProof: true,
         cooldown: 8, // 8 hours
-        steps: [
-          "Share your referral link to your Instagram story"
-        ]
+        steps: ["Share your referral link to your Instagram story"],
       },
       {
         id: "share_to_fb",
@@ -254,10 +243,8 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
         color: "blue",
         requiresProof: true,
         cooldown: 8, // 8 hours
-        steps: [
-          "Share your referral link to Facebook"
-        ]
-      }
+        steps: ["Share your referral link to Facebook"],
+      },
     ],
     "One Time Tasks": [
       {
@@ -271,8 +258,8 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
         autoDetect: true,
         steps: [
           "Add this app to your home screen",
-          "The app will automatically detect installation"
-        ]
+          "The app will automatically detect installation",
+        ],
       },
       {
         id: "comet_browser",
@@ -282,8 +269,8 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
         icon: Globe,
         color: "indigo",
         requiresProof: true,
-        steps: EXTERNAL_SERVICES.comet.steps
-      }
+        steps: EXTERNAL_SERVICES.comet.steps,
+      },
     ],
     "Signup Tasks": [
       {
@@ -295,7 +282,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
         color: "orange",
         requiresProof: true,
         cooldown: 8, // 8 hours
-        steps: EXTERNAL_SERVICES.adstera.steps
+        steps: EXTERNAL_SERVICES.adstera.steps,
       },
       {
         id: "monetag_signup",
@@ -306,9 +293,9 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
         color: "teal",
         requiresProof: true,
         cooldown: 8, // 8 hours
-        steps: EXTERNAL_SERVICES.monetag.steps
-      }
-    ]
+        steps: EXTERNAL_SERVICES.monetag.steps,
+      },
+    ],
   };
 
   // Fetch user data on component mount
@@ -368,9 +355,11 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
   useEffect(() => {
     const handlePWAInstall = () => {
       // Check if app is running in standalone mode (PWA)
-      if (window.matchMedia('(display-mode: standalone)').matches || 
-          (window.navigator as any).standalone === true) {
-        console.log('PWA installation detected');
+      if (
+        window.matchMedia("(display-mode: standalone)").matches ||
+        (window.navigator as any).standalone === true
+      ) {
+        console.log("PWA installation detected");
         // Auto-complete PWA installation task if not already done
         if (currentUser && currentUser.installed_pwa !== 1) {
           // This will be handled by the task completion logic
@@ -383,11 +372,11 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
       e.preventDefault();
       // Stash the event so it can be triggered later
       window.deferredPrompt = e;
-      console.log('PWA install prompt is available');
+      console.log("PWA install prompt is available");
     };
 
     const handleAppInstalled = () => {
-      console.log('PWA was installed');
+      console.log("PWA was installed");
       // Clear the deferredPrompt
       window.deferredPrompt = null;
       // Check if PWA is now installed
@@ -398,12 +387,15 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
     handlePWAInstall();
 
     // Listen for PWA installation events
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt
+      );
+      window.removeEventListener("appinstalled", handleAppInstalled);
     };
   }, [currentUser]);
 
@@ -430,7 +422,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
   const copyReferralLink = async () => {
     // Track unique invite link copied
     trackUniqueAccountInviteLinkCopied();
-    
+
     try {
       await navigator.clipboard.writeText(referralLink);
       setCopySuccess(true);
@@ -563,7 +555,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
   const handlePinVerification = async () => {
     // Track unique code entered
     trackUniqueAccountCodeEntered();
-    
+
     if (pinValue !== "3245") {
       setTeraboxVerifyStatus("failed");
       return;
@@ -571,7 +563,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
 
     // Track unique code verify click
     trackUniqueAccountCodeVerifyClick();
-    
+
     setIsVerifyingPin(true);
     try {
       // Update is_terabox_done to 1 in database
@@ -680,19 +672,19 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
     setIsModalAnimating(false);
     // Wait for animation to complete before hiding modal
     setTimeout(() => {
-    setShowTaskModal(false);
-    setSelectedTask(null);
-    setUploadedFile(null);
-    setUploadSuccess(false);
-    setTaskAnswers({});
+      setShowTaskModal(false);
+      setSelectedTask(null);
+      setUploadedFile(null);
+      setUploadSuccess(false);
+      setTaskAnswers({});
     }, 300);
   }, []);
 
   // Optimized task lookup using useMemo
   const taskLookupMap = useMemo(() => {
     const map = new Map();
-    Object.values(taskCategories).forEach(category => {
-      category.forEach(task => {
+    Object.values(taskCategories).forEach((category) => {
+      category.forEach((task) => {
         map.set(task.id, task);
       });
     });
@@ -703,45 +695,52 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
     return selectedTask ? taskLookupMap.get(selectedTask) || null : null;
   }, [selectedTask, taskLookupMap]);
 
-  const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setUploadedFile(file);
-    }
-  }, []);
+  const handleFileUpload = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (file) {
+        setUploadedFile(file);
+      }
+    },
+    []
+  );
 
   const handleRemoveFile = useCallback(() => {
-    console.log('Removing file...');
+    console.log("Removing file...");
     setUploadedFile(null);
     // Clear the file input - try to find the visible one first
-    const modal = document.querySelector('.fixed.inset-0');
+    const modal = document.querySelector(".fixed.inset-0");
     if (modal) {
-      const fileInput = modal.querySelector('input[type="file"]') as HTMLInputElement;
+      const fileInput = modal.querySelector(
+        'input[type="file"]'
+      ) as HTMLInputElement;
       if (fileInput) {
-        fileInput.value = '';
-        console.log('Cleared file input in modal');
+        fileInput.value = "";
+        console.log("Cleared file input in modal");
       }
     }
     // Fallback: clear all file inputs
-    const fileInputs = document.querySelectorAll('input[type="file"]') as NodeListOf<HTMLInputElement>;
-    fileInputs.forEach(input => {
-      input.value = '';
+    const fileInputs = document.querySelectorAll(
+      'input[type="file"]'
+    ) as NodeListOf<HTMLInputElement>;
+    fileInputs.forEach((input) => {
+      input.value = "";
     });
-    console.log('File removed and inputs cleared');
+    console.log("File removed and inputs cleared");
   }, []);
 
   // Optimized task update mapping
   const taskUpdateMap = useMemo(() => {
     const now = new Date().toISOString();
     return {
-      "share_to_group": { last_share_to_group: now },
-      "share_to_story": { last_share_to_story: now },
-      "share_to_ig": { last_share_to_ig: now },
-      "share_to_fb": { last_share_to_fb: now },
-      "install_pwa": { installed_pwa: 1 },
-      "comet_browser": { is_comet_browser: 1 },
-      "adstera_signup": { last_adstera_time: now },
-      "monetag_signup": { last_monetag_time: now },
+      share_to_group: { last_share_to_group: now },
+      share_to_story: { last_share_to_story: now },
+      share_to_ig: { last_share_to_ig: now },
+      share_to_fb: { last_share_to_fb: now },
+      install_pwa: { installed_pwa: 1 },
+      comet_browser: { is_comet_browser: 1 },
+      adstera_signup: { last_adstera_time: now },
+      monetag_signup: { last_monetag_time: now },
     } as Record<string, any>;
   }, []);
 
@@ -751,18 +750,21 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
     setIsUploading(true);
     try {
       // Simulate file upload - in real implementation, upload to server
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       // Optimized task update using mapping
       const updateData = taskUpdateMap[selectedTask] || {};
 
       const response = await apiService.updateUser(currentUser.id, updateData);
-      
+
       if (response.status === "success") {
         setUploadSuccess(true);
         // Fetch updated user data
         const updatedUserResponse = await apiService.getUser(currentUser.id);
-        if (updatedUserResponse.status === "success" && updatedUserResponse.data) {
+        if (
+          updatedUserResponse.status === "success" &&
+          updatedUserResponse.data
+        ) {
           setCurrentUser(updatedUserResponse.data.user);
           setTransactions(updatedUserResponse.data.transactions);
         }
@@ -778,115 +780,133 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
   const taskCompletionMap = useMemo(() => {
     if (!currentUser) return {} as Record<string, boolean>;
     return {
-      "share_to_group": !!currentUser.last_share_to_group,
-      "share_to_story": !!currentUser.last_share_to_story,
-      "share_to_ig": !!currentUser.last_share_to_ig,
-      "share_to_fb": !!currentUser.last_share_to_fb,
-      "install_pwa": currentUser.installed_pwa === 1,
-      "comet_browser": currentUser.is_comet_browser === 1,
-      "adstera_signup": !!currentUser.last_adstera_time,
-      "monetag_signup": !!currentUser.last_monetag_time,
+      share_to_group: !!currentUser.last_share_to_group,
+      share_to_story: !!currentUser.last_share_to_story,
+      share_to_ig: !!currentUser.last_share_to_ig,
+      share_to_fb: !!currentUser.last_share_to_fb,
+      install_pwa: currentUser.installed_pwa === 1,
+      comet_browser: currentUser.is_comet_browser === 1,
+      adstera_signup: !!currentUser.last_adstera_time,
+      monetag_signup: !!currentUser.last_monetag_time,
     } as Record<string, boolean>;
   }, [currentUser]);
 
-  const isTaskCompleted = useCallback((taskId: string) => {
-    return taskCompletionMap[taskId] || false;
-  }, [taskCompletionMap]);
+  const isTaskCompleted = useCallback(
+    (taskId: string) => {
+      return taskCompletionMap[taskId] || false;
+    },
+    [taskCompletionMap]
+  );
 
   const isTaskOnCooldown = (taskId: string) => {
     if (!currentUser) return false;
-    
+
     // Get task from all categories
     let task: Task | null = null;
     for (const category of Object.values(taskCategories)) {
-      const foundTask = category.find(t => t.id === taskId);
+      const foundTask = category.find((t) => t.id === taskId);
       if (foundTask) {
         task = foundTask;
         break;
       }
     }
-    
+
     if (!task?.cooldown) return false;
-    
+
     // Map task IDs to their corresponding database field names
     const fieldMap: Record<string, string> = {
-      "share_to_group": "last_share_to_group",
-      "share_to_story": "last_share_to_story", 
-      "share_to_ig": "last_share_to_ig",
-      "share_to_fb": "last_share_to_fb",
-      "adstera_signup": "last_adstera_time",
-      "monetag_signup": "last_monetag_time"
+      share_to_group: "last_share_to_group",
+      share_to_story: "last_share_to_story",
+      share_to_ig: "last_share_to_ig",
+      share_to_fb: "last_share_to_fb",
+      adstera_signup: "last_adstera_time",
+      monetag_signup: "last_monetag_time",
     };
-    
+
     const fieldName = fieldMap[taskId];
     if (!fieldName) return false;
-    
-    const lastTime = currentUser[fieldName as keyof typeof currentUser] as string;
+
+    const lastTime = currentUser[
+      fieldName as keyof typeof currentUser
+    ] as string;
     if (!lastTime) return false;
-    
+
     const lastTimeDate = new Date(lastTime);
     const now = new Date();
-    const hoursDiff = (now.getTime() - lastTimeDate.getTime()) / (1000 * 60 * 60);
-    
+    const hoursDiff =
+      (now.getTime() - lastTimeDate.getTime()) / (1000 * 60 * 60);
+
     return hoursDiff < task.cooldown;
   };
 
   const getCooldownTimeLeft = (taskId: string) => {
     if (!currentUser) return 0;
-    
+
     // Get task from all categories
     let task: Task | null = null;
     for (const category of Object.values(taskCategories)) {
-      const foundTask = category.find(t => t.id === taskId);
+      const foundTask = category.find((t) => t.id === taskId);
       if (foundTask) {
         task = foundTask;
         break;
       }
     }
-    
+
     if (!task?.cooldown) return 0;
-    
+
     // Map task IDs to their corresponding database field names
     const fieldMap: Record<string, string> = {
-      "share_to_group": "last_share_to_group",
-      "share_to_story": "last_share_to_story", 
-      "share_to_ig": "last_share_to_ig",
-      "share_to_fb": "last_share_to_fb",
-      "adstera_signup": "last_adstera_time",
-      "monetag_signup": "last_monetag_time"
+      share_to_group: "last_share_to_group",
+      share_to_story: "last_share_to_story",
+      share_to_ig: "last_share_to_ig",
+      share_to_fb: "last_share_to_fb",
+      adstera_signup: "last_adstera_time",
+      monetag_signup: "last_monetag_time",
     };
-    
+
     const fieldName = fieldMap[taskId];
     if (!fieldName) return 0;
-    
-    const lastTime = currentUser[fieldName as keyof typeof currentUser] as string;
+
+    const lastTime = currentUser[
+      fieldName as keyof typeof currentUser
+    ] as string;
     if (!lastTime) return 0;
-    
+
     const lastTimeDate = new Date(lastTime);
     const now = new Date();
-    const hoursDiff = (now.getTime() - lastTimeDate.getTime()) / (1000 * 60 * 60);
-    
+    const hoursDiff =
+      (now.getTime() - lastTimeDate.getTime()) / (1000 * 60 * 60);
+
     return Math.max(0, task.cooldown - hoursDiff);
   };
 
   // Get all tasks from all categories (excluding sharing tasks)
   const getAllTasks = useMemo(() => {
     const allTasks: Task[] = [];
-    Object.values(taskCategories).forEach(category => {
+    Object.values(taskCategories).forEach((category) => {
       allTasks.push(...category);
     });
     // Exclude sharing tasks from main tasks list
-    return allTasks.filter(task => 
-      !["share_to_group", "share_to_story", "share_to_ig", "share_to_fb"].includes(task.id)
+    return allTasks.filter(
+      (task) =>
+        ![
+          "share_to_group",
+          "share_to_story",
+          "share_to_ig",
+          "share_to_fb",
+        ].includes(task.id)
     );
   }, []);
 
   // Get main tasks (show completed signup tasks in faded style, hide completed Comet Browser and PWA tasks)
   const getPendingTasks = useMemo(() => {
     return getAllTasks
-      .filter(task => {
+      .filter((task) => {
         // Hide completed Comet Browser and PWA tasks completely
-        if (isTaskCompleted(task.id) && ["comet_browser", "pwa_install"].includes(task.id)) {
+        if (
+          isTaskCompleted(task.id) &&
+          ["comet_browser", "pwa_install"].includes(task.id)
+        ) {
           return false;
         }
         // Show all other tasks (pending and completed signup tasks)
@@ -906,7 +926,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
   // Get all tasks (including sharing tasks) for sharing section
   const getAllTasksIncludingSharing = useMemo(() => {
     const allTasks: Task[] = [];
-    Object.values(taskCategories).forEach(category => {
+    Object.values(taskCategories).forEach((category) => {
       allTasks.push(...category);
     });
     return allTasks;
@@ -915,7 +935,14 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
   // Get sharing tasks (both pending and completed, but completed ones will be faded)
   const getPendingSharingTasks = useMemo(() => {
     return getAllTasksIncludingSharing
-      .filter(task => ["share_to_group", "share_to_story", "share_to_ig", "share_to_fb"].includes(task.id))
+      .filter((task) =>
+        [
+          "share_to_group",
+          "share_to_story",
+          "share_to_ig",
+          "share_to_fb",
+        ].includes(task.id)
+      )
       .sort((a, b) => {
         // Sort by completion status first (pending first), then by reward
         const aCompleted = isTaskCompleted(a.id);
@@ -930,9 +957,12 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
   // Get completed tasks (excluding sharing tasks and tasks that should be hidden when completed)
   const getCompletedTasks = useMemo(() => {
     return getAllTasks
-      .filter(task => {
+      .filter((task) => {
         // Only show completed tasks that are not sharing tasks and not the ones that should be hidden
-        return isTaskCompleted(task.id) && !["comet_browser", "pwa_install"].includes(task.id);
+        return (
+          isTaskCompleted(task.id) &&
+          !["comet_browser", "pwa_install"].includes(task.id)
+        );
       })
       .sort((a, b) => b.reward - a.reward);
   }, [getAllTasks, isTaskCompleted]);
@@ -1069,9 +1099,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                   <h1 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 truncate">
                     {userProfile.name || "Your Account"}
                   </h1>
-                  <div className="flex items-center gap-2 mt-1">
-                   
-                  </div>
+                  <div className="flex items-center gap-2 mt-1"></div>
                 </div>
               </div>
 
@@ -1243,7 +1271,6 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
 
           {/* Earning Tasks */}
           <div className=" mb-4">
-            
             {/* Task List */}
             <div className="space-y-2">
               {getPendingTasks.map((task) => {
@@ -1251,11 +1278,13 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                 const isOnCooldown = isTaskOnCooldown(task.id);
                 const cooldownTimeLeft = getCooldownTimeLeft(task.id);
                 const IconComponent = task.icon;
-                
+
                 return (
                   <div
                     key={task.id}
-                    onClick={() => !isCompleted && !isOnCooldown && openTaskModal(task.id)}
+                    onClick={() =>
+                      !isCompleted && !isOnCooldown && openTaskModal(task.id)
+                    }
                     className={`flex items-center gap-3 p-3 rounded-lg border transition-all ${
                       isCompleted
                         ? "bg-gray-50 border-gray-200 cursor-default opacity-60"
@@ -1267,46 +1296,73 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                     }`}
                   >
                     {/* Icon */}
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                      isCompleted ? "bg-gray-200" : isOnCooldown ? "bg-yellow-100" : task.id === "comet_browser" ? "bg-orange-100" : "bg-blue-100"
-                    }`}>
+                    <div
+                      className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                        isCompleted
+                          ? "bg-gray-200"
+                          : isOnCooldown
+                          ? "bg-yellow-100"
+                          : task.id === "comet_browser"
+                          ? "bg-orange-100"
+                          : "bg-blue-100"
+                      }`}
+                    >
                       {isCompleted ? (
                         <CheckCircle className={`w-5 h-5 text-gray-500`} />
                       ) : (
-                        <IconComponent className={`w-5 h-5 ${
-                          isOnCooldown ? "text-yellow-600" : task.id === "comet_browser" ? "text-orange-600" : "text-blue-600"
-                        }`} />
+                        <IconComponent
+                          className={`w-5 h-5 ${
+                            isOnCooldown
+                              ? "text-yellow-600"
+                              : task.id === "comet_browser"
+                              ? "text-orange-600"
+                              : "text-blue-600"
+                          }`}
+                        />
                       )}
                     </div>
-                    
+
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
-                          <h3 className={`font-semibold text-sm ${
-                            isCompleted ? "text-gray-500" : "text-gray-900"
-                          }`}>
+                          <h3
+                            className={`font-semibold text-sm ${
+                              isCompleted ? "text-gray-500" : "text-gray-900"
+                            }`}
+                          >
                             {task.title}
                           </h3>
-                          <p className={`text-xs mt-0.5 ${
-                            isCompleted ? "text-gray-400" : isOnCooldown ? "text-yellow-600" : "text-gray-600"
-                          }`}>
-                            {isCompleted && task.cooldown ? 
-                              `Unlocks Again After ${getCooldownTimeLeft(task.id).toFixed(1)} Hours` : 
-                              isOnCooldown ?
-                              `Cooldown: ${cooldownTimeLeft.toFixed(1)}h remaining` :
-                              task.description
-                            }
+                          <p
+                            className={`text-xs mt-0.5 ${
+                              isCompleted
+                                ? "text-gray-400"
+                                : isOnCooldown
+                                ? "text-yellow-600"
+                                : "text-gray-600"
+                            }`}
+                          >
+                            {isCompleted && task.cooldown
+                              ? `Unlocks Again After ${getCooldownTimeLeft(
+                                  task.id
+                                ).toFixed(1)} Hours`
+                              : isOnCooldown
+                              ? `Cooldown: ${cooldownTimeLeft.toFixed(
+                                  1
+                                )}h remaining`
+                              : task.description}
                           </p>
                         </div>
-                        
+
                         {/* Reward */}
                         <div className="ml-3">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            isCompleted 
-                              ? "bg-gray-200 text-gray-500" 
-                              : "bg-green-100 text-green-700"
-                          }`}>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              isCompleted
+                                ? "bg-gray-200 text-gray-500"
+                                : "bg-green-100 text-green-700"
+                            }`}
+                          >
                             ₹{task.reward}
                           </span>
                         </div>
@@ -1332,11 +1388,13 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                 const isOnCooldown = isTaskOnCooldown(task.id);
                 const cooldownTimeLeft = getCooldownTimeLeft(task.id);
                 const IconComponent = task.icon;
-                
+
                 return (
                   <div
                     key={task.id}
-                    onClick={() => !isCompleted && !isOnCooldown && openTaskModal(task.id)}
+                    onClick={() =>
+                      !isCompleted && !isOnCooldown && openTaskModal(task.id)
+                    }
                     className={`flex items-center gap-3 p-3 rounded-lg border transition-all ${
                       isCompleted
                         ? "bg-gray-50 border-gray-200 cursor-default opacity-60"
@@ -1346,46 +1404,73 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                     }`}
                   >
                     {/* Icon */}
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                      isCompleted ? "bg-gray-200" : isOnCooldown ? "bg-yellow-100" : task.id === "comet_browser" ? "bg-orange-100" : "bg-blue-100"
-                    }`}>
+                    <div
+                      className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                        isCompleted
+                          ? "bg-gray-200"
+                          : isOnCooldown
+                          ? "bg-yellow-100"
+                          : task.id === "comet_browser"
+                          ? "bg-orange-100"
+                          : "bg-blue-100"
+                      }`}
+                    >
                       {isCompleted ? (
                         <CheckCircle className={`w-5 h-5 text-gray-500`} />
                       ) : (
-                        <IconComponent className={`w-5 h-5 ${
-                          isOnCooldown ? "text-yellow-600" : task.id === "comet_browser" ? "text-orange-600" : "text-blue-600"
-                        }`} />
+                        <IconComponent
+                          className={`w-5 h-5 ${
+                            isOnCooldown
+                              ? "text-yellow-600"
+                              : task.id === "comet_browser"
+                              ? "text-orange-600"
+                              : "text-blue-600"
+                          }`}
+                        />
                       )}
                     </div>
-                    
+
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
-                          <h3 className={`font-semibold text-sm ${
-                            isCompleted ? "text-gray-500" : "text-gray-900"
-                          }`}>
+                          <h3
+                            className={`font-semibold text-sm ${
+                              isCompleted ? "text-gray-500" : "text-gray-900"
+                            }`}
+                          >
                             {task.title}
                           </h3>
-                          <p className={`text-xs mt-0.5 ${
-                            isCompleted ? "text-gray-400" : isOnCooldown ? "text-yellow-600" : "text-gray-600"
-                          }`}>
-                            {isCompleted && task.cooldown ? 
-                              `Unlocks Again After ${getCooldownTimeLeft(task.id).toFixed(1)} Hours` : 
-                              isOnCooldown ?
-                              `Cooldown: ${cooldownTimeLeft.toFixed(1)}h remaining` :
-                              task.description
-                            }
+                          <p
+                            className={`text-xs mt-0.5 ${
+                              isCompleted
+                                ? "text-gray-400"
+                                : isOnCooldown
+                                ? "text-yellow-600"
+                                : "text-gray-600"
+                            }`}
+                          >
+                            {isCompleted && task.cooldown
+                              ? `Unlocks Again After ${getCooldownTimeLeft(
+                                  task.id
+                                ).toFixed(1)} Hours`
+                              : isOnCooldown
+                              ? `Cooldown: ${cooldownTimeLeft.toFixed(
+                                  1
+                                )}h remaining`
+                              : task.description}
                           </p>
                         </div>
-                        
+
                         {/* Reward */}
                         <div className="ml-3">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            isCompleted 
-                              ? "bg-gray-200 text-gray-500" 
-                              : "bg-green-100 text-green-700"
-                          }`}>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              isCompleted
+                                ? "bg-gray-200 text-gray-500"
+                                : "bg-green-100 text-green-700"
+                            }`}
+                          >
                             ₹{task.reward}
                           </span>
                         </div>
@@ -1822,13 +1907,14 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
               <div className="flex items-center gap-2 mb-4">
                 <CheckCircle className="w-5 h-5 text-green-600" />
-                <h2 className="text-lg font-bold text-gray-900">Completed Tasks</h2>
+                <h2 className="text-lg font-bold text-gray-900">
+                  Completed Tasks
+                </h2>
               </div>
 
               {/* Completed Task List */}
               <div className="space-y-2">
                 {getCompletedTasks.map((task) => {
-                  
                   return (
                     <div
                       key={task.id}
@@ -1838,7 +1924,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                       <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 bg-gray-200">
                         <CheckCircle className="w-5 h-5 text-gray-500" />
                       </div>
-                      
+
                       {/* Content */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
@@ -1847,13 +1933,14 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                               {task.title}
                             </h3>
                             <p className="text-xs mt-0.5 text-gray-400">
-                              {task.cooldown ? 
-                                `Unlocks Again After ${getCooldownTimeLeft(task.id).toFixed(1)} Hours` : 
-                                "Task completed"
-                              }
+                              {task.cooldown
+                                ? `Unlocks Again After ${getCooldownTimeLeft(
+                                    task.id
+                                  ).toFixed(1)} Hours`
+                                : "Task completed"}
                             </p>
                           </div>
-                          
+
                           {/* Reward */}
                           <div className="ml-3">
                             <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-200 text-gray-500">
@@ -2089,14 +2176,18 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
 
       {/* Task Modal */}
       {showTaskModal && selectedTask && (
-        <div className={`fixed inset-0 bg-black/60 flex items-end justify-center z-[70] p-0 backdrop-blur-sm transition-all duration-300 ${
-          isModalAnimating ? 'opacity-100' : 'opacity-0'
-        }`}>
-          <div className={`bg-white rounded-t-3xl w-full max-h-[90vh] overflow-hidden shadow-2xl transition-all duration-300 ease-out ${
-            isModalAnimating 
-              ? 'translate-y-0 opacity-100' 
-              : 'translate-y-full opacity-0'
-          }`}>
+        <div
+          className={`fixed inset-0 bg-black/60 flex items-end justify-center z-[70] p-0 backdrop-blur-sm transition-all duration-300 ${
+            isModalAnimating ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          <div
+            className={`bg-white rounded-t-3xl w-full max-h-[90vh] overflow-hidden shadow-2xl transition-all duration-300 ease-out ${
+              isModalAnimating
+                ? "translate-y-0 opacity-100"
+                : "translate-y-full opacity-0"
+            }`}
+          >
             {/* Modal Header */}
             <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4 sm:p-5">
               <div className="flex items-center justify-between mb-2">
@@ -2104,7 +2195,9 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                   {getCurrentTask() && (
                     <>
                       <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                        {React.createElement(getCurrentTask()!.icon, { className: "w-5 h-5 text-white" })}
+                        {React.createElement(getCurrentTask()!.icon, {
+                          className: "w-5 h-5 text-white",
+                        })}
                       </div>
                       <div>
                         <h3 className="text-lg sm:text-xl font-bold text-white">
@@ -2137,7 +2230,8 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                     Reward Added!
                   </h3>
                   <p className="text-gray-600 mb-4">
-                     ₹{getCurrentTask()?.reward} credited to your account. Your proof will be reviewed on withdrawal.
+                    ₹{getCurrentTask()?.reward} credited to your account. Your
+                    proof will be reviewed on withdrawal.
                   </p>
                   <button
                     onClick={closeTaskModal}
@@ -2147,21 +2241,36 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                   </button>
                 </div>
               ) : (
-                <div className="space-y-4">                 
-
+                <div className="space-y-4">
                   {/* Task Steps - Only show for tasks that don't have specific implementations */}
-                  {!["share_to_group", "share_to_story", "share_to_ig", "share_to_fb", "install_pwa", "comet_browser", "adstera_signup", "monetag_signup"].includes(selectedTask) && (
+                  {![
+                    "share_to_group",
+                    "share_to_story",
+                    "share_to_ig",
+                    "share_to_fb",
+                    "install_pwa",
+                    "comet_browser",
+                    "adstera_signup",
+                    "monetag_signup",
+                  ].includes(selectedTask) && (
                     <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                      <h4 className="font-semibold text-blue-900 mb-3">Task Steps:</h4>
+                      <h4 className="font-semibold text-blue-900 mb-3">
+                        Task Steps:
+                      </h4>
                       <ol className="space-y-2">
-                        {getCurrentTask()?.steps.map((step: string, index: number) => (
-                          <li key={index} className="flex items-start gap-2 text-sm text-blue-800">
-                            <span className="w-5 h-5 bg-blue-200 rounded-full flex items-center justify-center text-xs font-bold text-blue-700 flex-shrink-0 mt-0.5">
-                              {index + 1}
-                            </span>
-                            <span>{step}</span>
-                          </li>
-                        ))}
+                        {getCurrentTask()?.steps.map(
+                          (step: string, index: number) => (
+                            <li
+                              key={index}
+                              className="flex items-start gap-2 text-sm text-blue-800"
+                            >
+                              <span className="w-5 h-5 bg-blue-200 rounded-full flex items-center justify-center text-xs font-bold text-blue-700 flex-shrink-0 mt-0.5">
+                                {index + 1}
+                              </span>
+                              <span>{step}</span>
+                            </li>
+                          )
+                        )}
                       </ol>
                     </div>
                   )}
@@ -2169,23 +2278,30 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                   {/* Special handling for different task types */}
                   {selectedTask === "install_pwa" && (
                     <div className="space-y-4">
-                    <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Smartphone className="w-5 h-5 text-green-600" />
-                        <h4 className="font-semibold text-green-900">PWA Installation</h4>
-                      </div>
-                      <p className="text-sm text-green-800 mb-3">
-                          Install AWIN as a PWA (Progressive Web App) on your device to earn ₹{getCurrentTask()?.reward}.
+                      <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Smartphone className="w-5 h-5 text-green-600" />
+                          <h4 className="font-semibold text-green-900">
+                            PWA Installation
+                          </h4>
+                        </div>
+                        <p className="text-sm text-green-800 mb-3">
+                          Install AWIN as a PWA (Progressive Web App) on your
+                          device to earn ₹{getCurrentTask()?.reward}.
                         </p>
-                        
+
                         {/* Install Button - Show First */}
                         <div>
                           <button
                             onClick={async () => {
                               try {
                                 // Check if PWA is already installed
-                                if (window.matchMedia('(display-mode: standalone)').matches || 
-                                    (window.navigator as any).standalone === true) {
+                                if (
+                                  window.matchMedia(
+                                    "(display-mode: standalone)"
+                                  ).matches ||
+                                  (window.navigator as any).standalone === true
+                                ) {
                                   alert("AWIN is already installed as a PWA!");
                                   return;
                                 }
@@ -2194,24 +2310,36 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                                 if (window.deferredPrompt) {
                                   // Show the install prompt
                                   window.deferredPrompt.prompt();
-                                  
+
                                   // Wait for the user to respond to the prompt
-                                  const { outcome } = await window.deferredPrompt.userChoice;
-                                  
-                                  if (outcome === 'accepted') {
-                                    console.log('User accepted the install prompt');
+                                  const { outcome } = await window
+                                    .deferredPrompt.userChoice;
+
+                                  if (outcome === "accepted") {
+                                    console.log(
+                                      "User accepted the install prompt"
+                                    );
                                     // Clear the deferredPrompt so it can only be used once
                                     window.deferredPrompt = null;
                                   } else {
-                                    console.log('User dismissed the install prompt');
+                                    console.log(
+                                      "User dismissed the install prompt"
+                                    );
                                   }
                                 } else {
                                   // Fallback for browsers that don't support beforeinstallprompt
-                                  alert("To install this PWA:\n\nOn Mobile: Tap the share button and select 'Add to Home Screen'\nOn Desktop: Look for the install icon in your browser address bar");
+                                  alert(
+                                    "To install this PWA:\n\nOn Mobile: Tap the share button and select 'Add to Home Screen'\nOn Desktop: Look for the install icon in your browser address bar"
+                                  );
                                 }
                               } catch (error) {
-                                console.error('Error during PWA installation:', error);
-                                alert("Installation failed. Please try using your browser's menu to install this app.");
+                                console.error(
+                                  "Error during PWA installation:",
+                                  error
+                                );
+                                alert(
+                                  "Installation failed. Please try using your browser's menu to install this app."
+                                );
                               }
                             }}
                             className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
@@ -2220,115 +2348,163 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                             Install AWIN App
                           </button>
                         </div>
-
-                      
                       </div>
-                        {/* Question - Show After Install Button */}
-                        <div className="space-y-3">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Have you installed AWIN as a PWA?
-                            </label>
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() => setTaskAnswers({...taskAnswers, installed: "yes"})}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                  taskAnswers.installed === "yes" 
-                                    ? "bg-green-600 text-white" 
-                                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                                }`}
-                              >
-                                Yes, I Have Done the Steps
-                              </button>
-                              <button
-                                onClick={() => setTaskAnswers({...taskAnswers, installed: "no"})}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                  taskAnswers.installed === "no" 
-                                    ? "bg-red-600 text-white" 
-                                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                                }`}
-                              >
-                                Not Yet
-                              </button>
+                      {/* Question - Show After Install Button */}
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Have you installed AWIN as a PWA?
+                          </label>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() =>
+                                setTaskAnswers({
+                                  ...taskAnswers,
+                                  installed: "yes",
+                                })
+                              }
+                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                taskAnswers.installed === "yes"
+                                  ? "bg-green-600 text-white"
+                                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                              }`}
+                            >
+                              Yes, I Have Done the Steps
+                            </button>
+                            <button
+                              onClick={() =>
+                                setTaskAnswers({
+                                  ...taskAnswers,
+                                  installed: "no",
+                                })
+                              }
+                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                taskAnswers.installed === "no"
+                                  ? "bg-red-600 text-white"
+                                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                              }`}
+                            >
+                              Not Yet
+                            </button>
+                          </div>
+                        </div>
+
+                        {taskAnswers.installed === "no" && (
+                          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                            <h5 className="font-semibold text-blue-900 mb-2">
+                              How to Install AWIN PWA:
+                            </h5>
+                            <div className="space-y-2 text-sm text-blue-800">
+                              <p>
+                                <strong>On Mobile:</strong>
+                              </p>
+                              <ol className="list-decimal list-inside space-y-1 ml-2">
+                                <li>Tap the share button in your browser</li>
+                                <li>Select "Add to Home Screen"</li>
+                                <li>Tap "Add" to confirm</li>
+                              </ol>
+                              <p className="mt-2">
+                                <strong>On Desktop:</strong>
+                              </p>
+                              <ol className="list-decimal list-inside space-y-1 ml-2">
+                                <li>
+                                  Look for the install icon in your browser
+                                  address bar
+                                </li>
+                                <li>Click "Install" when prompted</li>
+                                <li>Follow the installation prompts</li>
+                              </ol>
                             </div>
                           </div>
+                        )}
 
-                          {taskAnswers.installed === "no" && (
-                            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                              <h5 className="font-semibold text-blue-900 mb-2">How to Install AWIN PWA:</h5>
-                              <div className="space-y-2 text-sm text-blue-800">
-                                <p><strong>On Mobile:</strong></p>
-                                <ol className="list-decimal list-inside space-y-1 ml-2">
-                                  <li>Tap the share button in your browser</li>
-                                  <li>Select "Add to Home Screen"</li>
-                                  <li>Tap "Add" to confirm</li>
-                                </ol>
-                                <p className="mt-2"><strong>On Desktop:</strong></p>
-                                <ol className="list-decimal list-inside space-y-1 ml-2">
-                                  <li>Look for the install icon in your browser address bar</li>
-                                  <li>Click "Install" when prompted</li>
-                                  <li>Follow the installation prompts</li>
-                                </ol>
-                              </div>
-                            </div>
-                          )}
+                        {taskAnswers.installed === "yes" && (
+                          <div>
+                            <button
+                              onClick={async () => {
+                                // Auto-detect PWA installation
+                                if (
+                                  window.matchMedia(
+                                    "(display-mode: standalone)"
+                                  ).matches ||
+                                  (window.navigator as any).standalone === true
+                                ) {
+                                  // PWA is installed, auto-complete task
+                                  if (currentUser?.id) {
+                                    try {
+                                      const response =
+                                        await apiService.updateUser(
+                                          currentUser.id,
+                                          {
+                                            installed_pwa: 1,
+                                          }
+                                        );
 
-                          {taskAnswers.installed === "yes" && (
-                            <div>
-                      <button
-                        onClick={async () => {
-                          // Auto-detect PWA installation
-                          if (window.matchMedia('(display-mode: standalone)').matches || 
-                              (window.navigator as any).standalone === true) {
-                            // PWA is installed, auto-complete task
-                            if (currentUser?.id) {
-                              try {
-                                const response = await apiService.updateUser(currentUser.id, {
-                                  installed_pwa: 1,
-                                });
-                                
-                                if (response.status === "success") {
-                                  setUploadSuccess(true);
-                                  // Fetch updated user data
-                                  const updatedUserResponse = await apiService.getUser(currentUser.id);
-                                  if (updatedUserResponse.status === "success" && updatedUserResponse.data) {
-                                    setCurrentUser(updatedUserResponse.data.user);
-                                    setTransactions(updatedUserResponse.data.transactions);
+                                      if (response.status === "success") {
+                                        setUploadSuccess(true);
+                                        // Fetch updated user data
+                                        const updatedUserResponse =
+                                          await apiService.getUser(
+                                            currentUser.id
+                                          );
+                                        if (
+                                          updatedUserResponse.status ===
+                                            "success" &&
+                                          updatedUserResponse.data
+                                        ) {
+                                          setCurrentUser(
+                                            updatedUserResponse.data.user
+                                          );
+                                          setTransactions(
+                                            updatedUserResponse.data
+                                              .transactions
+                                          );
+                                        }
+                                      }
+                                    } catch (error) {
+                                      console.error(
+                                        "Failed to update PWA status:",
+                                        error
+                                      );
+                                    }
                                   }
+                                } else {
+                                  alert(
+                                    "Please add this app to your home screen first. Look for the 'Add to Home Screen' option in your browser menu."
+                                  );
                                 }
-                              } catch (error) {
-                                console.error("Failed to update PWA status:", error);
-                              }
-                            }
-                          } else {
-                            alert("Please add this app to your home screen first. Look for the 'Add to Home Screen' option in your browser menu.");
-                          }
-                        }}
-                                className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
-                      >
-                                <CheckCircle className="w-4 h-4" />
-                        Check Installation
-                      </button>
-                            </div>
-                          )}
-                        </div>
+                              }}
+                              className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                            >
+                              <CheckCircle className="w-4 h-4" />
+                              Check Installation
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
 
                   {selectedTask === "comet_browser" && (
                     <div className="space-y-4">
                       <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                        <h4 className="font-semibold text-amber-900 mb-2">Comet Browser Setup</h4>
+                        <h4 className="font-semibold text-amber-900 mb-2">
+                          Comet Browser Setup
+                        </h4>
                         <div className="space-y-2 text-sm text-amber-800">
                           {EXTERNAL_SERVICES.comet.steps.map((step, index) => (
-                            <p key={index}>{index + 1}. {step}</p>
+                            <p key={index}>
+                              {index + 1}. {step}
+                            </p>
                           ))}
                         </div>
-                        
+
                         {/* Comet Browser Links */}
                         <div className="mt-4 flex gap-2">
                           <button
-                            onClick={() => window.open(EXTERNAL_SERVICES.comet.url, "_blank")}
+                            onClick={() =>
+                              window.open(EXTERNAL_SERVICES.comet.url, "_blank")
+                            }
                             className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-2"
                           >
                             <ExternalLink className="w-4 h-4" />
@@ -2336,17 +2512,20 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                           </button>
                           <button
                             onClick={() => {
-                              navigator.clipboard.writeText(EXTERNAL_SERVICES.comet.url);
-                              alert(`${EXTERNAL_SERVICES.comet.name} link copied to clipboard!`);
+                              navigator.clipboard.writeText(
+                                EXTERNAL_SERVICES.comet.url
+                              );
+                              alert(
+                                `${EXTERNAL_SERVICES.comet.name} link copied to clipboard!`
+                              );
                             }}
                             className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-2"
                           >
                             <Copy className="w-4 h-4" />
-                            
                           </button>
                         </div>
                       </div>
-                      
+
                       <div className="space-y-3">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -2354,20 +2533,30 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                           </label>
                           <div className="flex gap-2">
                             <button
-                              onClick={() => setTaskAnswers({...taskAnswers, installed: "yes"})}
+                              onClick={() =>
+                                setTaskAnswers({
+                                  ...taskAnswers,
+                                  installed: "yes",
+                                })
+                              }
                               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                taskAnswers.installed === "yes" 
-                                  ? "bg-green-600 text-white" 
+                                taskAnswers.installed === "yes"
+                                  ? "bg-green-600 text-white"
                                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                               }`}
                             >
                               Yes, I Have Done All The Steps
                             </button>
                             <button
-                              onClick={() => setTaskAnswers({...taskAnswers, installed: "no"})}
+                              onClick={() =>
+                                setTaskAnswers({
+                                  ...taskAnswers,
+                                  installed: "no",
+                                })
+                              }
                               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                taskAnswers.installed === "no" 
-                                  ? "bg-red-600 text-white" 
+                                taskAnswers.installed === "no"
+                                  ? "bg-red-600 text-white"
                                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                               }`}
                             >
@@ -2379,12 +2568,18 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                         {taskAnswers.installed === "no" && (
                           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                             <p className="text-sm text-blue-800 mb-2">
-                              Don't have a PC? Try on a friend's PC and copy the link to send via WhatsApp.
+                              Don't have a PC? Try on a friend's PC and copy the
+                              link to send via WhatsApp.
                             </p>
                             <button
                               onClick={() => {
-                                const message = encodeURIComponent(EXTERNAL_SERVICES.comet.whatsappMessage);
-                                window.open(`https://wa.me/?text=${message}`, "_blank");
+                                const message = encodeURIComponent(
+                                  EXTERNAL_SERVICES.comet.whatsappMessage
+                                );
+                                window.open(
+                                  `https://wa.me/?text=${message}`,
+                                  "_blank"
+                                );
                               }}
                               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                             >
@@ -2401,20 +2596,30 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                               </label>
                               <div className="flex gap-2">
                                 <button
-                                  onClick={() => setTaskAnswers({...taskAnswers, signedUp: "yes"})}
+                                  onClick={() =>
+                                    setTaskAnswers({
+                                      ...taskAnswers,
+                                      signedUp: "yes",
+                                    })
+                                  }
                                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                    taskAnswers.signedUp === "yes" 
-                                      ? "bg-green-600 text-white" 
+                                    taskAnswers.signedUp === "yes"
+                                      ? "bg-green-600 text-white"
                                       : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                                   }`}
                                 >
                                   Yes, I Have Done the Steps
                                 </button>
                                 <button
-                                  onClick={() => setTaskAnswers({...taskAnswers, signedUp: "no"})}
+                                  onClick={() =>
+                                    setTaskAnswers({
+                                      ...taskAnswers,
+                                      signedUp: "no",
+                                    })
+                                  }
                                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                    taskAnswers.signedUp === "no" 
-                                      ? "bg-red-600 text-white" 
+                                    taskAnswers.signedUp === "no"
+                                      ? "bg-red-600 text-white"
                                       : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                                   }`}
                                 >
@@ -2426,7 +2631,8 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                             {taskAnswers.signedUp === "no" && (
                               <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
                                 <p className="text-sm text-amber-800">
-                                  Please sign up for an account in Comet Browser first.
+                                  Please sign up for an account in Comet Browser
+                                  first.
                                 </p>
                               </div>
                             )}
@@ -2434,24 +2640,35 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                             {taskAnswers.signedUp === "yes" && (
                               <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                  Have you started at least 2 chats with the AI assistant?
+                                  Have you started at least 2 chats with the AI
+                                  assistant?
                                 </label>
                                 <div className="flex gap-2">
                                   <button
-                                    onClick={() => setTaskAnswers({...taskAnswers, chats: "yes"})}
+                                    onClick={() =>
+                                      setTaskAnswers({
+                                        ...taskAnswers,
+                                        chats: "yes",
+                                      })
+                                    }
                                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                      taskAnswers.chats === "yes" 
-                                        ? "bg-green-600 text-white" 
+                                      taskAnswers.chats === "yes"
+                                        ? "bg-green-600 text-white"
                                         : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                                     }`}
                                   >
                                     Yes, I Have Done the Steps
                                   </button>
                                   <button
-                                    onClick={() => setTaskAnswers({...taskAnswers, chats: "no"})}
+                                    onClick={() =>
+                                      setTaskAnswers({
+                                        ...taskAnswers,
+                                        chats: "no",
+                                      })
+                                    }
                                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                      taskAnswers.chats === "no" 
-                                        ? "bg-red-600 text-white" 
+                                      taskAnswers.chats === "no"
+                                        ? "bg-red-600 text-white"
                                         : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                                     }`}
                                   >
@@ -2464,7 +2681,8 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                             {taskAnswers.chats === "no" && (
                               <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
                                 <p className="text-sm text-amber-800">
-                                  Please start at least 2 chats with the AI assistant first.
+                                  Please start at least 2 chats with the AI
+                                  assistant first.
                                 </p>
                               </div>
                             )}
@@ -2475,49 +2693,60 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                                   Upload Screenshot of Your Chats
                                 </label>
                                 {!uploadedFile && (
-                                <div className="relative">
-                                  <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleFileUpload}
-                                    className="hidden"
-                                    id="comet-chats-screenshot"
-                                  />
-                                  <label
-                                    htmlFor="comet-chats-screenshot"
-                                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-indigo-300 rounded-lg cursor-pointer bg-indigo-50 hover:bg-indigo-100 hover:border-indigo-400 transition-colors"
-                                  >
-                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                      <Camera className="w-8 h-8 mb-2 text-indigo-400" />
-                                      <p className="mb-2 text-sm text-indigo-600">
-                                        <span className="font-semibold">Click to upload</span> your chat screenshots
-                                      </p>
-                                      <p className="text-xs text-indigo-500">PNG, JPG, GIF up to 10MB</p>
-                                    </div>
-                                  </label>
-                                </div>
+                                  <div className="relative">
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      onChange={handleFileUpload}
+                                      className="hidden"
+                                      id="comet-chats-screenshot"
+                                    />
+                                    <label
+                                      htmlFor="comet-chats-screenshot"
+                                      className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-indigo-300 rounded-lg cursor-pointer bg-indigo-50 hover:bg-indigo-100 hover:border-indigo-400 transition-colors"
+                                    >
+                                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                        <Camera className="w-8 h-8 mb-2 text-indigo-400" />
+                                        <p className="mb-2 text-sm text-indigo-600">
+                                          <span className="font-semibold">
+                                            Click to upload
+                                          </span>{" "}
+                                          your chat screenshots
+                                        </p>
+                                        <p className="text-xs text-indigo-500">
+                                          PNG, JPG, GIF up to 10MB
+                                        </p>
+                                      </div>
+                                    </label>
+                                  </div>
                                 )}
                                 {uploadedFile && (
                                   <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                                      <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                      <CheckCircle className="w-5 h-5 text-green-600" />
-                                      <div>
-                                        <p className="text-sm font-medium text-green-800">
-                                          ✓ File selected: {uploadedFile.name}
-                                        </p>
-                                        <p className="text-xs text-green-600">
-                                          Size: {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
-                                        </p>
-                                      </div>
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex items-center gap-2">
+                                        <CheckCircle className="w-5 h-5 text-green-600" />
+                                        <div>
+                                          <p className="text-sm font-medium text-green-800">
+                                            ✓ File selected: {uploadedFile.name}
+                                          </p>
+                                          <p className="text-xs text-green-600">
+                                            Size:{" "}
+                                            {(
+                                              uploadedFile.size /
+                                              1024 /
+                                              1024
+                                            ).toFixed(2)}{" "}
+                                            MB
+                                          </p>
                                         </div>
-                                        <button
-                                          onClick={handleRemoveFile}
-                                          className="p-1 hover:bg-red-100 rounded-full transition-colors"
-                                          title="Remove file"
-                                        >
-                                          <X className="w-4 h-4 text-red-600" />
-                                        </button>
+                                      </div>
+                                      <button
+                                        onClick={handleRemoveFile}
+                                        className="p-1 hover:bg-red-100 rounded-full transition-colors"
+                                        title="Remove file"
+                                      >
+                                        <X className="w-4 h-4 text-red-600" />
+                                      </button>
                                     </div>
                                   </div>
                                 )}
@@ -2527,10 +2756,15 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                                   <div className="flex items-start gap-2">
                                     <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
                                     <div className="text-sm text-red-800">
-                                      <p className="font-semibold mb-1">Important Warning:</p>
+                                      <p className="font-semibold mb-1">
+                                        Important Warning:
+                                      </p>
                                       <p>
-                                        Wrong or fake screenshots can result in account blocking and loss of all earnings. 
-                                        Please ensure your screenshots are genuine and clearly show the required action.
+                                        Wrong or fake screenshots can result in
+                                        account blocking and loss of all
+                                        earnings. Please ensure your screenshots
+                                        are genuine and clearly show the
+                                        required action.
                                       </p>
                                     </div>
                                   </div>
@@ -2553,7 +2787,9 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                                         : "bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg"
                                     }`}
                                   >
-                                    {isUploading ? "Submitting..." : "Submit Proof"}
+                                    {isUploading
+                                      ? "Submitting..."
+                                      : "Submit Proof"}
                                   </button>
                                 </div>
                               </div>
@@ -2565,59 +2801,271 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                   )}
 
                   {/* Adstera and Monetag special handling */}
-                  {(selectedTask === "adstera_signup" || selectedTask === "monetag_signup") && (() => {
-                    const service = selectedTask === "adstera_signup" ? EXTERNAL_SERVICES.adstera : EXTERNAL_SERVICES.monetag;
-                    return (
-                    <div className="space-y-4">
-                      <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
-                        <h4 className="font-semibold text-orange-900 mb-2">
-                            {service.name} Signup
-                        </h4>
-                        <p className="text-sm text-orange-800 mb-3">
-                            {service.description}. Visit the website and sign up for an account.
-                        </p>
-                        <a
-                            href={service.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                            Visit {service.name}
-                        </a>
-                      </div>
+                  {(selectedTask === "adstera_signup" ||
+                    selectedTask === "monetag_signup") &&
+                    (() => {
+                      const service =
+                        selectedTask === "adstera_signup"
+                          ? EXTERNAL_SERVICES.adstera
+                          : EXTERNAL_SERVICES.monetag;
+                      return (
+                        <div className="space-y-4">
+                          <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
+                            <h4 className="font-semibold text-orange-900 mb-2">
+                              {service.name} Signup
+                            </h4>
+                            <p className="text-sm text-orange-800 mb-3">
+                              {service.description}. Visit the website and sign
+                              up for an account.
+                            </p>
+                            <a
+                              href={service.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                            >
+                              <ExternalLink className="w-4 h-4" />
+                              Visit {service.name}
+                            </a>
+                          </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Have you signed up on the website?
-                        </label>
-                        <div className="flex gap-2 mb-3">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Have you signed up on the website?
+                            </label>
+                            <div className="flex gap-2 mb-3">
+                              <button
+                                onClick={() =>
+                                  setTaskAnswers({
+                                    ...taskAnswers,
+                                    signedUp: "yes",
+                                  })
+                                }
+                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                  taskAnswers.signedUp === "yes"
+                                    ? "bg-green-600 text-white"
+                                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                }`}
+                              >
+                                Yes
+                              </button>
+                              <button
+                                onClick={() =>
+                                  setTaskAnswers({
+                                    ...taskAnswers,
+                                    signedUp: "no",
+                                  })
+                                }
+                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                  taskAnswers.signedUp === "no"
+                                    ? "bg-red-600 text-white"
+                                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                }`}
+                              >
+                                No
+                              </button>
+                            </div>
+
+                            {taskAnswers.signedUp === "yes" && (
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-3">
+                                  Upload Screenshot of Your Account
+                                </label>
+                                {!uploadedFile && (
+                                  <div className="relative">
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      onChange={handleFileUpload}
+                                      className="hidden"
+                                      id="account-screenshot"
+                                    />
+                                    <label
+                                      htmlFor="account-screenshot"
+                                      className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-orange-300 rounded-lg cursor-pointer bg-orange-50 hover:bg-orange-100 hover:border-orange-400 transition-colors"
+                                    >
+                                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                        <Camera className="w-8 h-8 mb-2 text-orange-400" />
+                                        <p className="mb-2 text-sm text-orange-600">
+                                          <span className="font-semibold">
+                                            Click to upload
+                                          </span>{" "}
+                                          your account screenshot
+                                        </p>
+                                        <p className="text-xs text-orange-500">
+                                          PNG, JPG, GIF up to 10MB
+                                        </p>
+                                      </div>
+                                    </label>
+                                  </div>
+                                )}
+                                {uploadedFile && (
+                                  <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex items-center gap-2">
+                                        <CheckCircle className="w-5 h-5 text-green-600" />
+                                        <div>
+                                          <p className="text-sm font-medium text-green-800">
+                                            ✓ File selected: {uploadedFile.name}
+                                          </p>
+                                          <p className="text-xs text-green-600">
+                                            Size:{" "}
+                                            {(
+                                              uploadedFile.size /
+                                              1024 /
+                                              1024
+                                            ).toFixed(2)}{" "}
+                                            MB
+                                          </p>
+                                        </div>
+                                      </div>
+                                      <button
+                                        onClick={handleRemoveFile}
+                                        className="p-1 hover:bg-red-100 rounded-full transition-colors"
+                                        title="Remove file"
+                                      >
+                                        <X className="w-4 h-4 text-red-600" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Warning message */}
+                                <div className="bg-red-50 border border-red-200 rounded-xl p-4 mt-4">
+                                  <div className="flex items-start gap-2">
+                                    <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                                    <div className="text-sm text-red-800">
+                                      <p className="font-semibold mb-1">
+                                        Important Warning:
+                                      </p>
+                                      <p>
+                                        Wrong or fake screenshots can result in
+                                        account blocking and loss of all
+                                        earnings. Please ensure your screenshots
+                                        are genuine and clearly show the
+                                        required action.
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Submit buttons */}
+                                <div className="flex gap-3 pt-4">
+                                  <button
+                                    onClick={closeTaskModal}
+                                    className="flex-1 py-3 px-4 rounded-xl font-semibold border-2 border-gray-300 text-gray-700 hover:bg-gray-50 transition-all"
+                                  >
+                                    Cancel
+                                  </button>
+                                  <button
+                                    onClick={submitTaskProof}
+                                    disabled={!uploadedFile || isUploading}
+                                    className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all ${
+                                      !uploadedFile || isUploading
+                                        ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                        : "bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg"
+                                    }`}
+                                  >
+                                    {isUploading
+                                      ? "Submitting..."
+                                      : "Submit Proof"}
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                  {/* Share to Group Task */}
+                  {selectedTask === "share_to_group" && (
+                    <div className="space-y-4">
+                      <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">
+                          Share to WhatsApp Group
+                        </h4>
+                        <p className="text-sm text-green-800 mb-3">
+                          Share your referral link to a WhatsApp group.
+                        </p>
+                        <div className="flex gap-2">
                           <button
-                            onClick={() => setTaskAnswers({...taskAnswers, signedUp: "yes"})}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                              taskAnswers.signedUp === "yes" 
-                                ? "bg-green-600 text-white" 
-                                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                            }`}
+                            onClick={() => {
+                              const message = encodeURIComponent(
+                                `Check this out! ${referralLink}`
+                              );
+                              window.open(
+                                `https://wa.me/?text=${message}`,
+                                "_blank"
+                              );
+                            }}
+                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-2"
                           >
-                            Yes
+                            <Share2 className="w-4 h-4" />
+                            Share to WhatsApp Group
                           </button>
                           <button
-                            onClick={() => setTaskAnswers({...taskAnswers, signedUp: "no"})}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                              taskAnswers.signedUp === "no" 
-                                ? "bg-red-600 text-white" 
-                                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                            }`}
+                            onClick={() => {
+                              navigator.clipboard.writeText(referralLink);
+                              alert("Link copied to clipboard!");
+                            }}
+                            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-2"
                           >
-                            No
+                            <Copy className="w-4 h-4" />
                           </button>
                         </div>
+                      </div>
 
-                        {taskAnswers.signedUp === "yes" && (
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Have you shared the link to a WhatsApp group?
+                          </label>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() =>
+                                setTaskAnswers({
+                                  ...taskAnswers,
+                                  shared: "yes",
+                                })
+                              }
+                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                taskAnswers.shared === "yes"
+                                  ? "bg-green-600 text-white"
+                                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                              }`}
+                            >
+                              Yes, I Have Done the Steps
+                            </button>
+                            <button
+                              onClick={() =>
+                                setTaskAnswers({ ...taskAnswers, shared: "no" })
+                              }
+                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                taskAnswers.shared === "no"
+                                  ? "bg-red-600 text-white"
+                                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                              }`}
+                            >
+                              Not Yet
+                            </button>
+                          </div>
+                        </div>
+
+                        {taskAnswers.shared === "no" && (
+                          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                            <p className="text-sm text-amber-800">
+                              Please share your referral link to a WhatsApp
+                              group first, then come back to upload the
+                              screenshot.
+                            </p>
+                          </div>
+                        )}
+
+                        {taskAnswers.shared === "yes" && (
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-3">
-                              Upload Screenshot of Your Account
+                              Upload Screenshot of Group Message
                             </label>
                             {!uploadedFile && (
                               <div className="relative">
@@ -2626,58 +3074,235 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                                   accept="image/*"
                                   onChange={handleFileUpload}
                                   className="hidden"
-                                  id="account-screenshot"
+                                  id="group-screenshot"
                                 />
                                 <label
-                                  htmlFor="account-screenshot"
-                                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-orange-300 rounded-lg cursor-pointer bg-orange-50 hover:bg-orange-100 hover:border-orange-400 transition-colors"
+                                  htmlFor="group-screenshot"
+                                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 hover:border-gray-400 transition-colors"
                                 >
                                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                    <Camera className="w-8 h-8 mb-2 text-orange-400" />
-                                    <p className="mb-2 text-sm text-orange-600">
-                                      <span className="font-semibold">Click to upload</span> your account screenshot
+                                    <Camera className="w-8 h-8 mb-2 text-gray-400" />
+                                    <p className="mb-2 text-sm text-gray-500">
+                                      <span className="font-semibold">
+                                        Click to upload
+                                      </span>{" "}
+                                      or drag and drop
                                     </p>
-                                    <p className="text-xs text-orange-500">PNG, JPG, GIF up to 10MB</p>
+                                    <p className="text-xs text-gray-500">
+                                      PNG, JPG, GIF up to 10MB
+                                    </p>
                                   </div>
                                 </label>
                               </div>
                             )}
                             {uploadedFile && (
                               <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                                      <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                  <CheckCircle className="w-5 h-5 text-green-600" />
-                                  <div>
-                                    <p className="text-sm font-medium text-green-800">
-                                      ✓ File selected: {uploadedFile.name}
-                                    </p>
-                                    <p className="text-xs text-green-600">
-                                      Size: {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
-                                    </p>
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <CheckCircle className="w-5 h-5 text-green-600" />
+                                    <div>
+                                      <p className="text-sm font-medium text-green-800">
+                                        ✓ File selected: {uploadedFile.name}
+                                      </p>
+                                      <p className="text-xs text-green-600">
+                                        Size:{" "}
+                                        {(
+                                          uploadedFile.size /
+                                          1024 /
+                                          1024
+                                        ).toFixed(2)}{" "}
+                                        MB
+                                      </p>
+                                    </div>
                                   </div>
+                                  <button
+                                    onClick={handleRemoveFile}
+                                    className="p-1 hover:bg-red-100 rounded-full transition-colors"
+                                    title="Remove file"
+                                  >
+                                    <X className="w-4 h-4 text-red-600" />
+                                  </button>
                                 </div>
-                                        <button
-                                          onClick={handleRemoveFile}
-                                          className="p-1 hover:bg-red-100 rounded-full transition-colors"
-                                          title="Remove file"
-                                        >
-                                          <X className="w-4 h-4 text-red-600" />
-                                        </button>
                               </div>
+                            )}
+
+                            <WarningMessage />
+                            <SubmitButtons
+                              onCancel={closeTaskModal}
+                              onSubmit={submitTaskProof}
+                              isUploading={isUploading}
+                              hasFile={!!uploadedFile}
+                            />
                           </div>
                         )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Share to WhatsApp Status Task */}
+                  {selectedTask === "share_to_story" && (
+                    <div className="space-y-4">
+                      <div className="bg-purple-50 border border-purple-200 rounded-xl p-4">
+                        <h4 className="font-semibold text-purple-900 mb-2">
+                          Share to WhatsApp Status
+                        </h4>
+                        <p className="text-sm text-purple-800 mb-3">
+                          Share your referral link to your WhatsApp status.
+                        </p>
+                        <div className="space-y-2">
+                          <p className="text-sm text-purple-700">
+                            <strong>Steps:</strong>
+                          </p>
+                          <ol className="text-sm text-purple-700 space-y-1 ml-4">
+                            <li>1. Open WhatsApp app</li>
+                            <li>2. Go to Status tab</li>
+                            <li>3. Create a new status</li>
+                            <li>
+                              4. Add text: "Check this out! {referralLink}"
+                            </li>
+                            <li>5. Post the status</li>
+                          </ol>
+                        </div>
+                        <div className="mt-3">
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(referralLink);
+                              alert("Link copied to clipboard!");
+                            }}
+                            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-2"
+                          >
+                            {" "}
+                            Copy Link to Share
+                            <Copy className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Have you shared the link to your WhatsApp status?
+                          </label>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() =>
+                                setTaskAnswers({
+                                  ...taskAnswers,
+                                  shared: "yes",
+                                })
+                              }
+                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                taskAnswers.shared === "yes"
+                                  ? "bg-green-600 text-white"
+                                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                              }`}
+                            >
+                              Yes, I Have Done the Steps
+                            </button>
+                            <button
+                              onClick={() =>
+                                setTaskAnswers({ ...taskAnswers, shared: "no" })
+                              }
+                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                taskAnswers.shared === "no"
+                                  ? "bg-red-600 text-white"
+                                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                              }`}
+                            >
+                              Not Yet
+                            </button>
+                          </div>
+                        </div>
+
+                        {taskAnswers.shared === "no" && (
+                          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                            <p className="text-sm text-amber-800">
+                              Please share your referral link to your WhatsApp
+                              status first, then come back to upload the
+                              screenshot.
+                            </p>
+                          </div>
+                        )}
+
+                        {taskAnswers.shared === "yes" && (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-3">
+                              Upload Screenshot of Your WhatsApp Status
+                            </label>
+                            {!uploadedFile && (
+                              <div className="relative">
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={handleFileUpload}
+                                  className="hidden"
+                                  id="story-screenshot"
+                                />
+                                <label
+                                  htmlFor="story-screenshot"
+                                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-purple-300 rounded-lg cursor-pointer bg-purple-50 hover:bg-purple-100 hover:border-purple-400 transition-colors"
+                                >
+                                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <Camera className="w-8 h-8 mb-2 text-purple-400" />
+                                    <p className="mb-2 text-sm text-purple-600">
+                                      <span className="font-semibold">
+                                        Click to upload
+                                      </span>{" "}
+                                      your story screenshot
+                                    </p>
+                                    <p className="text-xs text-purple-500">
+                                      PNG, JPG, GIF up to 10MB
+                                    </p>
+                                  </div>
+                                </label>
+                              </div>
+                            )}
+                            {uploadedFile && (
+                              <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <CheckCircle className="w-5 h-5 text-green-600" />
+                                    <div>
+                                      <p className="text-sm font-medium text-green-800">
+                                        ✓ File selected: {uploadedFile.name}
+                                      </p>
+                                      <p className="text-xs text-green-600">
+                                        Size:{" "}
+                                        {(
+                                          uploadedFile.size /
+                                          1024 /
+                                          1024
+                                        ).toFixed(2)}{" "}
+                                        MB
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <button
+                                    onClick={handleRemoveFile}
+                                    className="p-1 hover:bg-red-100 rounded-full transition-colors"
+                                    title="Remove file"
+                                  >
+                                    <X className="w-4 h-4 text-red-600" />
+                                  </button>
+                                </div>
+                              </div>
+                            )}
 
                             {/* Warning message */}
                             <div className="bg-red-50 border border-red-200 rounded-xl p-4 mt-4">
                               <div className="flex items-start gap-2">
                                 <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
                                 <div className="text-sm text-red-800">
-                                  <p className="font-semibold mb-1">Important Warning:</p>
-                                  <p>
-                                    Wrong or fake screenshots can result in account blocking and loss of all earnings. 
-                                    Please ensure your screenshots are genuine and clearly show the required action.
+                                  <p className="font-semibold mb-1">
+                                    Important Warning:
                                   </p>
-                          </div>
+                                  <p>
+                                    Wrong or fake screenshots can result in
+                                    account blocking and loss of all earnings.
+                                    Please ensure your screenshots are genuine
+                                    and clearly show the required action.
+                                  </p>
+                                </div>
                               </div>
                             </div>
 
@@ -2700,304 +3325,6 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                               >
                                 {isUploading ? "Submitting..." : "Submit Proof"}
                               </button>
-                      </div>
-                    </div>
-                  )}
-                      </div>
-                    </div>
-                    );
-                  })()}
-
-                  {/* Share to Group Task */}
-                  {selectedTask === "share_to_group" && (
-                    <div className="space-y-4">
-                      <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-                        <h4 className="font-semibold text-green-900 mb-2">Share to WhatsApp Group</h4>
-                        <p className="text-sm text-green-800 mb-3">
-                          Share your referral link to a WhatsApp group.
-                        </p>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => {
-                              const message = encodeURIComponent(`Check this out! ${referralLink}`);
-                              window.open(`https://wa.me/?text=${message}`, "_blank");
-                            }}
-                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-2"
-                          >
-                            <Share2 className="w-4 h-4" />
-                            Share to WhatsApp Group
-                          </button>
-                          <button
-                            onClick={() => {
-                              navigator.clipboard.writeText(referralLink);
-                              alert("Link copied to clipboard!");
-                            }}
-                            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-2"
-                          >
-                            <Copy className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-3">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Have you shared the link to a WhatsApp group?
-                          </label>
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => setTaskAnswers({...taskAnswers, shared: "yes"})}
-                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                taskAnswers.shared === "yes" 
-                                  ? "bg-green-600 text-white" 
-                                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                              }`}
-                            >
-                              Yes, I Have Done the Steps
-                            </button>
-                            <button
-                              onClick={() => setTaskAnswers({...taskAnswers, shared: "no"})}
-                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                taskAnswers.shared === "no" 
-                                  ? "bg-red-600 text-white" 
-                                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                              }`}
-                            >
-                              Not Yet
-                            </button>
-                          </div>
-                        </div>
-
-                        {taskAnswers.shared === "no" && (
-                          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                            <p className="text-sm text-amber-800">
-                              Please share your referral link to a WhatsApp group first, then come back to upload the screenshot.
-                            </p>
-                          </div>
-                        )}
-
-                        {taskAnswers.shared === "yes" && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-3">
-                          Upload Screenshot of Group Message
-                        </label>
-                        {!uploadedFile && (
-                          <div className="relative">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={handleFileUpload}
-                              className="hidden"
-                              id="group-screenshot"
-                            />
-                            <label
-                              htmlFor="group-screenshot"
-                              className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 hover:border-gray-400 transition-colors"
-                            >
-                              <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                <Camera className="w-8 h-8 mb-2 text-gray-400" />
-                                <p className="mb-2 text-sm text-gray-500">
-                                  <span className="font-semibold">Click to upload</span> or drag and drop
-                                </p>
-                                <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
-                              </div>
-                            </label>
-                          </div>
-                        )}
-                        {uploadedFile && (
-                          <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                                      <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <CheckCircle className="w-5 h-5 text-green-600" />
-                              <div>
-                                <p className="text-sm font-medium text-green-800">
-                                  ✓ File selected: {uploadedFile.name}
-                                </p>
-                                <p className="text-xs text-green-600">
-                                  Size: {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
-                                </p>
-                              </div>
-                                        </div>
-                                        <button
-                                          onClick={handleRemoveFile}
-                                          className="p-1 hover:bg-red-100 rounded-full transition-colors"
-                                          title="Remove file"
-                                        >
-                                          <X className="w-4 h-4 text-red-600" />
-                                        </button>
-                            </div>
-                          </div>
-                        )}
-
-                        <WarningMessage />
-                        <SubmitButtons 
-                          onCancel={closeTaskModal}
-                          onSubmit={submitTaskProof}
-                          isUploading={isUploading}
-                          hasFile={!!uploadedFile}
-                        />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Share to WhatsApp Status Task */}
-                  {selectedTask === "share_to_story" && (
-                    <div className="space-y-4">
-                      <div className="bg-purple-50 border border-purple-200 rounded-xl p-4">
-                        <h4 className="font-semibold text-purple-900 mb-2">Share to WhatsApp Status</h4>
-                        <p className="text-sm text-purple-800 mb-3">
-                          Share your referral link to your WhatsApp status.
-                        </p>
-                        <div className="space-y-2">
-                          <p className="text-sm text-purple-700">
-                            <strong>Steps:</strong>
-                          </p>
-                          <ol className="text-sm text-purple-700 space-y-1 ml-4">
-                            <li>1. Open WhatsApp app</li>
-                            <li>2. Go to Status tab</li>
-                            <li>3. Create a new status</li>
-                            <li>4. Add text: "Check this out! {referralLink}"</li>
-                            <li>5. Post the status</li>
-                          </ol>
-                        </div>
-                        <div className="mt-3">
-                          <button
-                            onClick={() => {
-                              navigator.clipboard.writeText(referralLink);
-                              alert("Link copied to clipboard!");
-                            }}
-                            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-2"
-                          > Copy Link to Share
-                            <Copy className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-3">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Have you shared the link to your WhatsApp status?
-                          </label>
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => setTaskAnswers({...taskAnswers, shared: "yes"})}
-                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                taskAnswers.shared === "yes" 
-                                  ? "bg-green-600 text-white" 
-                                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                              }`}
-                            >
-                              Yes, I Have Done the Steps
-                            </button>
-                            <button
-                              onClick={() => setTaskAnswers({...taskAnswers, shared: "no"})}
-                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                taskAnswers.shared === "no" 
-                                  ? "bg-red-600 text-white" 
-                                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                              }`}
-                            >
-                              Not Yet
-                            </button>
-                          </div>
-                        </div>
-
-                        {taskAnswers.shared === "no" && (
-                          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                            <p className="text-sm text-amber-800">
-                              Please share your referral link to your WhatsApp status first, then come back to upload the screenshot.
-                            </p>
-                          </div>
-                        )}
-
-                        {taskAnswers.shared === "yes" && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-3">
-                              Upload Screenshot of Your WhatsApp Status
-                        </label>
-                        {!uploadedFile && (
-                          <div className="relative">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={handleFileUpload}
-                              className="hidden"
-                              id="story-screenshot"
-                            />
-                            <label
-                              htmlFor="story-screenshot"
-                              className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-purple-300 rounded-lg cursor-pointer bg-purple-50 hover:bg-purple-100 hover:border-purple-400 transition-colors"
-                            >
-                              <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                <Camera className="w-8 h-8 mb-2 text-purple-400" />
-                                <p className="mb-2 text-sm text-purple-600">
-                                  <span className="font-semibold">Click to upload</span> your story screenshot
-                                </p>
-                                <p className="text-xs text-purple-500">PNG, JPG, GIF up to 10MB</p>
-                              </div>
-                            </label>
-                          </div>
-                        )}
-                        {uploadedFile && (
-                          <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                                      <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <CheckCircle className="w-5 h-5 text-green-600" />
-                              <div>
-                                <p className="text-sm font-medium text-green-800">
-                                  ✓ File selected: {uploadedFile.name}
-                                </p>
-                                <p className="text-xs text-green-600">
-                                  Size: {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
-                                </p>
-                              </div>
-                                        </div>
-                                        <button
-                                          onClick={handleRemoveFile}
-                                          className="p-1 hover:bg-red-100 rounded-full transition-colors"
-                                          title="Remove file"
-                                        >
-                                          <X className="w-4 h-4 text-red-600" />
-                                        </button>
-                                      </div>
-                          </div>
-                        )}
-
-                        {/* Warning message */}
-                        <div className="bg-red-50 border border-red-200 rounded-xl p-4 mt-4">
-                          <div className="flex items-start gap-2">
-                            <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
-                            <div className="text-sm text-red-800">
-                              <p className="font-semibold mb-1">Important Warning:</p>
-                              <p>
-                                Wrong or fake screenshots can result in account blocking and loss of all earnings. 
-                                Please ensure your screenshots are genuine and clearly show the required action.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Submit buttons */}
-                        <div className="flex gap-3 pt-4">
-                          <button
-                            onClick={closeTaskModal}
-                            className="flex-1 py-3 px-4 rounded-xl font-semibold border-2 border-gray-300 text-gray-700 hover:bg-gray-50 transition-all"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            onClick={submitTaskProof}
-                            disabled={!uploadedFile || isUploading}
-                            className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all ${
-                              !uploadedFile || isUploading
-                                ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                                : "bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg"
-                            }`}
-                          >
-                            {isUploading ? "Submitting..." : "Submit Proof"}
-                          </button>
                             </div>
                           </div>
                         )}
@@ -3009,7 +3336,9 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                   {selectedTask === "share_to_ig" && (
                     <div className="space-y-4">
                       <div className="bg-pink-50 border border-pink-200 rounded-xl p-4">
-                        <h4 className="font-semibold text-pink-900 mb-2">Share to Instagram Story</h4>
+                        <h4 className="font-semibold text-pink-900 mb-2">
+                          Share to Instagram Story
+                        </h4>
                         <p className="text-sm text-pink-800 mb-3">
                           Share your referral link to your Instagram story.
                         </p>
@@ -3020,7 +3349,9 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                           <ol className="text-sm text-pink-700 space-y-1 ml-4">
                             <li>1. Open Instagram app</li>
                             <li>2. Create a new story</li>
-                            <li>3. Add text: "Check this out! {referralLink}"</li>
+                            <li>
+                              3. Add text: "Check this out! {referralLink}"
+                            </li>
                             <li>4. Post the story</li>
                           </ol>
                         </div>
@@ -3036,7 +3367,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                           </button>
                         </div>
                       </div>
-                      
+
                       <div className="space-y-3">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -3044,20 +3375,27 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                           </label>
                           <div className="flex gap-2">
                             <button
-                              onClick={() => setTaskAnswers({...taskAnswers, shared: "yes"})}
+                              onClick={() =>
+                                setTaskAnswers({
+                                  ...taskAnswers,
+                                  shared: "yes",
+                                })
+                              }
                               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                taskAnswers.shared === "yes" 
-                                  ? "bg-green-600 text-white" 
+                                taskAnswers.shared === "yes"
+                                  ? "bg-green-600 text-white"
                                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                               }`}
                             >
                               Yes, I Have Done the Steps
                             </button>
                             <button
-                              onClick={() => setTaskAnswers({...taskAnswers, shared: "no"})}
+                              onClick={() =>
+                                setTaskAnswers({ ...taskAnswers, shared: "no" })
+                              }
                               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                taskAnswers.shared === "no" 
-                                  ? "bg-red-600 text-white" 
+                                taskAnswers.shared === "no"
+                                  ? "bg-red-600 text-white"
                                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                               }`}
                             >
@@ -3069,97 +3407,114 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                         {taskAnswers.shared === "no" && (
                           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
                             <p className="text-sm text-amber-800">
-                              Please share your referral link to your Instagram story first, then come back to upload the screenshot.
+                              Please share your referral link to your Instagram
+                              story first, then come back to upload the
+                              screenshot.
                             </p>
                           </div>
                         )}
 
                         {taskAnswers.shared === "yes" && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-3">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-3">
                               Upload Screenshot of Your Instagram Story
-                        </label>
-                        {!uploadedFile && (
-                          <div className="relative">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={handleFileUpload}
-                              className="hidden"
-                              id="ig-post-screenshot"
-                            />
-                            <label
-                              htmlFor="ig-post-screenshot"
-                              className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-pink-300 rounded-lg cursor-pointer bg-pink-50 hover:bg-pink-100 hover:border-pink-400 transition-colors"
-                            >
-                              <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                <Camera className="w-8 h-8 mb-2 text-pink-400" />
-                                <p className="mb-2 text-sm text-pink-600">
-                                  <span className="font-semibold">Click to upload</span> your post screenshot
-                                </p>
-                                <p className="text-xs text-pink-500">PNG, JPG, GIF up to 10MB</p>
-                              </div>
                             </label>
-                          </div>
-                        )}
-                        {uploadedFile && (
-                          <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                                      <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <CheckCircle className="w-5 h-5 text-green-600" />
-                              <div>
-                                <p className="text-sm font-medium text-green-800">
-                                  ✓ File selected: {uploadedFile.name}
-                                </p>
-                                <p className="text-xs text-green-600">
-                                  Size: {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
-                                </p>
+                            {!uploadedFile && (
+                              <div className="relative">
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={handleFileUpload}
+                                  className="hidden"
+                                  id="ig-post-screenshot"
+                                />
+                                <label
+                                  htmlFor="ig-post-screenshot"
+                                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-pink-300 rounded-lg cursor-pointer bg-pink-50 hover:bg-pink-100 hover:border-pink-400 transition-colors"
+                                >
+                                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <Camera className="w-8 h-8 mb-2 text-pink-400" />
+                                    <p className="mb-2 text-sm text-pink-600">
+                                      <span className="font-semibold">
+                                        Click to upload
+                                      </span>{" "}
+                                      your post screenshot
+                                    </p>
+                                    <p className="text-xs text-pink-500">
+                                      PNG, JPG, GIF up to 10MB
+                                    </p>
+                                  </div>
+                                </label>
                               </div>
-                                        </div>
-                                        <button
-                                          onClick={handleRemoveFile}
-                                          className="p-1 hover:bg-red-100 rounded-full transition-colors"
-                                          title="Remove file"
-                                        >
-                                          <X className="w-4 h-4 text-red-600" />
-                                        </button>
-                                      </div>
-                          </div>
-                        )}
+                            )}
+                            {uploadedFile && (
+                              <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <CheckCircle className="w-5 h-5 text-green-600" />
+                                    <div>
+                                      <p className="text-sm font-medium text-green-800">
+                                        ✓ File selected: {uploadedFile.name}
+                                      </p>
+                                      <p className="text-xs text-green-600">
+                                        Size:{" "}
+                                        {(
+                                          uploadedFile.size /
+                                          1024 /
+                                          1024
+                                        ).toFixed(2)}{" "}
+                                        MB
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <button
+                                    onClick={handleRemoveFile}
+                                    className="p-1 hover:bg-red-100 rounded-full transition-colors"
+                                    title="Remove file"
+                                  >
+                                    <X className="w-4 h-4 text-red-600" />
+                                  </button>
+                                </div>
+                              </div>
+                            )}
 
-                        {/* Warning message */}
-                        <div className="bg-red-50 border border-red-200 rounded-xl p-4 mt-4">
-                          <div className="flex items-start gap-2">
-                            <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
-                            <div className="text-sm text-red-800">
-                              <p className="font-semibold mb-1">Important Warning:</p>
-                              <p>
-                                Wrong or fake screenshots can result in account blocking and loss of all earnings. 
-                                Please ensure your screenshots are genuine and clearly show the required action.
-                              </p>
+                            {/* Warning message */}
+                            <div className="bg-red-50 border border-red-200 rounded-xl p-4 mt-4">
+                              <div className="flex items-start gap-2">
+                                <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                                <div className="text-sm text-red-800">
+                                  <p className="font-semibold mb-1">
+                                    Important Warning:
+                                  </p>
+                                  <p>
+                                    Wrong or fake screenshots can result in
+                                    account blocking and loss of all earnings.
+                                    Please ensure your screenshots are genuine
+                                    and clearly show the required action.
+                                  </p>
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                        </div>
 
-                        {/* Submit buttons */}
-                        <div className="flex gap-3 pt-4">
-                          <button
-                            onClick={closeTaskModal}
-                            className="flex-1 py-3 px-4 rounded-xl font-semibold border-2 border-gray-300 text-gray-700 hover:bg-gray-50 transition-all"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            onClick={submitTaskProof}
-                            disabled={!uploadedFile || isUploading}
-                            className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all ${
-                              !uploadedFile || isUploading
-                                ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                                : "bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg"
-                            }`}
-                          >
-                            {isUploading ? "Submitting..." : "Submit Proof"}
-                          </button>
+                            {/* Submit buttons */}
+                            <div className="flex gap-3 pt-4">
+                              <button
+                                onClick={closeTaskModal}
+                                className="flex-1 py-3 px-4 rounded-xl font-semibold border-2 border-gray-300 text-gray-700 hover:bg-gray-50 transition-all"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={submitTaskProof}
+                                disabled={!uploadedFile || isUploading}
+                                className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all ${
+                                  !uploadedFile || isUploading
+                                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                    : "bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg"
+                                }`}
+                              >
+                                {isUploading ? "Submitting..." : "Submit Proof"}
+                              </button>
                             </div>
                           </div>
                         )}
@@ -3171,7 +3526,9 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                   {selectedTask === "share_to_fb" && (
                     <div className="space-y-4">
                       <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                        <h4 className="font-semibold text-blue-900 mb-2">Share to Facebook</h4>
+                        <h4 className="font-semibold text-blue-900 mb-2">
+                          Share to Facebook
+                        </h4>
                         <p className="text-sm text-blue-800 mb-3">
                           Share your referral link to Facebook.
                         </p>
@@ -3182,7 +3539,9 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                           <ol className="text-sm text-blue-700 space-y-1 ml-4">
                             <li>1. Open Facebook app or website</li>
                             <li>2. Create a new post</li>
-                            <li>3. Add text: "Check this out! {referralLink}"</li>
+                            <li>
+                              3. Add text: "Check this out! {referralLink}"
+                            </li>
                             <li>4. Post the content</li>
                           </ol>
                         </div>
@@ -3198,7 +3557,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                           </button>
                         </div>
                       </div>
-                      
+
                       <div className="space-y-3">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -3206,20 +3565,27 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                           </label>
                           <div className="flex gap-2">
                             <button
-                              onClick={() => setTaskAnswers({...taskAnswers, shared: "yes"})}
+                              onClick={() =>
+                                setTaskAnswers({
+                                  ...taskAnswers,
+                                  shared: "yes",
+                                })
+                              }
                               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                taskAnswers.shared === "yes" 
-                                  ? "bg-green-600 text-white" 
+                                taskAnswers.shared === "yes"
+                                  ? "bg-green-600 text-white"
                                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                               }`}
                             >
                               Yes, I Have Done the Steps
                             </button>
                             <button
-                              onClick={() => setTaskAnswers({...taskAnswers, shared: "no"})}
+                              onClick={() =>
+                                setTaskAnswers({ ...taskAnswers, shared: "no" })
+                              }
                               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                taskAnswers.shared === "no" 
-                                  ? "bg-red-600 text-white" 
+                                taskAnswers.shared === "no"
+                                  ? "bg-red-600 text-white"
                                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                               }`}
                             >
@@ -3231,104 +3597,119 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                         {taskAnswers.shared === "no" && (
                           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
                             <p className="text-sm text-amber-800">
-                              Please share your referral link to Facebook first, then come back to upload the screenshot.
+                              Please share your referral link to Facebook first,
+                              then come back to upload the screenshot.
                             </p>
                           </div>
                         )}
 
                         {taskAnswers.shared === "yes" && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-3">
-                          Upload Screenshot of Your Facebook Post
-                        </label>
-                        {!uploadedFile && (
-                          <div className="relative">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={handleFileUpload}
-                              className="hidden"
-                              id="fb-post-screenshot"
-                            />
-                            <label
-                              htmlFor="fb-post-screenshot"
-                              className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-blue-300 rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100 hover:border-blue-400 transition-colors"
-                            >
-                              <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                <Camera className="w-8 h-8 mb-2 text-blue-400" />
-                                <p className="mb-2 text-sm text-blue-600">
-                                  <span className="font-semibold">Click to upload</span> your Facebook post screenshot
-                                </p>
-                                <p className="text-xs text-blue-500">PNG, JPG, GIF up to 10MB</p>
-                              </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-3">
+                              Upload Screenshot of Your Facebook Post
                             </label>
-                          </div>
-                        )}
-                        {uploadedFile && (
-                          <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                                      <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <CheckCircle className="w-5 h-5 text-green-600" />
-                              <div>
-                                <p className="text-sm font-medium text-green-800">
-                                  ✓ File selected: {uploadedFile.name}
-                                </p>
-                                <p className="text-xs text-green-600">
-                                  Size: {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
-                                </p>
+                            {!uploadedFile && (
+                              <div className="relative">
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={handleFileUpload}
+                                  className="hidden"
+                                  id="fb-post-screenshot"
+                                />
+                                <label
+                                  htmlFor="fb-post-screenshot"
+                                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-blue-300 rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100 hover:border-blue-400 transition-colors"
+                                >
+                                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <Camera className="w-8 h-8 mb-2 text-blue-400" />
+                                    <p className="mb-2 text-sm text-blue-600">
+                                      <span className="font-semibold">
+                                        Click to upload
+                                      </span>{" "}
+                                      your Facebook post screenshot
+                                    </p>
+                                    <p className="text-xs text-blue-500">
+                                      PNG, JPG, GIF up to 10MB
+                                    </p>
+                                  </div>
+                                </label>
+                              </div>
+                            )}
+                            {uploadedFile && (
+                              <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <CheckCircle className="w-5 h-5 text-green-600" />
+                                    <div>
+                                      <p className="text-sm font-medium text-green-800">
+                                        ✓ File selected: {uploadedFile.name}
+                                      </p>
+                                      <p className="text-xs text-green-600">
+                                        Size:{" "}
+                                        {(
+                                          uploadedFile.size /
+                                          1024 /
+                                          1024
+                                        ).toFixed(2)}{" "}
+                                        MB
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <button
+                                    onClick={handleRemoveFile}
+                                    className="p-1 hover:bg-red-100 rounded-full transition-colors"
+                                    title="Remove file"
+                                  >
+                                    <X className="w-4 h-4 text-red-600" />
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Warning message */}
+                            <div className="bg-red-50 border border-red-200 rounded-xl p-4 mt-4">
+                              <div className="flex items-start gap-2">
+                                <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                                <div className="text-sm text-red-800">
+                                  <p className="font-semibold mb-1">
+                                    Important Warning:
+                                  </p>
+                                  <p>
+                                    Wrong or fake screenshots can result in
+                                    account blocking and loss of all earnings.
+                                    Please ensure your screenshots are genuine
+                                    and clearly show the required action.
+                                  </p>
+                                </div>
                               </div>
                             </div>
-                                        <button
-                                          onClick={handleRemoveFile}
-                                          className="p-1 hover:bg-red-100 rounded-full transition-colors"
-                                          title="Remove file"
-                                        >
-                                          <X className="w-4 h-4 text-red-600" />
-                                        </button>
-                      </div>
-                    </div>
-                  )}
 
-                  {/* Warning message */}
-                        <div className="bg-red-50 border border-red-200 rounded-xl p-4 mt-4">
-                    <div className="flex items-start gap-2">
-                      <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
-                      <div className="text-sm text-red-800">
-                        <p className="font-semibold mb-1">Important Warning:</p>
-                        <p>
-                          Wrong or fake screenshots can result in account blocking and loss of all earnings. 
-                          Please ensure your screenshots are genuine and clearly show the required action.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                        {/* Submit buttons */}
-                  <div className="flex gap-3 pt-4">
-                    <button
-                      onClick={closeTaskModal}
-                      className="flex-1 py-3 px-4 rounded-xl font-semibold border-2 border-gray-300 text-gray-700 hover:bg-gray-50 transition-all"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={submitTaskProof}
-                      disabled={!uploadedFile || isUploading}
-                      className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all ${
-                        !uploadedFile || isUploading
-                          ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                          : "bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg"
-                      }`}
-                    >
-                      {isUploading ? "Submitting..." : "Submit Proof"}
-                    </button>
-                  </div>
+                            {/* Submit buttons */}
+                            <div className="flex gap-3 pt-4">
+                              <button
+                                onClick={closeTaskModal}
+                                className="flex-1 py-3 px-4 rounded-xl font-semibold border-2 border-gray-300 text-gray-700 hover:bg-gray-50 transition-all"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={submitTaskProof}
+                                disabled={!uploadedFile || isUploading}
+                                className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all ${
+                                  !uploadedFile || isUploading
+                                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                    : "bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg"
+                                }`}
+                              >
+                                {isUploading ? "Submitting..." : "Submit Proof"}
+                              </button>
+                            </div>
                           </div>
                         )}
                       </div>
                     </div>
                   )}
-
                 </div>
               )}
             </div>
@@ -3342,14 +3723,14 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
           <div className="inline-flex items-center justify-center w-10 h-10 bg-blue-500 rounded-full mb-3">
             <Trophy className="h-5 w-5 text-white" />
           </div>
-          
+
           <h3 className="text-blue-800 font-bold text-lg mb-2">
             💰 Want More Money?
           </h3>
           <p className="text-blue-700 text-sm mb-3">
             Refer friends and earn ₹300 each
           </p>
-          
+
           <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
             <p className="text-blue-800 text-xs">
               🎯 Unlimited referrals • 💸 Instant payouts • 🏆 No limits
@@ -3363,14 +3744,16 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
         <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">
           Frequently Asked Questions
         </h3>
-        
+
         <div className="space-y-3">
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
             <h4 className="font-medium text-gray-800 text-sm mb-2">
               How it Works?
             </h4>
             <p className="text-gray-600 text-xs leading-relaxed">
-              Complete quizzes, invite friends, and earn money. It's simple - play, share, and withdraw your winnings directly to your bank account via UPI.
+              Complete quizzes, invite friends, and earn money. It's simple -
+              play, share, and withdraw your winnings directly to your bank
+              account via UPI.
             </p>
           </div>
 
@@ -3379,7 +3762,9 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
               How can we give out Money?
             </h4>
             <p className="text-gray-600 text-xs leading-relaxed">
-              We partner with advertisers and sponsors who pay us for user engagement. This allows us to reward our users with real money for their participation.
+              We partner with advertisers and sponsors who pay us for user
+              engagement. This allows us to reward our users with real money for
+              their participation.
             </p>
           </div>
 
@@ -3388,7 +3773,9 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
               How much you can earn?
             </h4>
             <p className="text-gray-600 text-xs leading-relaxed">
-              Earn ₹453 from quiz completion + ₹300 for each friend you refer. No limits on referrals - invite as many friends as you want and keep earning!
+              Earn ₹453 from quiz completion + ₹300 for each friend you refer.
+              No limits on referrals - invite as many friends as you want and
+              keep earning!
             </p>
           </div>
 
@@ -3397,12 +3784,13 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
               Will I really get money?
             </h4>
             <p className="text-gray-600 text-xs leading-relaxed">
-              Yes! We guarantee real money transfers. Complete the requirements, and your earnings will be transferred directly to your bank account via UPI within 24 hours.
+              Yes! We guarantee real money transfers. Complete the requirements,
+              and your earnings will be transferred directly to your bank
+              account via UPI within 24 hours.
             </p>
           </div>
         </div>
       </div>
-
     </div>
   );
 };
