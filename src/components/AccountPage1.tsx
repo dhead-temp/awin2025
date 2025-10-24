@@ -10,7 +10,6 @@ import {
   Wallet,
   Users,
   Share2,
-  TrendingUp,
   Copy,
   Trophy,
   CreditCard,
@@ -35,6 +34,9 @@ import {
   Transaction,
 } from "../services/api";
 import StatsCard from "./StatsCard";
+import TodosSection from "./TodosSection";
+import TransactionsSection from "./TransactionsSection";
+import CompletedTasksSection from "./CompletedTasksSection";
 import { Page } from "../App";
 import {
   trackAccountView,
@@ -1277,306 +1279,25 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
             />
           </div>
 
-          {/* Earning Tasks */}
-          <div className=" mb-4">
-            {/* Task List */}
-            <div className="space-y-2">
-              {getPendingTasks.map((task) => {
-                const isCompleted = isTaskCompleted(task.id);
-                const isOnCooldown = isTaskOnCooldown(task.id);
-                const cooldownTimeLeft = getCooldownTimeLeft(task.id);
-                const IconComponent = task.icon;
-
-                return (
-                  <div
-                    key={task.id}
-                    onClick={() =>
-                      !isCompleted && !isOnCooldown && openTaskModal(task.id)
-                    }
-                    className={`flex items-center gap-3 p-3 rounded-lg border transition-all ${
-                      isCompleted
-                        ? "bg-gray-50 border-gray-200 cursor-default opacity-60"
-                        : isOnCooldown
-                        ? "bg-yellow-50 border-yellow-200 cursor-default"
-                        : task.id === "comet_browser"
-                        ? "bg-gradient-to-r from-orange-50 to-red-50 border-orange-300 hover:border-orange-400 hover:shadow-xl cursor-pointer active:scale-98"
-                        : "bg-white border-gray-200 hover:border-blue-300 hover:shadow-md cursor-pointer active:scale-98"
-                    }`}
-                  >
-                    {/* Icon */}
-                    <div
-                      className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                        isCompleted
-                          ? "bg-gray-200"
-                          : isOnCooldown
-                          ? "bg-yellow-100"
-                          : task.id === "comet_browser"
-                          ? "bg-orange-100"
-                          : "bg-blue-100"
-                      }`}
-                    >
-                      {isCompleted ? (
-                        <CheckCircle className={`w-5 h-5 text-gray-500`} />
-                      ) : (
-                        <IconComponent
-                          className={`w-5 h-5 ${
-                            isOnCooldown
-                              ? "text-yellow-600"
-                              : task.id === "comet_browser"
-                              ? "text-orange-600"
-                              : "text-blue-600"
-                          }`}
-                        />
-                      )}
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1 min-w-0">
-                          <h3
-                            className={`font-semibold text-sm ${
-                              isCompleted ? "text-gray-500" : "text-gray-900"
-                            }`}
-                          >
-                            {task.title}
-                          </h3>
-                          <p
-                            className={`text-xs mt-0.5 ${
-                              isCompleted
-                                ? "text-gray-400"
-                                : isOnCooldown
-                                ? "text-yellow-600"
-                                : "text-gray-600"
-                            }`}
-                          >
-                            {isCompleted && task.cooldown
-                              ? `Unlocks Again After ${getCooldownTimeLeft(
-                                  task.id
-                                ).toFixed(1)} Hours`
-                              : isOnCooldown
-                              ? `Cooldown: ${cooldownTimeLeft.toFixed(
-                                  1
-                                )}h remaining`
-                              : task.description}
-                          </p>
-                        </div>
-
-                        {/* Reward */}
-                        <div className="ml-3">
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              isCompleted
-                                ? "bg-gray-200 text-gray-500"
-                                : "bg-green-100 text-green-700"
-                            }`}
-                          >
-                            ₹{task.reward}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Sharing Tasks Section */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 py-4 px-2 mb-4">
-            <div className="flex items-center gap-2 mb-4">
-              <Share2 className="w-5 h-5 text-blue-600" />
-              <h2 className="text-lg font-bold text-gray-900">Sharing Tasks</h2>
-            </div>
-
-            {/* Sharing Task List */}
-            <div className="space-y-2">
-              {getPendingSharingTasks.map((task) => {
-                const isCompleted = isTaskCompleted(task.id);
-                const isOnCooldown = isTaskOnCooldown(task.id);
-                const cooldownTimeLeft = getCooldownTimeLeft(task.id);
-                const IconComponent = task.icon;
-
-                return (
-                  <div
-                    key={task.id}
-                    onClick={() =>
-                      !isCompleted && !isOnCooldown && openTaskModal(task.id)
-                    }
-                    className={`flex items-center gap-3 p-3 rounded-lg border transition-all ${
-                      isCompleted
-                        ? "bg-gray-50 border-gray-200 cursor-default opacity-60"
-                        : isOnCooldown
-                        ? "bg-yellow-50 border-yellow-200 cursor-default"
-                        : "bg-white border-gray-200 hover:border-blue-300 hover:shadow-md cursor-pointer active:scale-98"
-                    }`}
-                  >
-                    {/* Icon */}
-                    <div
-                      className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                        isCompleted
-                          ? "bg-gray-200"
-                          : isOnCooldown
-                          ? "bg-yellow-100"
-                          : task.id === "comet_browser"
-                          ? "bg-orange-100"
-                          : "bg-blue-100"
-                      }`}
-                    >
-                      {isCompleted ? (
-                        <CheckCircle className={`w-5 h-5 text-gray-500`} />
-                      ) : (
-                        <IconComponent
-                          className={`w-5 h-5 ${
-                            isOnCooldown
-                              ? "text-yellow-600"
-                              : task.id === "comet_browser"
-                              ? "text-orange-600"
-                              : "text-blue-600"
-                          }`}
-                        />
-                      )}
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1 min-w-0">
-                          <h3
-                            className={`font-semibold text-sm ${
-                              isCompleted ? "text-gray-500" : "text-gray-900"
-                            }`}
-                          >
-                            {task.title}
-                          </h3>
-                          <p
-                            className={`text-xs mt-0.5 ${
-                              isCompleted
-                                ? "text-gray-400"
-                                : isOnCooldown
-                                ? "text-yellow-600"
-                                : "text-gray-600"
-                            }`}
-                          >
-                            {isCompleted && task.cooldown
-                              ? `Unlocks Again After ${getCooldownTimeLeft(
-                                  task.id
-                                ).toFixed(1)} Hours`
-                              : isOnCooldown
-                              ? `Cooldown: ${cooldownTimeLeft.toFixed(
-                                  1
-                                )}h remaining`
-                              : task.description}
-                          </p>
-                        </div>
-
-                        {/* Reward */}
-                        <div className="ml-3">
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              isCompleted
-                                ? "bg-gray-200 text-gray-500"
-                                : "bg-green-100 text-green-700"
-                            }`}
-                          >
-                            ₹{task.reward}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          {/* Todos Section */}
+          <TodosSection
+            getPendingTasks={getPendingTasks}
+            getPendingSharingTasks={getPendingSharingTasks}
+            isTaskCompleted={isTaskCompleted}
+            isTaskOnCooldown={isTaskOnCooldown}
+            getCooldownTimeLeft={getCooldownTimeLeft}
+            openTaskModal={openTaskModal}
+          />
 
           {/* Transaction History */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 mb-4 sm:mb-6">
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <div className="flex items-center gap-2">
-                <History className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" />
-                <h2 className="text-sm sm:text-base font-bold text-gray-900">
-                  Recent Transactions
-                </h2>
-              </div>
-              <button
-                onClick={() => {
-                  trackUniqueViewedTransactionHistory();
-                  setShowHistoryModal(true);
-                }}
-                className="text-blue-600 hover:text-blue-700 text-xs sm:text-sm font-medium px-2 py-1 rounded-lg hover:bg-blue-50 transition-all"
-              >
-                View All
-              </button>
-            </div>
-
-            <div className="space-y-2 sm:space-y-3">
-              {isLoading ? (
-                <div className="text-center text-xs sm:text-sm text-gray-500 py-6 sm:py-8">
-                  Loading transactions...
-                </div>
-              ) : filteredTx.length === 0 ? (
-                <div className="text-center text-xs sm:text-sm text-gray-500 py-6 sm:py-8">
-                  No transactions yet
-                </div>
-              ) : (
-                filteredTx.slice(0, 5).map((tx) => {
-                  const isCredit = tx.type === "credit";
-                  return (
-                    <div
-                      key={tx.id}
-                      className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
-                    >
-                      <div
-                        className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center ${
-                          isCredit ? "bg-emerald-100" : "bg-red-100"
-                        }`}
-                      >
-                        {isCredit ? (
-                          <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
-                        ) : (
-                          <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="text-xs sm:text-sm font-semibold text-gray-900 truncate">
-                            {tx.note || "Transaction"}
-                          </div>
-                          <div
-                            className={`text-xs sm:text-sm font-bold whitespace-nowrap ${
-                              isCredit ? "text-emerald-700" : "text-red-700"
-                            }`}
-                          >
-                            {isCredit ? "+" : "-"}₹
-                            {typeof tx.amount === "string"
-                              ? parseFloat(tx.amount).toFixed(2)
-                              : tx.amount}
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between gap-2 mt-1">
-                          <div className="text-xs text-gray-500">
-                            {new Date(tx.created_on).toLocaleDateString()}
-                          </div>
-                          <span
-                            className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                              tx.note === "Withdrawal Request"
-                                ? "bg-yellow-50 text-yellow-700"
-                                : "bg-emerald-50 text-emerald-700"
-                            }`}
-                          >
-                            {tx.note === "Withdrawal Request"
-                              ? "In Process"
-                              : "Completed"}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
+          <TransactionsSection
+            isLoading={isLoading}
+            filteredTx={filteredTx}
+            showHistoryModal={showHistoryModal}
+            setShowHistoryModal={setShowHistoryModal}
+            transactions={transactions}
+            trackUniqueViewedTransactionHistory={trackUniqueViewedTransactionHistory}
+          />
 
           {/* Withdraw Modal */}
           {showTeraboxModal && (
@@ -1691,8 +1412,8 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                               </button>
                             </div>
                           </div>
-                        </div>
-                      )}
+                    </div>
+      )}
 
                       {teraboxVerifyStatus === "success" && (
                         <div className="bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-xl p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
@@ -1910,149 +1631,12 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
             </div>
           )}
 
-          {/* Completed Tasks Section - Only show if there are completed tasks */}
-          {getCompletedTasks.length > 0 && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
-              <div className="flex items-center gap-2 mb-4">
-                <CheckCircle className="w-5 h-5 text-green-600" />
-                <h2 className="text-lg font-bold text-gray-900">
-                  Completed Tasks
-                </h2>
-              </div>
+          {/* Completed Tasks Section */}
+          <CompletedTasksSection
+            getCompletedTasks={getCompletedTasks}
+            getCooldownTimeLeft={getCooldownTimeLeft}
+          />
 
-              {/* Completed Task List */}
-              <div className="space-y-2">
-                {getCompletedTasks.map((task) => {
-                  return (
-                    <div
-                      key={task.id}
-                      className="flex items-center gap-3 p-3 rounded-lg border bg-gray-50 border-gray-200 cursor-default"
-                    >
-                      {/* Icon */}
-                      <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 bg-gray-200">
-                        <CheckCircle className="w-5 h-5 text-gray-500" />
-                      </div>
-
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-sm text-gray-500">
-                              {task.title}
-                            </h3>
-                            <p className="text-xs mt-0.5 text-gray-400">
-                              {task.cooldown
-                                ? `Unlocks Again After ${getCooldownTimeLeft(
-                                    task.id
-                                  ).toFixed(1)} Hours`
-                                : "Task completed"}
-                            </p>
-                          </div>
-
-                          {/* Reward */}
-                          <div className="ml-3">
-                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-200 text-gray-500">
-                              ₹{task.reward}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Transaction History Modal */}
-          {showHistoryModal && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-3 sm:p-4">
-              <div className="bg-white rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
-                <div className="flex items-center justify-between p-3 sm:p-4 border-b">
-                  <h3 className="text-sm sm:text-base lg:text-lg font-bold text-gray-900">
-                    All Transactions
-                  </h3>
-                  <button
-                    onClick={() => setShowHistoryModal(false)}
-                    className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100"
-                  >
-                    <X className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </button>
-                </div>
-                <div className="p-3 sm:p-4 flex-1 overflow-y-auto">
-                  <div className="divide-y divide-gray-100">
-                    {isLoading ? (
-                      <div className="text-center text-xs sm:text-sm text-gray-500 py-6 sm:py-8">
-                        Loading transactions...
-                      </div>
-                    ) : transactions.length === 0 ? (
-                      <div className="text-center text-xs sm:text-sm text-gray-500 py-6 sm:py-8">
-                        No transactions yet
-                      </div>
-                    ) : (
-                      transactions.map((tx) => {
-                        const isCredit = tx.type === "credit";
-                        return (
-                          <div
-                            key={tx.id}
-                            className="py-2 sm:py-3 flex items-center"
-                          >
-                            <div
-                              className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center mr-2 sm:mr-3 ${
-                                isCredit ? "bg-emerald-50" : "bg-red-50"
-                              }`}
-                            >
-                              {isCredit ? (
-                                <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
-                              ) : (
-                                <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between">
-                                <div className="text-xs sm:text-sm font-semibold text-gray-900 truncate">
-                                  {tx.note || "Transaction"}
-                                </div>
-                                <div
-                                  className={`text-xs sm:text-sm font-bold ${
-                                    isCredit
-                                      ? "text-emerald-700"
-                                      : "text-red-700"
-                                  }`}
-                                >
-                                  {isCredit ? "+" : "-"}₹
-                                  {typeof tx.amount === "string"
-                                    ? parseFloat(tx.amount).toFixed(2)
-                                    : tx.amount}
-                                </div>
-                              </div>
-                              <div className="flex items-center justify-between mt-1">
-                                <div className="text-[10px] sm:text-[11px] text-gray-500">
-                                  {new Date(tx.created_on).toLocaleString()} •
-                                  TXN-{String(tx.id)}
-                                </div>
-                                <span
-                                  className={`text-[10px] sm:text-[11px] px-2 py-0.5 rounded-full border font-medium ${
-                                    tx.note === "Withdrawal Request"
-                                      ? "bg-yellow-50 text-yellow-700 border-yellow-200"
-                                      : "bg-emerald-50 text-emerald-700 border-emerald-200"
-                                  }`}
-                                >
-                                  {tx.note === "Withdrawal Request"
-                                    ? "In Process"
-                                    : "Completed"}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Email/Phone Update Modal */}
           {showEmailPhoneModal && (
