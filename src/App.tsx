@@ -19,6 +19,7 @@ import HowItWorksPage from "./components/HowItWorksPage";
 import { apiService } from "./services/api";
 import { initGA, trackPageView, trackReferralClick } from "./utils/analytics";
 import { handlePushNotificationPermission, initializeFCM } from "./utils/pushNotifications";
+import { clarity } from "./utils/clarity";
 
 export type Page =
   | "home"
@@ -78,6 +79,8 @@ function AppContent() {
   // Track page views on route changes
   useEffect(() => {
     trackPageView(location.pathname, document.title);
+    // Track page view in Clarity
+    clarity.pageView(location.pathname);
   }, [location.pathname]);
 
   // Check quiz reward status from database
@@ -132,6 +135,8 @@ function AppContent() {
       
       // Track referral click
       trackReferralClick(inviteCode);
+      // Track referral click in Clarity
+      clarity.trackReferral('click', inviteCode);
 
       // Increment click count for the invite code with better error handling
       apiService.incrementClickCount(inviteCode)
@@ -193,6 +198,10 @@ function AppContent() {
       totalEarnings: prev.totalEarnings + 453,
     }));
 
+    // Track quiz completion in Clarity
+    clarity.trackQuizCompletion(100, undefined); // Assuming perfect score
+    clarity.trackEarnings(453, 'quiz');
+
     // Note: Database update will happen when user completes invitation process (3+ shares)
   }, [currentUser?.id]);
 
@@ -217,6 +226,9 @@ function AppContent() {
 
         setCurrentUser(newUser);
         localStorage.setItem("currentUser", JSON.stringify(newUser));
+
+        // Identify user in Clarity
+        clarity.identify(newUser.id);
 
         console.log("User created successfully:", newUser);
         
