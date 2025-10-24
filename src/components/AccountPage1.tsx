@@ -776,6 +776,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
     }
   }, [currentUser, selectedTask, uploadedFile, taskUpdateMap]);
 
+
   // Optimized task completion mapping
   const taskCompletionMap = useMemo(() => {
     if (!currentUser) return {} as Record<string, boolean>;
@@ -784,8 +785,8 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
       share_to_story: !!currentUser.last_share_to_story,
       share_to_ig: !!currentUser.last_share_to_ig,
       share_to_fb: !!currentUser.last_share_to_fb,
-      install_pwa: currentUser.installed_pwa === 1,
-      comet_browser: currentUser.is_comet_browser === 1,
+      install_pwa: String(currentUser.installed_pwa) === "1",
+      comet_browser: String(currentUser.is_comet_browser) === "1",
       adstera_signup: !!currentUser.last_adstera_time,
       monetag_signup: !!currentUser.last_monetag_time,
     } as Record<string, boolean>;
@@ -2220,7 +2221,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
             </div>
 
             {/* Modal Content */}
-            <div className="p-4 sm:p-5 max-h-[70vh] overflow-y-auto">
+            <div className="p-4 sm:p-5 pb-8 sm:pb-10 max-h-[70vh] overflow-y-auto">
               {uploadSuccess ? (
                 <div className="text-center py-8">
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -2608,7 +2609,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                                       : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                                   }`}
                                 >
-                                  Yes, I Have Done the Steps
+                                  Yes
                                 </button>
                                 <button
                                   onClick={() =>
@@ -2657,7 +2658,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                                         : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                                     }`}
                                   >
-                                    Yes, I Have Done the Steps
+                                    Yes
                                   </button>
                                   <button
                                     onClick={() =>
