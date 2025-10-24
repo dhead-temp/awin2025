@@ -67,13 +67,13 @@ const EXTERNAL_SERVICES = {
   },
   adstera: {
     name: "Signup Link 1",
-    url: "https://be6.in/mov68_monetag",
+    url: "https://be6.in/mov44-adstera-oct-24",
     description: "Advertising platform",
     steps: [
       "Visit this website",
       "Sign up for an account",
       "Browse Website for 3 Minutes",
-    ]
+    ],
   },
   monetag: {
     name: "Signup Link 2",
@@ -83,8 +83,8 @@ const EXTERNAL_SERVICES = {
       "Visit this website",
       "Sign up for an account",
       "Browse Website for 3 Minutes",
-    ]
-    },
+    ],
+  },
 };
 
 // Optimized reusable components
@@ -784,7 +784,6 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
     }
   }, [currentUser, selectedTask, uploadedFile, taskUpdateMap]);
 
-
   // Optimized task completion mapping
   const taskCompletionMap = useMemo(() => {
     if (!currentUser) return {} as Record<string, boolean>;
@@ -968,10 +967,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
     return getAllTasks
       .filter((task) => {
         // Only show completed tasks that are not sharing tasks and not PWA tasks that should be hidden
-        return (
-          isTaskCompleted(task.id) &&
-          !["pwa_install"].includes(task.id)
-        );
+        return isTaskCompleted(task.id) && !["pwa_install"].includes(task.id);
       })
       .sort((a, b) => b.reward - a.reward);
   }, [getAllTasks, isTaskCompleted]);
@@ -2824,19 +2820,22 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                               {service.name}
                             </h4>
                             <p className="text-sm text-orange-800 mb-3">
-                              {service.description}. Visit the Sponsor Website and Spent Some Time There.
+                              {service.description}. Visit the Sponsor Website
+                              and Spent Some Time There.
                             </p>
-                            
+
                             {/* Steps */}
                             <div className="mb-4">
-                              <h5 className="font-semibold text-orange-900 mb-2">Steps:</h5>
+                              <h5 className="font-semibold text-orange-900 mb-2">
+                                Steps:
+                              </h5>
                               <ol className="list-decimal list-inside space-y-1 text-sm text-orange-800">
                                 {service.steps.map((step, index) => (
                                   <li key={index}>{step}</li>
                                 ))}
                               </ol>
                             </div>
-                            
+
                             <a
                               href={service.url}
                               target="_blank"
