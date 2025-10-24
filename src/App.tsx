@@ -30,6 +30,42 @@ export type Page =
   | "account1"
   | "how-it-works";
 
+// Component to handle default route logic
+function DefaultRoute() {
+  const navigate = useNavigate();
+  const [currentUser] = useState<{
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    invitedBy: string | null;
+  } | null>(() => {
+    // Initialize from localStorage if available
+    const savedUser = localStorage.getItem("currentUser");
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+
+  useEffect(() => {
+    // If user is logged in, redirect to account page
+    if (currentUser?.id) {
+      navigate("/account", { replace: true });
+    } else {
+      // If not logged in, redirect to quiz page
+      navigate("/quiz", { replace: true });
+    }
+  }, [currentUser, navigate]);
+
+  // Show loading while determining redirect
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Loading...</p>
+      </div>
+    </div>
+  );
+}
+
 // Component to handle navigation logic
 function AppContent() {
   const navigate = useNavigate();
@@ -266,13 +302,7 @@ function AppContent() {
         <Routes>
           <Route
             path="/"
-            element={
-              <QuizPage
-                onNavigate={navigateTo}
-                onMarkAsPlayed={markQuizAsPlayed}
-                hasPlayedQuiz={hasPlayedQuiz}
-              />
-            }
+            element={<DefaultRoute />}
           />
           <Route
             path="/home"
