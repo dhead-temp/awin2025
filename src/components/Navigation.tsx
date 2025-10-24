@@ -16,7 +16,6 @@ export default function Navigation({}: NavigationProps) {
     { path: '/quiz', label: 'Play Quiz', icon: HelpCircle },
     { path: '/win1', label: 'Win Page', icon: Trophy },
     { path: '/account', label: 'My Account', icon: User },
-    { path: '/account1', label: 'Tasks & Rewards', icon: Trophy },
     { path: '/how-it-works', label: 'How It Works', icon: BookOpen },
   ];
 

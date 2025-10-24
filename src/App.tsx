@@ -291,13 +291,19 @@ function AppContent() {
           <Route
             path="/account"
             element={
-              <AccountPage userStats={userStats} onNavigate={navigateTo} />
+              <AccountPage1 userStats={userStats} onNavigate={navigateTo} />
             }
           />
           <Route
             path="/account1"
             element={
               <AccountPage1 userStats={userStats} onNavigate={navigateTo} />
+            }
+          />
+          <Route
+            path="/account-old"
+            element={
+              <AccountPage userStats={userStats} onNavigate={navigateTo} />
             }
           />
           <Route path="/how-it-works" element={<HowItWorksPage />} />
