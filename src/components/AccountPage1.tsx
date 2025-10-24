@@ -962,14 +962,14 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
       });
   }, [getAllTasksIncludingSharing, isTaskCompleted]);
 
-  // Get completed tasks (excluding sharing tasks and PWA tasks that should be hidden when completed)
+  // Get completed tasks (excluding sharing tasks)
   const getCompletedTasks = useMemo(() => {
     return getAllTasks
       .filter((task) => {
-        // Only show completed tasks that are not sharing tasks and not PWA tasks that should be hidden
+        // Only show completed tasks that are not sharing tasks
         return (
           isTaskCompleted(task.id) &&
-          !["install_pwa"].includes(task.id)
+          !["share_to_group", "share_to_story", "share_to_ig", "share_to_fb"].includes(task.id)
         );
       })
       .sort((a, b) => b.reward - a.reward);
