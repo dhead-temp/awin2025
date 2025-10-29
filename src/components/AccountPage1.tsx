@@ -457,7 +457,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
   };
 
   const generateWhatsAppLink = () => {
-    const message = encodeURIComponent(`Ye dekhna ${referralLink}`);
+    const message = encodeURIComponent(`Ye Dekhna Ache se ${referralLink}`);
     return `https://wa.me/?text=${message}`;
   };
 
@@ -2596,7 +2596,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                           <button
                             onClick={() => {
                               const message = encodeURIComponent(
-                                `Check this out! ${referralLink}`
+                                `Ye Dekhna Poora ${referralLink}`
                               );
                               window.open(
                                 `https://wa.me/?text=${message}`,
@@ -2762,7 +2762,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                             <li>2. Go to Status tab</li>
                             <li>3. Create a new status</li>
                             <li>
-                              4. Add text: "Check this out! {referralLink}"
+                              4. Add text: "Ye Dekhna Pura karke {referralLink}"
                             </li>
                             <li>5. Post the status</li>
                           </ol>
@@ -2954,7 +2954,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                             <li>1. Open Instagram app</li>
                             <li>2. Create a new story</li>
                             <li>
-                              3. Add text: "Check this out! {referralLink}"
+                              3. Add text: "ye dekhna poora karke {referralLink}"
                             </li>
                             <li>4. Post the story</li>
                           </ol>
@@ -3144,7 +3144,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                             <li>1. Open Facebook app or website</li>
                             <li>2. Create a new post</li>
                             <li>
-                              3. Add text: "Check this out! {referralLink}"
+                              3. Add text: "Ye Dekhna Poora karke {referralLink}"
                             </li>
                             <li>4. Post the content</li>
                           </ol>
