@@ -58,7 +58,7 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
 
   const questions = [
     {
-      question: "Which is the national river of India?",
+      question: "National River of India?",
       options: ["Yamuna", "Saraswati", "Ganga", "Brahmaputra"],
       correct: 3
     },
