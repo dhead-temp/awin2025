@@ -58,14 +58,14 @@ const QuizPage: React.FC<QuizPageProps> = ({ onNavigate, onMarkAsPlayed, hasPlay
 
   const questions = [
     {
-      question: "What is the capital of India?",
-      options: ["Mumbai", "New Delhi", "Kolkata", "Chennai"],
-      correct: 1
+      question: "Which is the national river of India?",
+      options: ["Yamuna", "Saraswati", "Ganga", "Brahmaputra"],
+      correct: 3
     },
     {
-      question: "Which planet is known as the Red Planet?",
-      options: ["Venus", "Mars", "Jupiter", "Saturn"],
-      correct: 1
+      question: "National flower of India?",
+      options: ["Rose", "Lotus", "Lily", "Marigold"],
+      correct: 2
     },
     {
       question: "What is 15 + 25?",
