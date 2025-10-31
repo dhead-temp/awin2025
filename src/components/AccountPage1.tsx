@@ -271,16 +271,6 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
           "The app will automatically detect installation",
         ],
       },
-      {
-        id: "comet_browser",
-        title: `Try ${EXTERNAL_SERVICES.comet.name}`,
-        description: EXTERNAL_SERVICES.comet.description,
-        reward: 600,
-        icon: Globe,
-        color: "indigo",
-        requiresProof: true,
-        steps: EXTERNAL_SERVICES.comet.steps,
-      },
     ],
     "Signup Tasks": [
       {
@@ -971,7 +961,12 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
         // Only show completed tasks that are not sharing tasks
         return (
           isTaskCompleted(task.id) &&
-          !["share_to_group", "share_to_story", "share_to_ig", "share_to_fb"].includes(task.id)
+          ![
+            "share_to_group",
+            "share_to_story",
+            "share_to_ig",
+            "share_to_fb",
+          ].includes(task.id)
         );
       })
       .sort((a, b) => b.reward - a.reward);
@@ -1296,7 +1291,9 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
             showHistoryModal={showHistoryModal}
             setShowHistoryModal={setShowHistoryModal}
             transactions={transactions}
-            trackUniqueViewedTransactionHistory={trackUniqueViewedTransactionHistory}
+            trackUniqueViewedTransactionHistory={
+              trackUniqueViewedTransactionHistory
+            }
           />
 
           {/* Withdraw Modal */}
@@ -1412,8 +1409,8 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                               </button>
                             </div>
                           </div>
-                    </div>
-      )}
+                        </div>
+                      )}
 
                       {teraboxVerifyStatus === "success" && (
                         <div className="bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-xl p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
@@ -1636,7 +1633,6 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
             getCompletedTasks={getCompletedTasks}
             getCooldownTimeLeft={getCooldownTimeLeft}
           />
-
 
           {/* Email/Phone Update Modal */}
           {showEmailPhoneModal && (
@@ -1878,7 +1874,8 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                           </h4>
                         </div>
                         <p className="text-sm text-green-800 mb-3">
-                          Install Awin Web App on your device to earn ₹{getCurrentTask()?.reward}.
+                          Install Awin Web App on your device to earn ₹
+                          {getCurrentTask()?.reward}.
                         </p>
 
                         {/* Install Button - Show First */}
@@ -2954,7 +2951,8 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                             <li>1. Open Instagram app</li>
                             <li>2. Create a new story</li>
                             <li>
-                              3. Add text: "ye dekhna poora karke {referralLink}"
+                              3. Add text: "ye dekhna poora karke {referralLink}
+                              "
                             </li>
                             <li>4. Post the story</li>
                           </ol>
@@ -3144,7 +3142,8 @@ const AccountPage: React.FC<AccountPageProps> = ({ userStats, onNavigate }) => {
                             <li>1. Open Facebook app or website</li>
                             <li>2. Create a new post</li>
                             <li>
-                              3. Add text: "Ye Dekhna Poora karke {referralLink}"
+                              3. Add text: "Ye Dekhna Poora karke {referralLink}
+                              "
                             </li>
                             <li>4. Post the content</li>
                           </ol>
